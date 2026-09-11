@@ -1,0 +1,1117 @@
+[
+  {
+    "id": "768b8096b9a950d29f6bd8ec9fcfeaad",
+    "timestamp": "2026-09-11T08:00:15.576000Z",
+    "name": "cartwheel.session_message",
+    "input": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "type": "text",
+            "content": "Show me order 4127."
+          }
+        ]
+      }
+    ],
+    "output": [
+      {
+        "role": "assistant",
+        "parts": [
+          {
+            "type": "text",
+            "content": "I'm not able to pull up order 4127 — it doesn't appear to belong to your store, so I don't have permission to view it. I can only see orders for your own store.\n\nIf you'd like, I can list your store's recent orders to help you find the one you're looking for. Just let me know!"
+          }
+        ]
+      }
+    ],
+    "sessionId": null,
+    "release": null,
+    "version": null,
+    "userId": null,
+    "metadata": {
+      "attributes": {
+        "cartwheel.user_role": "merchant",
+        "cartwheel.user_id": "9002",
+        "cartwheel.prompt_version": "75f378c49b71"
+      },
+      "resourceAttributes": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.43.0",
+        "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+        "service.name": "unknown_service"
+      },
+      "scope": {
+        "name": "cartwheel.server",
+        "attributes": {}
+      }
+    },
+    "tags": [],
+    "public": false,
+    "environment": "default",
+    "htmlPath": "/project/cartwheel-dev/traces/768b8096b9a950d29f6bd8ec9fcfeaad",
+    "latency": 3.138,
+    "totalCost": 0.0,
+    "observations": [
+      {
+        "id": "2ebe303f946b14b4",
+        "traceId": "768b8096b9a950d29f6bd8ec9fcfeaad",
+        "type": "SPAN",
+        "name": "cartwheel.session_message",
+        "startTime": "2026-09-11T08:00:15.572000Z",
+        "endTime": "2026-09-11T08:00:18.710000Z",
+        "completionStartTime": null,
+        "model": null,
+        "modelParameters": null,
+        "input": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "content": "Show me order 4127."
+              }
+            ]
+          }
+        ],
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "cartwheel.user_role": "merchant",
+            "cartwheel.user_id": "9002",
+            "cartwheel.prompt_version": "75f378c49b71"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "cartwheel.server",
+            "attributes": {}
+          }
+        },
+        "output": [
+          {
+            "role": "assistant",
+            "parts": [
+              {
+                "type": "text",
+                "content": "I'm not able to pull up order 4127 — it doesn't appear to belong to your store, so I don't have permission to view it. I can only see orders for your own store.\n\nIf you'd like, I can list your store's recent orders to help you find the one you're looking for. Just let me know!"
+              }
+            ]
+          }
+        ],
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": null,
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 3.138,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.056Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "cd67f7ff22383921",
+        "traceId": "768b8096b9a950d29f6bd8ec9fcfeaad",
+        "type": "SPAN",
+        "name": "Agent Workflow",
+        "startTime": "2026-09-11T08:00:15.573000Z",
+        "endTime": "2026-09-11T08:00:18.709000Z",
+        "completionStartTime": null,
+        "model": null,
+        "modelParameters": null,
+        "input": null,
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "traceloop.span.kind": "workflow",
+            "gen_ai.provider.name": "openai",
+            "traceloop.workflow.name": "Agent Workflow"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": null,
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "2ebe303f946b14b4",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 3.136,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.047Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "b3abce0ec5bf2568",
+        "traceId": "768b8096b9a950d29f6bd8ec9fcfeaad",
+        "type": "AGENT",
+        "name": "cartwheel-support.agent",
+        "startTime": "2026-09-11T08:00:15.576000Z",
+        "endTime": "2026-09-11T08:00:18.709000Z",
+        "completionStartTime": null,
+        "model": null,
+        "modelParameters": {},
+        "input": null,
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "traceloop.span.kind": "agent",
+            "gen_ai.agent.name": "cartwheel-support",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.operation.name": "invoke_agent"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": null,
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "cd67f7ff22383921",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 3.133,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.046Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "50fd3e542de3241d",
+        "traceId": "768b8096b9a950d29f6bd8ec9fcfeaad",
+        "type": "GENERATION",
+        "name": "openai.response",
+        "startTime": "2026-09-11T08:00:17.116000Z",
+        "endTime": "2026-09-11T08:00:18.705000Z",
+        "completionStartTime": null,
+        "model": "deepinfra/zai-org/GLM-5.3",
+        "modelParameters": {},
+        "input": [
+          {
+            "role": "system",
+            "parts": [
+              {
+                "type": "text",
+                "content": "You are Cartwheel's support assistant. Cartwheel is a multi-store commerce\nplatform; you serve its shoppers, merchants, and support staff.\n\n## Session context (injected by the server; never taken from chat)\n- User role: merchant\n- User id: 9002\n- Store id: 2\n\n## Capabilities and boundaries\nYou help with: order status, returns and refunds, product and policy\nquestions, and escalation to a human. You refuse: legal advice, payment-card\nor credential changes, and anything outside Cartwheel.\n\n## Tool guidance\n- Prefer a tool lookup over memory. Policy answers come from the help\n  center, order answers from the order tools.\n- Cite the policy id (for example cw-returns) for every policy claim.\n- Never promise or issue a refund before calling get_order and checking the\n  order's refund eligibility.\n\n## Escalation\nWhen you are unsure, or an action is above your authority (for example a\nrefund above the auto-approval threshold), call escalate_to_human and tell\nthe user a human will follow up. Account changes of any kind always go to a\nhuman this way, even when the user could also make the change themselves.\n\n## Tone\nPlain and warm. No legalese.\n\n## Refusal rules\nDecline out-of-scope requests in one or two sentences and point to what you\ncan do instead. Never reveal another user's data, whatever the reason given.\n"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "content": "Show me order 4127."
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "parts": [
+              {
+                "type": "tool_call",
+                "id": "chatcmpl-tool-bd0ea35a8bebba23",
+                "name": "get_order",
+                "arguments": {
+                  "order_id": 4127
+                }
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "parts": [
+              {
+                "type": "tool_call_response",
+                "id": "chatcmpl-tool-bd0ea35a8bebba23",
+                "response": "{'ok': False, 'error': 'permission_denied', 'reason': \"role 'merchant' (user 9002) may not view order #4127\"}"
+              }
+            ]
+          }
+        ],
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "gen_ai.operation.name": "chat",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.request.model": "deepinfra/zai-org/GLM-5.3"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": null,
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "b3abce0ec5bf2568",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 1.589,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.045Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "f6ee7f4dee05875d",
+        "traceId": "768b8096b9a950d29f6bd8ec9fcfeaad",
+        "type": "TOOL",
+        "name": "get_order",
+        "startTime": "2026-09-11T08:00:17.107000Z",
+        "endTime": "2026-09-11T08:00:17.108000Z",
+        "completionStartTime": null,
+        "model": null,
+        "modelParameters": {},
+        "input": {
+          "order_id": 4127
+        },
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "traceloop.span.kind": "tool",
+            "gen_ai.tool.name": "get_order",
+            "gen_ai.tool.type": "function",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.operation.name": "execute_tool",
+            "cartwheel.user_role": "merchant",
+            "cartwheel.user_id": "9002",
+            "cartwheel.store_id": "2",
+            "cartwheel.permission_denied": "true",
+            "cartwheel.permission_denied.reason": "role 'merchant' (user 9002) may not view order #4127"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": {
+          "ok": false,
+          "error": "permission_denied",
+          "reason": "role 'merchant' (user 9002) may not view order #4127"
+        },
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "b3abce0ec5bf2568",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 0.001,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:18.008Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:17.997Z"
+      },
+      {
+        "id": "5dbaac7f41cccd3f",
+        "traceId": "768b8096b9a950d29f6bd8ec9fcfeaad",
+        "type": "GENERATION",
+        "name": "openai.response",
+        "startTime": "2026-09-11T08:00:15.576000Z",
+        "endTime": "2026-09-11T08:00:17.104000Z",
+        "completionStartTime": null,
+        "model": "deepinfra/zai-org/GLM-5.3",
+        "modelParameters": {},
+        "input": [
+          {
+            "role": "system",
+            "parts": [
+              {
+                "type": "text",
+                "content": "You are Cartwheel's support assistant. Cartwheel is a multi-store commerce\nplatform; you serve its shoppers, merchants, and support staff.\n\n## Session context (injected by the server; never taken from chat)\n- User role: merchant\n- User id: 9002\n- Store id: 2\n\n## Capabilities and boundaries\nYou help with: order status, returns and refunds, product and policy\nquestions, and escalation to a human. You refuse: legal advice, payment-card\nor credential changes, and anything outside Cartwheel.\n\n## Tool guidance\n- Prefer a tool lookup over memory. Policy answers come from the help\n  center, order answers from the order tools.\n- Cite the policy id (for example cw-returns) for every policy claim.\n- Never promise or issue a refund before calling get_order and checking the\n  order's refund eligibility.\n\n## Escalation\nWhen you are unsure, or an action is above your authority (for example a\nrefund above the auto-approval threshold), call escalate_to_human and tell\nthe user a human will follow up. Account changes of any kind always go to a\nhuman this way, even when the user could also make the change themselves.\n\n## Tone\nPlain and warm. No legalese.\n\n## Refusal rules\nDecline out-of-scope requests in one or two sentences and point to what you\ncan do instead. Never reveal another user's data, whatever the reason given.\n"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "content": "Show me order 4127."
+              }
+            ]
+          }
+        ],
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "gen_ai.operation.name": "chat",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.request.model": "deepinfra/zai-org/GLM-5.3"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": null,
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "b3abce0ec5bf2568",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 1.528,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:18.004Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:17.996Z"
+      }
+    ],
+    "scores": [],
+    "projectId": "cartwheel-dev",
+    "updatedAt": "2026-09-11T08:00:23.074Z",
+    "externalId": null,
+    "bookmarked": false,
+    "createdAt": "2026-09-11T08:00:17.999Z"
+  },
+  {
+    "id": "2248910f85630023c108b732ce4141dd",
+    "timestamp": "2026-09-11T08:00:18.733000Z",
+    "name": "cartwheel.session_message",
+    "input": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "type": "text",
+            "content": "Show me order 4127."
+          }
+        ]
+      }
+    ],
+    "output": [
+      {
+        "role": "assistant",
+        "parts": [
+          {
+            "type": "text",
+            "content": "Here's order 4127:\n\n- **Store:** Blue Heron Ceramics\n- **Product:** Product #1 (quantity: 1)\n- **Total:** $84.00\n- **Status:** Delivered\n- **Ordered:** June 14, 2026\n- **Shipped:** June 16, 2026\n- **Delivered:** June 19, 2026\n\nGood news — this order is currently **eligible for a refund** if you'd like one. Just let me know if there's anything else you'd like to do with this order."
+          }
+        ]
+      }
+    ],
+    "sessionId": null,
+    "release": null,
+    "version": null,
+    "userId": null,
+    "metadata": {
+      "attributes": {
+        "cartwheel.user_role": "support",
+        "cartwheel.user_id": "9501",
+        "cartwheel.prompt_version": "930b0fb3a74a"
+      },
+      "resourceAttributes": {
+        "telemetry.sdk.language": "python",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.43.0",
+        "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+        "service.name": "unknown_service"
+      },
+      "scope": {
+        "name": "cartwheel.server",
+        "attributes": {}
+      }
+    },
+    "tags": [],
+    "public": false,
+    "environment": "default",
+    "htmlPath": "/project/cartwheel-dev/traces/2248910f85630023c108b732ce4141dd",
+    "latency": 2.197,
+    "totalCost": 0.0,
+    "observations": [
+      {
+        "id": "39639b3abc41a108",
+        "traceId": "2248910f85630023c108b732ce4141dd",
+        "type": "SPAN",
+        "name": "cartwheel.session_message",
+        "startTime": "2026-09-11T08:00:18.733000Z",
+        "endTime": "2026-09-11T08:00:20.930000Z",
+        "completionStartTime": null,
+        "model": null,
+        "modelParameters": null,
+        "input": [
+          {
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "content": "Show me order 4127."
+              }
+            ]
+          }
+        ],
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "cartwheel.user_role": "support",
+            "cartwheel.user_id": "9501",
+            "cartwheel.prompt_version": "930b0fb3a74a"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "cartwheel.server",
+            "attributes": {}
+          }
+        },
+        "output": [
+          {
+            "role": "assistant",
+            "parts": [
+              {
+                "type": "text",
+                "content": "Here's order 4127:\n\n- **Store:** Blue Heron Ceramics\n- **Product:** Product #1 (quantity: 1)\n- **Total:** $84.00\n- **Status:** Delivered\n- **Ordered:** June 14, 2026\n- **Shipped:** June 16, 2026\n- **Delivered:** June 19, 2026\n\nGood news — this order is currently **eligible for a refund** if you'd like one. Just let me know if there's anything else you'd like to do with this order."
+              }
+            ]
+          }
+        ],
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": null,
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 2.197,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.058Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "8ed9a42b4824ca63",
+        "traceId": "2248910f85630023c108b732ce4141dd",
+        "type": "SPAN",
+        "name": "Agent Workflow",
+        "startTime": "2026-09-11T08:00:18.734000Z",
+        "endTime": "2026-09-11T08:00:20.929000Z",
+        "completionStartTime": null,
+        "model": null,
+        "modelParameters": null,
+        "input": null,
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "traceloop.span.kind": "workflow",
+            "gen_ai.provider.name": "openai",
+            "traceloop.workflow.name": "Agent Workflow"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": null,
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "39639b3abc41a108",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 2.195,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.057Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "0e291465f3587a72",
+        "traceId": "2248910f85630023c108b732ce4141dd",
+        "type": "AGENT",
+        "name": "cartwheel-support.agent",
+        "startTime": "2026-09-11T08:00:18.736000Z",
+        "endTime": "2026-09-11T08:00:20.929000Z",
+        "completionStartTime": null,
+        "model": null,
+        "modelParameters": {},
+        "input": null,
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "traceloop.span.kind": "agent",
+            "gen_ai.agent.name": "cartwheel-support",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.operation.name": "invoke_agent"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": null,
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "8ed9a42b4824ca63",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 2.193,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.054Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "7a82a2cc0d679c41",
+        "traceId": "2248910f85630023c108b732ce4141dd",
+        "type": "GENERATION",
+        "name": "openai.response",
+        "startTime": "2026-09-11T08:00:18.738000Z",
+        "endTime": "2026-09-11T08:00:19.533000Z",
+        "completionStartTime": null,
+        "model": "deepinfra/zai-org/GLM-5.3",
+        "modelParameters": {},
+        "input": [
+          {
+            "role": "system",
+            "parts": [
+              {
+                "type": "text",
+                "content": "You are Cartwheel's support assistant. Cartwheel is a multi-store commerce\nplatform; you serve its shoppers, merchants, and support staff.\n\n## Session context (injected by the server; never taken from chat)\n- User role: support\n- User id: 9501\n- Store id: none\n\n## Capabilities and boundaries\nYou help with: order status, returns and refunds, product and policy\nquestions, and escalation to a human. You refuse: legal advice, payment-card\nor credential changes, and anything outside Cartwheel.\n\n## Tool guidance\n- Prefer a tool lookup over memory. Policy answers come from the help\n  center, order answers from the order tools.\n- Cite the policy id (for example cw-returns) for every policy claim.\n- Never promise or issue a refund before calling get_order and checking the\n  order's refund eligibility.\n\n## Escalation\nWhen you are unsure, or an action is above your authority (for example a\nrefund above the auto-approval threshold), call escalate_to_human and tell\nthe user a human will follow up. Account changes of any kind always go to a\nhuman this way, even when the user could also make the change themselves.\n\n## Tone\nPlain and warm. No legalese.\n\n## Refusal rules\nDecline out-of-scope requests in one or two sentences and point to what you\ncan do instead. Never reveal another user's data, whatever the reason given.\n"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "content": "Show me order 4127."
+              }
+            ]
+          }
+        ],
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "gen_ai.operation.name": "chat",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.request.model": "deepinfra/zai-org/GLM-5.3"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": null,
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "0e291465f3587a72",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 0.795,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.049Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "170bce19c077cd71",
+        "traceId": "2248910f85630023c108b732ce4141dd",
+        "type": "GENERATION",
+        "name": "openai.response",
+        "startTime": "2026-09-11T08:00:19.544000Z",
+        "endTime": "2026-09-11T08:00:20.919000Z",
+        "completionStartTime": null,
+        "model": "deepinfra/zai-org/GLM-5.3",
+        "modelParameters": {},
+        "input": [
+          {
+            "role": "system",
+            "parts": [
+              {
+                "type": "text",
+                "content": "You are Cartwheel's support assistant. Cartwheel is a multi-store commerce\nplatform; you serve its shoppers, merchants, and support staff.\n\n## Session context (injected by the server; never taken from chat)\n- User role: support\n- User id: 9501\n- Store id: none\n\n## Capabilities and boundaries\nYou help with: order status, returns and refunds, product and policy\nquestions, and escalation to a human. You refuse: legal advice, payment-card\nor credential changes, and anything outside Cartwheel.\n\n## Tool guidance\n- Prefer a tool lookup over memory. Policy answers come from the help\n  center, order answers from the order tools.\n- Cite the policy id (for example cw-returns) for every policy claim.\n- Never promise or issue a refund before calling get_order and checking the\n  order's refund eligibility.\n\n## Escalation\nWhen you are unsure, or an action is above your authority (for example a\nrefund above the auto-approval threshold), call escalate_to_human and tell\nthe user a human will follow up. Account changes of any kind always go to a\nhuman this way, even when the user could also make the change themselves.\n\n## Tone\nPlain and warm. No legalese.\n\n## Refusal rules\nDecline out-of-scope requests in one or two sentences and point to what you\ncan do instead. Never reveal another user's data, whatever the reason given.\n"
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "content": "Show me order 4127."
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "parts": [
+              {
+                "type": "tool_call",
+                "id": "chatcmpl-tool-99ceff3a8da3891d",
+                "name": "get_order",
+                "arguments": {
+                  "order_id": 4127
+                }
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "parts": [
+              {
+                "type": "tool_call_response",
+                "id": "chatcmpl-tool-99ceff3a8da3891d",
+                "response": "{'ok': True, 'order': {'order_id': 4127, 'store_id': 1, 'product_id': 1, 'quantity': 1, 'total_usd': 84.0, 'status': 'delivered', 'ordered_at': '2026-06-14', 'shipped_at': '2026-06-16', 'delivered_at': '2026-06-19', 'refund_eligible': True, 'store_name': 'Blue Heron Ceramics'}}"
+              }
+            ]
+          }
+        ],
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "gen_ai.operation.name": "chat",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.request.model": "deepinfra/zai-org/GLM-5.3"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": null,
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "0e291465f3587a72",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 1.375,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.048Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      },
+      {
+        "id": "2c1beeb183ccf841",
+        "traceId": "2248910f85630023c108b732ce4141dd",
+        "type": "TOOL",
+        "name": "get_order",
+        "startTime": "2026-09-11T08:00:19.534000Z",
+        "endTime": "2026-09-11T08:00:19.536000Z",
+        "completionStartTime": null,
+        "model": null,
+        "modelParameters": {},
+        "input": {
+          "order_id": 4127
+        },
+        "version": null,
+        "metadata": {
+          "attributes": {
+            "traceloop.span.kind": "tool",
+            "gen_ai.tool.name": "get_order",
+            "gen_ai.tool.type": "function",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.operation.name": "execute_tool",
+            "cartwheel.user_role": "support",
+            "cartwheel.user_id": "9501",
+            "cartwheel.permission_denied": "false"
+          },
+          "resourceAttributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.43.0",
+            "service.instance.id": "9e2a1004-dc33-4b09-acfa-d5a92cc40c92",
+            "service.name": "unknown_service"
+          },
+          "scope": {
+            "name": "opentelemetry.instrumentation.openai_agents",
+            "version": "0.62.3",
+            "attributes": {}
+          }
+        },
+        "output": {
+          "ok": true,
+          "order": {
+            "order_id": 4127,
+            "store_id": 1,
+            "product_id": 1,
+            "quantity": 1,
+            "total_usd": 84,
+            "status": "delivered",
+            "ordered_at": "2026-06-14",
+            "shipped_at": "2026-06-16",
+            "delivered_at": "2026-06-19",
+            "refund_eligible": true,
+            "store_name": "Blue Heron Ceramics"
+          }
+        },
+        "usage": {
+          "input": 0,
+          "output": 0,
+          "total": 0,
+          "unit": "TOKENS"
+        },
+        "level": "DEFAULT",
+        "statusMessage": null,
+        "parentObservationId": "0e291465f3587a72",
+        "promptId": null,
+        "usageDetails": {},
+        "costDetails": {},
+        "environment": "default",
+        "promptName": null,
+        "promptVersion": null,
+        "modelId": null,
+        "inputPrice": 0.0,
+        "outputPrice": 0.0,
+        "totalPrice": 0.0,
+        "calculatedInputCost": null,
+        "calculatedOutputCost": null,
+        "calculatedTotalCost": 0.0,
+        "latency": 0.002,
+        "timeToFirstToken": null,
+        "totalTokens": 0,
+        "usagePricingTierName": null,
+        "updatedAt": "2026-09-11T08:00:23.047Z",
+        "completionTokens": 0,
+        "unit": "TOKENS",
+        "usagePricingTierId": null,
+        "promptTokens": 0,
+        "projectId": "cartwheel-dev",
+        "createdAt": "2026-09-11T08:00:23.031Z"
+      }
+    ],
+    "scores": [],
+    "projectId": "cartwheel-dev",
+    "updatedAt": "2026-09-11T08:00:23.069Z",
+    "externalId": null,
+    "bookmarked": false,
+    "createdAt": "2026-09-11T08:00:23.035Z"
+  }
+]
