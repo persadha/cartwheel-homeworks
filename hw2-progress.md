@@ -31,16 +31,17 @@ All that remains is the student's own work: handout assessments and the video.
   and no `NotImplementedError` markers remain in either HW2 file.
   Not yet verified: `post_message` runtime behaviour (needs Part D + Part E).
 
-## Next: Part E, the live trace run. Part D is DONE.
+## HISTORICAL planning notes (Parts D, E and F are all DONE; see the
+## dated sections further down for what actually happened).
 
 ### (a) Part E mechanics: see a real trace
 Order was reversed on 2026-09-11. Docker Desktop was not running, so Part D
 (fully offline) went first; this also matches the handout, which puts Part E
 after authentication testing.
 
-Four steps, of which step E1 was proposed and NOT run:
+Four steps, all since RUN (see the Part E section below):
 
-- **E1 (proposed, awaiting go):** start the trace stack.
+- **E1 (done):** start the trace stack.
   ```
   docker compose -f observability/docker-compose.yml up -d
   docker compose -f observability/docker-compose.yml ps
@@ -48,12 +49,13 @@ Four steps, of which step E1 was proposed and NOT run:
   Prerequisite the student handles: Docker Desktop must be running on Windows.
   Expect a multi-GB image download on first run; postgres/clickhouse/redis/minio
   go `healthy`, then langfuse-web needs another 30-60s for DB migrations.
-- **E2 (not yet proposed):** start the server,
+- **E2 (done):** start the server,
   `uv run uvicorn server.app:app --port 8010` — must stay running.
 - **E3:** `curl POST /sessions` for a user, then
   `curl POST /sessions/<id>/messages` with the bearer token.
-- **E4:** open http://localhost:3000 (student@example.com /
-  cartwheel-dev-pass), find the trace, inspect the span tree.
+- **E4 (done):** open http://localhost:3000, find the trace, inspect the
+  span tree. NOTE: sign in as your OWN account, not student@example.com;
+  see the resume section at the end of this file.
 
 Reminder covered already: spans reach Langfuse on a separate, batched path, so
 a trace appears a few seconds after the reply returns.
@@ -218,3 +220,52 @@ had only DEFAULT-level observations, so `final_status` is `completed`.
 - The Module 2 judge test needs a Langfuse slice that does not exist yet.
 - Still outstanding and deliberately NOT done by the agent: the handout's
   written assessments and the <=5 minute video.
+
+## Session ended 2026-09-11, ~10:30 UTC. How to resume.
+
+Everything for HW2 is DONE and pushed except the student's own assessments
+and the video. Services were stopped cleanly; no data was lost.
+
+Bring the stack back up:
+
+    docker compose -f observability/docker-compose.yml start
+    # langfuse-web needs ~30-60s before :3000 answers
+
+`start` is enough because the containers were stopped, not removed. Use
+`up -d` if they are gone. NEVER use `down -v`: the four
+`observability_langfuse_*` volumes hold all 14 traces AND the org
+membership below, and -v destroys them.
+
+Only needed if sending NEW requests:
+
+    uv run uvicorn server.app:app --port 8010
+
+Langfuse login: sign in as widianto.persadha@iea-hamburg.de with your own
+password. That account was added to the "Cartwheel Course" org as OWNER on
+2026-09-11 (row id `wp-cartwheel-owner` in `organization_memberships`), so
+the Cartwheel Dev project appears in the org switcher. Undo with
+`DELETE FROM organization_memberships WHERE id = 'wp-cartwheel-owner';`
+
+UNRESOLVED: signing in as student@example.com / cartwheel-dev-pass returned
+"Invalid credentials", even though that password verifies against the stored
+bcrypt hash and the failed attempt produced no server-side log. Not chased.
+The membership above makes it unnecessary, but the cause is still unknown.
+
+Open the browser at exactly http://localhost:3000, NOT 127.0.0.1:3000 --
+NEXTAUTH_URL is pinned to localhost and a mismatch breaks sign-in.
+
+The two traces for the video:
+- merchant denied : /project/cartwheel-dev/traces/768b8096b9a950d29f6bd8ec9fcfeaad
+- support allowed : /project/cartwheel-dev/traces/2248910f85630023c108b732ce4141dd
+Both are 6 observations. `hw2-traces-full.json` holds their complete spans,
+so they can still be explained even if Langfuse is ever wiped.
+
+Git: branch WP is pushed to remote `fork`
+(https://github.com/persadha/cartwheel-homeworks), tracking fork/WP.
+`origin` is still the course repo. Local `main` is untouched: ahead 1,
+behind 4 of origin/main.
+
+Note: 6 practice traces from 09:44-10:00 have a null trace-level `input`.
+They are endpoint traces (they carry the cartwheel.session_message root
+span), most likely sent with an empty message. Not investigated. The five
+Part E traces and the two Part F traces all have their content intact.
