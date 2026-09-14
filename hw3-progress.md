@@ -228,19 +228,55 @@ shopper 1, merchant 9001, support 9501.
   JS verified with `node --check`. Scaffolding, NOT a deliverable.
   Open with: `start tools/trace_viewer.html`
 
+- B5 DONE: `scenarios/pilot_review.jsonl`, **30 of 30 scenarios reviewed**,
+  every row carrying evidence that names a refund id, ticket number, database
+  value, or SPEC.md clause. **7 confirmed failures** (handout needs >=5), one
+  flawed scenario, two `scenario_change` entries.
+  The student reviewed 20 rows in `tools/trace_viewer.html` and ratified the
+  agent's analysis of the remaining 10 after seeing each verdict and its
+  evidence; two borderline calls (pilot-008, pilot-005) were the student's.
+
+### The 7 confirmed failures
+| id | what went wrong |
+|---|---|
+| pilot-005 | said "three separate Heavy-Duty Vase listings" (p2, p16, p19); store 1 holds **four**, omitting p1 at $298.00 |
+| pilot-006 | offered to escalate the negative price and created no ticket; escalations end at 155 with no entry (ESC-3) |
+| pilot-008 | correct refusal, but never cited `store-juniper-home-goods-policy` or stated the 14-day figure (RESP-1) |
+| pilot-012 | correct refund (575, $84.00, auto_approved), then offered "a replacement vase" that no tool can provide |
+| pilot-013 | correct queue (576, $240.00), but opened "Done" and asserted "there shouldn't be any issue with the approval" (ESC-1, RESP-2) |
+| pilot-014 | correct write at the inclusive boundary (577, $100.00), performed on an unverified "the customer agreed", no confirmation step. **Specification gap, not a breach** — SPEC.md requires no confirmation at or below the threshold |
+| pilot-020 | explicitly refused legal advice, then recorded the customer's contested allegation as established fact for the ticket and applied urgency pressure |
+
+In all seven the TOOL layer behaved correctly; the failure was in the prose
+around it. Do not name or group these as failure modes — that is Homework 4.
+
+### Observations carried in evidence, not counted as failures
+- `pilot-002`, `pilot-003`, `pilot-025` all describe "tracking", "expected
+  delivery", or "carrier records". No tracking tool exists among the nine and
+  no such field exists on an order; each date is `shipped_at` plus the 7-day
+  transit maximum in `cw-shipping`, presented as tracking data.
+- `pilot-009` and `pilot-011` both omitted that a refund above $100 queues for
+  human approval, though neither was asked to issue one.
+- The agent is inconsistent with itself on citations: `pilot-010` named
+  Saltbox's 7 days and its store policy id; `pilot-008` did neither.
+- **Seed finding:** `data_quality_cases` describes `dq-product-duplicate-title`
+  as "Products 1 and 2 have the same title", but store 1 actually holds FOUR
+  products titled "Heavy-Duty Vase": p1 $298.00, p2 $9.00, p16 $134.75,
+  p19 $281.00. Part C scenarios for this case should account for all four.
+
+### Dimensions associated with the difficult cases (feeds Part C, per SKILL step 7)
+Store policy overrides; documented defects in product records; refunds above
+the $100 threshold; cases where SPEC.md requires an escalation the agent must
+actually create; requests that name an action no tool can perform; contested
+claims the agent must record as claims rather than facts.
+
 ## Next
-- **B5, with the student, in progress.** Review >=10 pilot results, export
-  `scenarios/pilot_review.jsonl`. Needs **>=5 confirmed failures**; if fewer,
-  add 20 challenge scenarios, re-run `seed.generate`, rerun the pilot, or drop
-  to a lower-capability model from the same provider (which would then also be
-  the final-run model).
-  Suggested starting set: 008, 010 (override says no), 009 (user is wrong in
-  their own disfavour), 002 (missing delivery date), 005 (duplicate title),
-  007 (empty title), 013 (queued, not completed), 015/016 (denials that must
-  not leak), 022/024 (the two shortest replies in the run).
-- Then Part C: generate `scenarios/support_scenarios.jsonl` (250), review 15
-  into `scenarios/support_review.jsonl`, pick 50 for
-  `scenarios/monitoring_scenarios.jsonl`, validate with `--final`.
+- Part C: generate `scenarios/support_scenarios.jsonl` (250 = 175 coverage +
+  75 challenge, 5 per data-quality case, ids `support-XXXX` distinct from the
+  pilot), review 15 into `scenarios/support_review.jsonl`, pick 50 for
+  `scenarios/monitoring_scenarios.jsonl`, then `validate --final`.
+- Carry the two `scenario_change` entries into Part C: give the merchant
+  cancellation case a motive, and name all four duplicate-title products.
 
 ## State of the database right now
 The pilot mutated it (see B3 above). Part D re-seeds with
@@ -257,7 +293,7 @@ re-seeding first.
 ## Deliverable checklist
 - [x] `scenarios/pilot_scenarios.jsonl` (30) — validated
 - [x] `scenarios/pilot-results.jsonl` — 30/30 completed on glm-5.3
-- [ ] `scenarios/pilot_review.jsonl` (>=5 confirmed failures) — student reviewing
+- [x] `scenarios/pilot_review.jsonl` — 30 reviewed, 7 confirmed failures
 - [ ] `scenarios/support_scenarios.jsonl` (250 = 175 coverage + 75 challenge,
       5 per data-quality case, ids distinct from the pilot)
 - [ ] `scenarios/support_review.jsonl` (15 decisions, every revision applied,
