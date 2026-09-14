@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartwheel scenario review</title>
+<style>
+  :root {
+    --bg: #f7f7f5;  --panel: #ffffff;  --ink: #1b1b1a;  --muted: #6b6b66;
+    --line: #e0e0db; --accent: #2f6f4f; --warn: #a8410f; --bad: #9b2226;
+    --good: #2f6f4f; --chip: #eeeeea;  --code: #f2f2ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16181a;  --panel: #1d2022; --ink: #e8e8e4; --muted: #9a9a94;
+      --line: #2e3134; --accent: #7fc3a0; --warn: #e2955f; --bad: #e88b8b;
+      --good: #7fc3a0; --chip: #26292c;  --code: #232629;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  code, pre, .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+  header {
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 650; letter-spacing: .01em; }
+  .spacer { flex: 1; }
+  button, select, input[type=file] { font: inherit; }
+  button {
+    background: var(--chip); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 6px; padding: 5px 11px; cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--accent); color: var(--panel); border-color: var(--accent); font-weight: 600; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  select { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 4px 7px; }
+
+  .tally { display: flex; gap: 14px; font-size: 12.5px; color: var(--muted); }
+  .tally b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .tally .hit b { color: var(--good); }
+
+  #drop {
+    margin: 40px auto; max-width: 620px; padding: 34px; text-align: center;
+    border: 2px dashed var(--line); border-radius: 12px; background: var(--panel);
+  }
+  #drop.hot { border-color: var(--accent); background: var(--chip); }
+  #drop h2 { margin: 0 0 6px; font-size: 17px; }
+  #drop p { color: var(--muted); margin: 6px 0; }
+
+  main { display: none; grid-template-columns: 330px 1fr; height: calc(100vh - 49px); }
+  main.ready { display: grid; }
+
+  #sidebar { border-right: 1px solid var(--line); overflow-y: auto; background: var(--panel); }
+  .filters { padding: 9px 12px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px; }
+  .filters select { font-size: 12px; }
+  .row {
+    padding: 8px 12px; border-bottom: 1px solid var(--line); cursor: pointer;
+    display: grid; grid-template-columns: 1fr auto; gap: 3px 8px; align-items: baseline;
+  }
+  .row:hover { background: var(--chip); }
+  .row.sel { background: var(--chip); box-shadow: inset 3px 0 0 var(--accent); }
+  .row .sid { font-weight: 620; font-size: 12.5px; }
+  .row .meta { grid-column: 1 / -1; color: var(--muted); font-size: 11.5px; }
+  .row .msg { grid-column: 1 / -1; color: var(--muted); font-size: 12px;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mark { font-size: 11px; font-weight: 700; }
+  .mark.fail { color: var(--bad); }  .mark.ok { color: var(--good); }
+  .mark.bad-scenario { color: var(--warn); }
+
+  #detail { overflow-y: auto; padding: 18px 22px 60px; }
+  #detail h2 { margin: 0 0 2px; font-size: 17px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 16px; }
+  .chip { background: var(--chip); border: 1px solid var(--line); border-radius: 20px;
+          padding: 2px 9px; font-size: 11.5px; color: var(--muted); }
+  .chip b { color: var(--ink); font-weight: 600; }
+
+  section { margin-bottom: 20px; }
+  section > h3 {
+    margin: 0 0 8px; font-size: 11.5px; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--muted); font-weight: 700;
+  }
+  .turn { border: 1px solid var(--line); border-radius: 9px; margin-bottom: 9px; overflow: hidden; }
+  .turn .who { padding: 5px 11px; font-size: 11px; font-weight: 700; letter-spacing: .05em;
+               text-transform: uppercase; color: var(--muted); background: var(--chip); }
+  .turn .body { padding: 10px 12px; white-space: pre-wrap; }
+  .turn.user .body { font-weight: 500; }
+
+  .expected { border: 1px solid var(--accent); border-radius: 9px; padding: 12px 14px; background: var(--panel); }
+  .expected .kind { font-size: 11px; font-weight: 700; letter-spacing: .05em;
+                    text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .expected .outcome { font-weight: 650; margin-bottom: 6px; }
+  .expected .src { margin-top: 9px; padding-top: 9px; border-top: 1px dashed var(--line);
+                   font-size: 12px; color: var(--muted); }
+  .expected .src code { background: var(--code); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
+
+  .form { border: 1px solid var(--line); border-radius: 9px; padding: 14px; background: var(--panel); }
+  .qline { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; flex-wrap: wrap; }
+  .qline > span:first-child { min-width: 200px; font-weight: 550; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; background: var(--panel); padding: 4px 13px; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button.on { background: var(--accent); color: var(--panel); font-weight: 650; }
+  .seg button.on.no { background: var(--bad); }
+  label.fld { display: block; margin-bottom: 11px; }
+  label.fld > span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  textarea {
+    width: 100%; min-height: 62px; resize: vertical; font: inherit;
+    background: var(--bg); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 6px; padding: 8px 10px;
+  }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .nav { display: flex; gap: 8px; margin-top: 14px; }
+  .empty { color: var(--muted); padding: 40px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Cartwheel scenario review</h1>
+  <select id="mode" title="Which deliverable you are producing">
+    <option value="pilot">Part B &mdash; pilot_review.jsonl</option>
+    <option value="final">Part C &mdash; support_review.jsonl</option>
+  </select>
+  <div class="tally" id="tally"></div>
+  <div class="spacer"></div>
+  <button id="reload">Load other files</button>
+  <button id="export" class="primary" disabled>Export review JSONL</button>
+</header>
+
+<div id="drop">
+  <h2>Drop your JSONL files here</h2>
+  <p><b>Required:</b> a results file &mdash; <code>scenarios/pilot-results.jsonl</code>
+     or <code>scenarios/final-results.jsonl</code></p>
+  <p><b>Optional:</b> the matching scenario file
+     (<code>pilot_scenarios.jsonl</code> / <code>support_scenarios.jsonl</code>)
+     to enable the role, group and difficulty filters</p>
+  <p><b>Optional:</b> an existing review file to carry on where you left off</p>
+  <p style="margin-top:18px"><input type="file" id="picker" multiple accept=".jsonl,.json"></p>
+  <p class="hint">Everything stays in this browser. Nothing is uploaded anywhere.</p>
+</div>
+
+<main id="main">
+  <div id="sidebar">
+    <div class="filters">
+      <select id="f-group"><option value="">all groups</option></select>
+      <select id="f-role"><option value="">all roles</option></select>
+      <select id="f-diff"><option value="">all difficulty</option></select>
+      <select id="f-state">
+        <option value="">all</option>
+        <option value="todo">not yet reviewed</option>
+        <option value="done">reviewed</option>
+        <option value="fail">confirmed failures</option>
+      </select>
+    </div>
+    <div id="list"></div>
+  </div>
+  <div id="detail"><div class="empty">Pick a scenario on the left.</div></div>
+</main>
+
+<script>
+"use strict";
+
+const LANGFUSE = "http://localhost:3000/project/cartwheel-dev/traces";
+const STORE_KEY = "cartwheel-hw3-review-v2";
+
+let results = [];               // records from *-results.jsonl
+let scenarios = new Map();      // id -> scenario record (optional file)
+let review = load();            // id -> {scenario_valid, confirmed_failure, evidence, scenario_change, decision, reason, change}
+let current = null;
+let mode = "pilot";
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); }
+  catch (e) { return {}; }
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(review)); }
+  catch (e) { /* private window, quota: the export is the real artifact */ }
+}
+function rec(id) {
+  if (!review[id]) review[id] = {};
+  return review[id];
+}
+const esc = s => String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+/* ---------- file intake ---------- */
+
+function parseJSONL(text) {
+  const out = [];
+  text.split(/\r?\n/).forEach((line, i) => {
+    if (!line.trim()) return;
+    try { out.push(JSON.parse(line)); }
+    catch (e) { console.warn("line " + (i + 1) + " is not JSON, skipped"); }
+  });
+  return out;
+}
+
+function ingest(records) {
+  if (!records.length) return;
+  const first = records[0];
+  if ("turns" in first && "scenario_id" in first) {
+    results = records;
+  } else if ("opening_message" in first && "id" in first) {
+    records.forEach(s => scenarios.set(s.id, s));
+  } else if ("scenario_id" in first && ("scenario_valid" in first || "decision" in first)) {
+    records.forEach(r => {
+      const t = rec(r.scenario_id);
+      Object.assign(t, r);
+      delete t.scenario_id;
+    });
+    if ("decision" in first) setMode("final");
+    save();
+  }
+}
+
+async function handleFiles(fileList) {
+  for (const f of fileList) ingest(parseJSONL(await f.text()));
+  if (results.length) {
+    document.getElementById("drop").style.display = "none";
+    document.getElementById("main").classList.add("ready");
+    buildFilters();
+    render();
+    if (!current) select(visible()[0]?.scenario_id);
+  }
+}
+
+document.getElementById("picker").addEventListener("change", e => handleFiles(e.target.files));
+const drop = document.getElementById("drop");
+["dragenter", "dragover"].forEach(ev =>
+  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("hot"); }));
+["dragleave", "drop"].forEach(ev =>
+  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("hot"); }));
+drop.addEventListener("drop", e => handleFiles(e.dataTransfer.files));
+document.addEventListener("dragover", e => e.preventDefault());
+document.addEventListener("drop", e => {
+  e.preventDefault();
+  if (e.target.closest("#drop")) return;
+  handleFiles(e.dataTransfer.files);
+});
+document.getElementById("reload").onclick = () => {
+  document.getElementById("drop").style.display = "";
+  document.getElementById("main").classList.remove("ready");
+};
+
+/* ---------- mode ---------- */
+
+function setMode(m) {
+  mode = m;
+  document.getElementById("mode").value = m;
+  render();
+}
+document.getElementById("mode").onchange = e => setMode(e.target.value);
+
+/* ---------- filters and list ---------- */
+
+function tupleOf(id) { return scenarios.get(id)?.tuple || {}; }
+
+function buildFilters() {
+  const fill = (sel, values) => {
+    const el = document.getElementById(sel);
+    const keep = el.value;
+    el.length = 1;
+    [...new Set(values)].filter(Boolean).sort().forEach(v => el.add(new Option(v, v)));
+    el.value = keep;
+  };
+  fill("f-group", results.map(r => r.scenario_group));
+  fill("f-role", results.map(r => tupleOf(r.scenario_id).role));
+  fill("f-diff", results.map(r => tupleOf(r.scenario_id).difficulty));
+  ["f-group", "f-role", "f-diff", "f-state"].forEach(id =>
+    document.getElementById(id).onchange = () => render());
+}
+
+function visible() {
+  const g = document.getElementById("f-group").value;
+  const ro = document.getElementById("f-role").value;
+  const d = document.getElementById("f-diff").value;
+  const st = document.getElementById("f-state").value;
+  return results.filter(r => {
+    const t = tupleOf(r.scenario_id), v = review[r.scenario_id];
+    if (g && r.scenario_group !== g) return false;
+    if (ro && t.role !== ro) return false;
+    if (d && t.difficulty !== d) return false;
+    if (st === "todo" && isReviewed(v)) return false;
+    if (st === "done" && !isReviewed(v)) return false;
+    if (st === "fail" && !(v && v.confirmed_failure === true)) return false;
+    return true;
+  });
+}
+
+function isReviewed(v) {
+  if (!v) return false;
+  return mode === "pilot"
+    ? (v.scenario_valid !== undefined || v.confirmed_failure !== undefined)
+    : Boolean(v.decision);
+}
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  visible().forEach(r => {
+    const t = tupleOf(r.scenario_id), v = review[r.scenario_id] || {};
+    const div = document.createElement("div");
+    div.className = "row" + (r.scenario_id === current ? " sel" : "");
+    let mark = "";
+    if (mode === "pilot") {
+      if (v.confirmed_failure === true) mark = '<span class="mark fail">FAIL</span>';
+      else if (v.scenario_valid === false) mark = '<span class="mark bad-scenario">BAD SCENARIO</span>';
+      else if (isReviewed(v)) mark = '<span class="mark ok">OK</span>';
+    } else if (v.decision) {
+      const cls = v.decision === "accept" ? "ok" : v.decision === "reject" ? "fail" : "bad-scenario";
+      mark = '<span class="mark ' + cls + '">' + v.decision.toUpperCase() + "</span>";
+    }
+    const bits = [r.scenario_group, t.role, t.intent, t.difficulty].filter(Boolean).join(" · ");
+    div.innerHTML =
+      '<span class="sid">' + esc(r.scenario_id) + "</span>" + mark +
+      '<span class="meta">' + esc(bits) + "</span>" +
+      '<span class="msg">' + esc(r.turns?.[0]?.user || "") + "</span>";
+    div.onclick = () => select(r.scenario_id);
+    list.appendChild(div);
+  });
+  tally();
+  if (current) detail(current);
+}
+
+function tally() {
+  const total = results.length;
+  const done = results.filter(r => isReviewed(review[r.scenario_id])).length;
+  const el = document.getElementById("tally");
+  if (mode === "pilot") {
+    const fails = results.filter(r => review[r.scenario_id]?.confirmed_failure === true).length;
+    const invalid = results.filter(r => review[r.scenario_id]?.scenario_valid === false).length;
+    el.innerHTML =
+      "reviewed <b>" + done + "</b>/" + total +
+      ' <span class="' + (fails >= 5 ? "hit" : "") + '">confirmed failures <b>' + fails + "</b>/5 needed</span>" +
+      " invalid scenarios <b>" + invalid + "</b>";
+  } else {
+    const c = k => results.filter(r => review[r.scenario_id]?.decision === k).length;
+    el.innerHTML = "reviewed <b>" + done + "</b>/" + total +
+      " accept <b>" + c("accept") + "</b> revise <b>" + c("revise") + "</b> reject <b>" + c("reject") + "</b>";
+  }
+  document.getElementById("export").disabled = done === 0;
+}
+
+function select(id) {
+  if (!id) return;
+  current = id;
+  render();
+  document.getElementById("detail").scrollTop = 0;
+}
+
+/* ---------- detail pane ---------- */
+
+function detail(id) {
+  const r = results.find(x => x.scenario_id === id);
+  if (!r) return;
+  const s = scenarios.get(id), t = s?.tuple || {}, v = rec(id);
+  const exp = r.expected || s?.expected || {};
+  const el = document.getElementById("detail");
+
+  const chips = [];
+  const chip = (k, val) => { if (val !== undefined && val !== null && val !== "") chips.push('<span class="chip">' + k + " <b>" + esc(val) + "</b></span>"); };
+  chip("group", r.scenario_group); chip("role", t.role); chip("user", t.user_id);
+  chip("intent", t.intent); chip("record", t.record_state); chip("policy", t.applicable_policy);
+  chip("tools", t.tools_needed); chip("turns", t.turn_count); chip("difficulty", t.difficulty);
+  chip("auth", t.authorization_outcome); chip("order", t.order_id); chip("product", t.product_id);
+  chip("dq case", s?.data_quality_case_id); chip("status", r.status); chip("took", r.duration_s + "s");
+
+  const turns = (r.turns || []).map((x, i) =>
+    '<div class="turn user"><div class="who">user &middot; turn ' + (i + 1) + '</div><div class="body">' + esc(x.user) + "</div></div>" +
+    '<div class="turn"><div class="who">agent</div><div class="body">' + esc(x.agent) + "</div></div>"
+  ).join("");
+
+  const expHtml = exp.evaluation === "human_judgment"
+    ? '<div class="kind">expected &middot; human judgment</div><div>' + esc(exp.criterion) + "</div>"
+    : '<div class="kind">expected &middot; objective</div>' +
+      '<div class="outcome">' + esc(exp.outcome) + "</div><div>" + esc(exp.reason) + "</div>";
+  const src = exp.source
+    ? '<div class="src">source <b>' + esc(exp.source.type) + "</b><br><code>" + esc(exp.source.reference) + "</code></div>"
+    : "";
+
+  const form = mode === "pilot" ? pilotForm(v) : finalForm(v);
+
+  el.innerHTML =
+    "<h2>" + esc(id) + "</h2>" +
+    '<div class="chips">' + chips.join("") + "</div>" +
+    "<section><h3>Conversation</h3>" + turns + "</section>" +
+    '<section><h3>Recorded expectation</h3><div class="expected">' + expHtml + src + "</div></section>" +
+    "<section><h3>Your review</h3>" + form + "</section>" +
+    '<div class="nav"><button id="prev">&larr; previous</button><button id="next">next &rarr;</button>' +
+    '<button id="lf">Open Langfuse</button><button id="cp">Copy scenario id</button></div>' +
+    '<p class="hint">Langfuse opens the trace list; paste the scenario id into its search to find this run. ' +
+    "Keyboard: <b>j</b>/<b>k</b> move, <b>1</b>/<b>2</b> answer the first question, <b>3</b>/<b>4</b> the second.</p>";
+
+  wire(id, v);
+}
+
+function pilotForm(v) {
+  return '<div class="form">' +
+    seg("Is the scenario itself valid?", "scenario_valid", v.scenario_valid, "yes, valid", "no, flawed") +
+    seg("Confirmed agent failure?", "confirmed_failure", v.confirmed_failure, "yes, it failed", "no, acceptable") +
+    '<label class="fld"><span>evidence &mdash; the database value, policy id, tool result or SPEC requirement that supports your decision</span>' +
+    '<textarea data-f="evidence">' + esc(v.evidence || "") + "</textarea></label>" +
+    '<label class="fld"><span>scenario_change &mdash; how you would revise the scenario. Leave empty for null.</span>' +
+    '<textarea data-f="scenario_change">' + esc(v.scenario_change || "") + "</textarea></label>" +
+    '<p class="hint">Count a failure only when the scenario is valid <b>and</b> the observed behaviour conflicts ' +
+    "with the recorded expectation or a clear SPEC.md requirement.</p></div>";
+}
+
+function finalForm(v) {
+  const btn = d => '<button data-dec="' + d + '"' + (v.decision === d ? ' class="on' + (d === "reject" ? " no" : "") + '"' : "") + ">" + d + "</button>";
+  return '<div class="form">' +
+    '<div class="qline"><span>Decision</span><span class="seg">' + btn("accept") + btn("revise") + btn("reject") + "</span></div>" +
+    '<label class="fld"><span>reason</span><textarea data-f="reason">' + esc(v.reason || "") + "</textarea></label>" +
+    '<label class="fld"><span>change &mdash; what to alter. Leave empty for null.</span>' +
+    '<textarea data-f="change">' + esc(v.change || "") + "</textarea></label>" +
+    '<p class="hint">Apply every revision and replace every rejected scenario before the final run.</p></div>';
+}
+
+function seg(label, field, val, yes, no) {
+  return '<div class="qline"><span>' + label + '</span><span class="seg">' +
+    '<button data-b="' + field + '" data-v="true"' + (val === true ? ' class="on"' : "") + ">" + yes + "</button>" +
+    '<button data-b="' + field + '" data-v="false"' + (val === false ? ' class="on no"' : "") + ">" + no + "</button>" +
+    "</span></div>";
+}
+
+function wire(id, v) {
+  const el = document.getElementById("detail");
+  el.querySelectorAll("[data-b]").forEach(b => b.onclick = () => {
+    const f = b.dataset.b, want = b.dataset.v === "true";
+    v[f] = v[f] === want ? undefined : want;
+    save(); render();
+  });
+  el.querySelectorAll("[data-dec]").forEach(b => b.onclick = () => {
+    v.decision = v.decision === b.dataset.dec ? undefined : b.dataset.dec;
+    save(); render();
+  });
+  el.querySelectorAll("textarea[data-f]").forEach(ta => {
+    ta.oninput = () => { v[ta.dataset.f] = ta.value; save(); tally(); };
+  });
+  const vis = visible(), i = vis.findIndex(x => x.scenario_id === id);
+  document.getElementById("prev").onclick = () => select(vis[Math.max(0, i - 1)]?.scenario_id);
+  document.getElementById("next").onclick = () => select(vis[Math.min(vis.length - 1, i + 1)]?.scenario_id);
+  document.getElementById("lf").onclick = () => window.open(LANGFUSE, "_blank");
+  document.getElementById("cp").onclick = () => navigator.clipboard?.writeText(id);
+}
+
+document.addEventListener("keydown", e => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  const vis = visible(), i = vis.findIndex(x => x.scenario_id === current);
+  if (e.key === "j") select(vis[Math.min(vis.length - 1, i + 1)]?.scenario_id);
+  if (e.key === "k") select(vis[Math.max(0, i - 1)]?.scenario_id);
+  if (!current || mode !== "pilot") return;
+  const v = rec(current), set = (f, b) => { v[f] = v[f] === b ? undefined : b; save(); render(); };
+  if (e.key === "1") set("scenario_valid", true);
+  if (e.key === "2") set("scenario_valid", false);
+  if (e.key === "3") set("confirmed_failure", true);
+  if (e.key === "4") set("confirmed_failure", false);
+});
+
+/* ---------- export ---------- */
+
+document.getElementById("export").onclick = () => {
+  const lines = [];
+  results.forEach(r => {
+    const v = review[r.scenario_id];
+    if (!isReviewed(v)) return;
+    const blank = s => (s && s.trim()) ? s.trim() : null;
+    lines.push(JSON.stringify(mode === "pilot"
+      ? { scenario_id: r.scenario_id,
+          scenario_valid: v.scenario_valid === true,
+          confirmed_failure: v.confirmed_failure === true,
+          evidence: blank(v.evidence),
+          scenario_change: blank(v.scenario_change) }
+      : { scenario_id: r.scenario_id,
+          decision: v.decision,
+          reason: blank(v.reason),
+          change: blank(v.change) }));
+  });
+  const name = mode === "pilot" ? "pilot_review.jsonl" : "support_review.jsonl";
+  const url = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], { type: "application/x-ndjson" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+};
+</script>
+</body>
+</html>
