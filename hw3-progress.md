@@ -270,13 +270,70 @@ the $100 threshold; cases where SPEC.md requires an escalation the agent must
 actually create; requests that name an action no tool can perform; contested
 claims the agent must record as claims rather than facts.
 
+### Part C (C1 DONE, C2 with the student)
+- Database re-seeded before generating, so every computed expectation matches
+  the state the Part D runner will see. The post-pilot database was copied to
+  `data/cartwheel-after-pilot.db` (gitignored) before the reset.
+- C1 DONE: `tools/build_support_scenarios.py` builds
+  `scenarios/support_scenarios.jsonl`. Scaffolding, not a deliverable. Every
+  expectation is computed from the database, `seed/eligibility.py` or
+  `facts.yaml`. Rerun as:
+  `uv run python -m seed.generate && uv run python tools/build_support_scenarios.py`
+  Result: 250 records, `validate --final` clean.
+  ```
+  coverage 175 (shopper 100 / merchant 45 / support 30)   challenge 75
+  turns 202 / 41 / 7      difficulty ordinary 156, boundary 75, ambiguous 19
+  in-window 72 vs out-of-window 72
+  sources: sql 87, eligibility_function 78, policy_document 44,
+           data_quality_table 30, specification 11
+  ids support-0001..0250, no overlap with pilot-*
+  ```
+  Four defects the build surfaced and fixed:
+  1. The duplicate-conversation guard fired three times (a repeated policy
+     question, two identical payout questions, two identical product
+     searches). Each product search now gets its own store.
+  2. First build was 48 percent "window closed", because only 480 of 8915
+     delivered orders are eligible. Now balanced 72/72 by alternating pools.
+  3. Merchants were asking for their own money back, the same realism flaw the
+     student found in pilot-024. Merchants and support now use staff-voiced
+     banks that speak about somebody else's order.
+  4. Generic followups were pasted onto intents where they made no sense (a
+     product search asked whether the item had been opened). Followups are now
+     per intent, and three-turn promotion skips product_search.
+  Both pilot `scenario_change` entries are carried in: the duplicate-title
+  scenarios name all four listings, and no merchant asks about their own order
+  without a stated reason.
+- `tools/trace_viewer.html` patched for Part C: with no results file it builds
+  the list from the scenario file alone, showing the planned conversation and
+  switching to Part C mode automatically. JS re-checked with `node --check`.
+
 ## Next
-- Part C: generate `scenarios/support_scenarios.jsonl` (250 = 175 coverage +
-  75 challenge, 5 per data-quality case, ids `support-XXXX` distinct from the
-  pilot), review 15 into `scenarios/support_review.jsonl`, pick 50 for
-  `scenarios/monitoring_scenarios.jsonl`, then `validate --final`.
-- Carry the two `scenario_change` entries into Part C: give the merchant
-  cancellation case a motive, and name all four duplicate-title products.
+- **C2, with the student.** Review 15 scenarios into
+  `scenarios/support_review.jsonl` (`scenario_id`, `decision`, `reason`,
+  `change`; accept / revise / reject). Selection below covers both groups, all
+  three roles and all 12 intents; it is also in `tools/c2-selection.txt`.
+
+  | id | group | role | intent | why it is in the sample |
+  |---|---|---|---|---|
+  | support-0001 | challenge | shopper | return_deadline | dq, missing delivery date |
+  | support-0016 | challenge | merchant | product_search | dq, duplicate title (all four listings) |
+  | support-0011 | challenge | merchant | order_status | dq, store mismatch |
+  | support-0031 | challenge | shopper | return_eligibility | store override, window CLOSED |
+  | support-0032 | challenge | shopper | return_eligibility | store override, window OPEN |
+  | support-0043 | challenge | shopper | order_status | authorization denied |
+  | support-0004 | challenge | shopper | refund_request | cross-turn correction |
+  | support-0062 | challenge | shopper | find_order | missing information, human_judgment |
+  | support-0057 | challenge | shopper | refund_request | refund above the $100 threshold |
+  | support-0184 | coverage | support | cancel_order | staff voice |
+  | support-0232 | coverage | merchant | restocking_fee | staff voice |
+  | support-0239 | coverage | support | dispute | staff voice |
+  | support-0222 | coverage | support | policy_question | policy citation |
+  | support-0241 | coverage | merchant | payout | merchant-only intent |
+  | support-0247 | coverage | shopper | out_of_scope | refusal |
+
+- Then C3: pick 50 for `scenarios/monitoring_scenarios.jsonl` (both groups,
+  all three roles), apply every revision and replace every rejection, and
+  re-run `validate --final` before Part D spends anything.
 
 ## State of the database right now
 The pilot mutated it (see B3 above). Part D re-seeds with

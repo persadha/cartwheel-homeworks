@@ -219,8 +219,24 @@ function ingest(records) {
   }
 }
 
+/* A Part C review happens BEFORE the scenarios are run, so there is no
+   results file. Stand in for one using the scenarios themselves: the planned
+   conversation, with no agent replies yet. */
+function planFromScenarios() {
+  results = [...scenarios.values()].map(s => ({
+    scenario_id: s.id,
+    scenario_group: s.scenario_group,
+    status: "not run yet",
+    duration_s: null,
+    planned: true,
+    turns: [s.opening_message, ...(s.followups || [])].map(m => ({ user: m, agent: null })),
+    expected: s.expected,
+  }));
+}
+
 async function handleFiles(fileList) {
   for (const f of fileList) ingest(parseJSONL(await f.text()));
+  if (!results.length && scenarios.size) { planFromScenarios(); mode = "final"; document.getElementById("mode").value = "final"; }
   if (results.length) {
     document.getElementById("drop").style.display = "none";
     document.getElementById("main").classList.add("ready");
@@ -373,7 +389,8 @@ function detail(id) {
 
   const turns = (r.turns || []).map((x, i) =>
     '<div class="turn user"><div class="who">user &middot; turn ' + (i + 1) + '</div><div class="body">' + esc(x.user) + "</div></div>" +
-    '<div class="turn"><div class="who">agent</div><div class="body">' + esc(x.agent) + "</div></div>"
+    (x.agent == null ? "" :
+      '<div class="turn"><div class="who">agent</div><div class="body">' + esc(x.agent) + "</div></div>")
   ).join("");
 
   const expHtml = exp.evaluation === "human_judgment"
@@ -389,7 +406,8 @@ function detail(id) {
   el.innerHTML =
     "<h2>" + esc(id) + "</h2>" +
     '<div class="chips">' + chips.join("") + "</div>" +
-    "<section><h3>Conversation</h3>" + turns + "</section>" +
+    "<section><h3>" + (r.planned ? "Planned conversation" : "Conversation") +
+      "</h3>" + turns + "</section>" +
     '<section><h3>Recorded expectation</h3><div class="expected">' + expHtml + src + "</div></section>" +
     "<section><h3>Your review</h3>" + form + "</section>" +
     '<div class="nav"><button id="prev">&larr; previous</button><button id="next">next &rarr;</button>' +
