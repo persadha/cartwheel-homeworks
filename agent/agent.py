@@ -37,7 +37,7 @@ from seed.eligibility import refund_needs_approval
 #
 # Specification mapping:
 #   PURPOSE-1 and SCOPE-1/2 -> identity, capabilities, and refusal rules
-#   TOOL-1 through TOOL-8   -> tool guidance and the registered tool list
+#   TOOL-1 through TOOL-13  -> tool guidance and the registered tool list
 #   ESC-1 through ESC-4     -> escalation instructions
 #   RESP-1, RESP-4, RESP-5  -> citation, disclosure, and tone guidance
 # AUTH-1 is absent from the prompt mapping because agent/auth.py and the tool

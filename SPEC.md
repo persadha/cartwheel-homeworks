@@ -75,6 +75,27 @@ Successful results contain `ok: true` and the result fields. Expected failures c
 | TOOL-7 | `issue_refund` | order identifier, amount, reason | creates a refund record; marks the order refunded only for an automatically approved refund | write |
 | TOOL-8 | `cancel_order` | order identifier, reason | marks an eligible order cancelled | write |
 | TOOL-9 | `escalate_to_human` | summary, context | creates a support ticket | write |
+| TOOL-10 | `check_return_eligibility` | order identifier | none | read |
+| TOOL-11 | `track_shipment` | order identifier | none | read |
+| TOOL-12 | `get_store_info` | store name | none | read |
+| TOOL-13 | `summarize_order_history` | none | none | read |
+
+Not every tool is offered to every role. `TOOLS_BY_ROLE` in `agent/agent.py`
+registers TOOL-1 to TOOL-4 and TOOL-7 to TOOL-9 for all three roles, and the
+rest as follows:
+
+| Tool | Shopper | Merchant | Support |
+| --- | --- | --- | --- |
+| `list_my_orders` | yes | yes | no |
+| `find_order` | yes | yes | yes |
+| `check_return_eligibility` | yes | yes | no |
+| `track_shipment` | yes | yes | yes |
+| `get_store_info` | no | yes | yes |
+| `summarize_order_history` | yes | yes | registered, always refuses |
+
+A tool that is not registered for a role cannot be called by that role at all.
+`list_my_orders` and `summarize_order_history` additionally refuse a support
+caller in code, so the refusal holds even where the tool is registered.
 
 ### Success and failure contracts
 
@@ -89,6 +110,10 @@ Successful results contain `ok: true` and the result fields. Expected failures c
 | `issue_refund` | `refund_id`, `order_id`, `amount_usd`, and `status`. Status is `auto_approved` at or below the threshold and `queued_for_approval` above it. | `invalid_argument` for a nonpositive amount or an amount above the order total; `not_found` for an unknown order; `permission_denied` for an unauthorized caller; `not_eligible` for an ineligible order; `paused` when refunds are disabled. |
 | `cancel_order` | `order_id` and `status: cancelled` after updating an authorized order whose current status is `placed`. | `not_found` for an unknown order; `permission_denied` for an unauthorized caller; `not_eligible` when the order is no longer `placed`; `paused` when cancellations are disabled. |
 | `escalate_to_human` | `ticket_id` and `sla_hours` after creating the support ticket. | Execution exception if ticket creation fails. |
+| `check_return_eligibility` | `eligible` and a `reason` in plain words, plus the facts behind it: `status`, `delivered_at`, `days_since_delivery`, and the world date as `asof`. Issues no refund. An order that is cancelled, already refunded, not yet delivered, or outside its window is reported as not eligible with the matching reason. | `not_found` for an unknown order; `permission_denied` for an order outside the caller's scope. |
+| `track_shipment` | `stage` (`awaiting_shipment`, `in_transit`, `delivered`, or `cancelled`), the order `status`, the recorded `ordered_at`, `shipped_at` and `delivered_at`, `days_in_transit`, `is_overdue`, `days_overdue`, the world date as `asof`, and `policy_id: cw-shipping`. `expected_ship_by` and `expected_delivery_by` are projections from the `cw-shipping` handling and transit maxima, not carrier data; `expected_delivery_is_estimate` reports only whether the ship date itself was projected, so it is `false` whenever a real `shipped_at` exists. The projected dates are always returned, including for an order whose recorded dates are inconsistent. | `not_found` for an unknown order; `permission_denied` for an order outside the caller's scope. |
+| `get_store_info` | `store_id`, `name`, `slug`, `product_count`, and `policy_override` carrying the store's policy document when it has one, otherwise null. Store details are public, so there is no scope check. | `invalid_argument` for an empty or whitespace-only store name; `not_found` for an unknown store. |
+| `summarize_order_history` | `order_count`, `by_status`, `total_spend_usd`, `first_ordered_at`, `last_ordered_at`, and a `recent` list, over the caller's own orders for a shopper or the store's orders for a merchant, at most 20 records. No orders yields zero counts and an empty list. | `invalid_argument` for a support caller or an unknown role; `permission_denied` for a merchant context with no store. |
 
 ## 5. Escalation policy
 
