@@ -331,23 +331,20 @@ def find_order(ctx: AuthContext, query: str) -> dict[str, Any]:
         }
 
     with db.connection() as conn:
+        # The scope comes from ctx, never from the query, and the candidate
+        # helper returns the whole authorised scope rather than a page of it.
         if ctx.role == "shopper":
-            orders = db.list_orders_for_user(conn, ctx.user_id, limit=DEFAULT_ORDER_LIMIT)
+            orders = db.list_order_search_candidates(conn, user_id=ctx.user_id)
         elif ctx.role == "merchant":
             if ctx.store_id is None:
                 return permission_denied(
                     "Merchant context has no store_id; cannot scope an order search."
                 )
-            orders = db.list_orders_for_store(conn, ctx.store_id, limit=DEFAULT_ORDER_LIMIT)
+            orders = db.list_order_search_candidates(conn, store_id=ctx.store_id)
         elif ctx.role == "support":
-            return {
-                "ok": False,
-                "error": "invalid_argument",
-                "reason": (
-                    "Support staff have no orders of their own; "
-                    "look up a specific order with get_order instead."
-                ),
-            }
+            # Support searches every order (SPEC TOOL-6); all_orders is allowed
+            # for this role and no other.
+            orders = db.list_order_search_candidates(conn, all_orders=True)
         else:
             return {
                 "ok": False,
@@ -355,17 +352,19 @@ def find_order(ctx: AuthContext, query: str) -> dict[str, Any]:
                 "reason": f"Unknown role {ctx.role!r}.",
             }
 
-        titles = _titles_for(conn, {o.product_id for o in orders})
+        titles = {product.id: product.title for product in db.list_products(conn)}
 
-        scored = []
+        # Candidates arrive newest first with order ID breaking ties. Match
+        # across all of them and keep that order: truncating before matching
+        # would hide an old order behind twenty newer ones.
+        matches = []
         for order in orders:
             title = titles.get(order.product_id, "").lower()
             best = max((fuzz.partial_ratio(t, title) for t in tokens), default=0)
             if best >= FUZZY_THRESHOLD:
-                scored.append((best, order))
-
-        scored.sort(key=lambda pair: (-pair[0], -pair[1].id))
-        matches = [o.to_public_dict() for _, o in scored[:MAX_FIND_RESULTS]]
+                matches.append(order.to_public_dict())
+                if len(matches) == MAX_FIND_RESULTS:
+                    break
 
     return {"ok": True, "orders": matches}
 

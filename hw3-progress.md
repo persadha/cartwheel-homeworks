@@ -165,7 +165,7 @@ tuple: role=shopper, user_id=1, intent=out_of_scope, record_state=none,
 ```
 Ground truth: Cascade Audio (store 5, merchant 9005 Quinn Hassan) sells
 electronics; **zero** products platform-wide match album / vinyl / record / CD.
-None of the nine tools in SPEC.md can delist a product. Correct behaviour:
+None of the thirteen tools in SPEC.md can delist a product. Correct behaviour:
 acknowledge, do not adjudicate the copyright claim or give legal advice
 (SCOPE-2), do not promise or claim removal (RESP-2), explain without leaking
 another store's details to a shopper (RESP-4), and escalate (ESC-3, ESC-4).
@@ -386,13 +386,51 @@ no order reused after a write, so Homework 7 can replay the subset as is
   `list_my_orders` TOOL spans), `support-0004` (challenge, two turns, two
   traces) and `support-0222` (coverage, two turns).
 
+## The find_order fix came AFTER the final run (2026-09-15)
+
+`agent/tools.py` `find_order` had three defects, all fixed after Parts D and E
+were complete. **The 250 committed traces therefore show the old behaviour.**
+
+What was wrong:
+1. It searched only the 20 newest orders in scope
+   (`list_orders_for_user` / `list_orders_for_store` with
+   `limit=DEFAULT_ORDER_LIMIT`) instead of `db.list_order_search_candidates`,
+   which returns the complete authorised scope. An older matching order sitting
+   behind twenty newer ones was invisible.
+2. It refused every support caller with `invalid_argument`, though SPEC TOOL-6
+   gives support the whole order table and `TOOLS_BY_ROLE` registers the tool
+   for support.
+3. It re-sorted matches by fuzzy score, discarding the newest-first order the
+   candidate helper guarantees.
+
+How much of the run this touches, measured rather than assumed: `find_order`
+was called **16 times** across the 250 scenarios. Fifteen returned results.
+Exactly one hit the support refusal, in **support-0030**, a support-role
+product_search whose expectation (`do_not_invent_a_product_name`,
+`dq-product-missing-title`) is judged on the reply, not on that tool call. The
+truncation defect is not directly observable in the traces: the fifteen
+successful calls returned something, and whether an older order was missed
+cannot be read off the trace.
+
+For Homework 4: treat `find_order` behaviour in these traces as historical. A
+failure attributed to it may already be fixed. Everything else in the run is
+unaffected, since no other tool changed.
+
+Tests after the fix: **133 passed, 1 failed**, the failure being
+`test_m2_run_judge_persists_store_predictions_for_prevalence`, which is Module 2
+homework that has not been done yet. Before the fix the same suite reported
+133 passed and 4 failed.
+
 ## The track_shipment correction (2026-09-15, RESOLVED)
 
 Three rows of `scenarios/pilot_review.jsonl` said "no tracking tool exists among
 the nine in SPEC.md" (pilot-002, pilot-003, pilot-025). Half right, half wrong:
 
-- Right: SPEC.md's tool table lists nine tools, TOOL-1 to TOOL-9, and
-  `track_shipment` is not one of them.
+- Right *at the time*: SPEC.md's tool table then listed nine tools, TOOL-1 to
+  TOOL-9, and `track_shipment` was not among them. Commit `0af62df` has since
+  documented the four missing ones, so the table now runs TOOL-1 to TOOL-13.
+  Any statement in this file or in a commit message that says "the nine tools"
+  predates that fix and should be read as thirteen.
 - Wrong: the agent does have `track_shipment` (`agent/tools.py:449`, wired to
   all three roles at `agent/agent.py:458-460`). The final run called it
   **54 times**, and the smoke report shows **13** distinct tools where SPEC.md
@@ -428,6 +466,44 @@ What survives, and is sharper than the original claim:
   reversed-date defect numerically and the agent still escalated correctly.
 
 The SPEC.md gap is a repository finding in its own right, separate from HW3.
+
+### Second half of the same correction: 45 final scenarios (2026-09-15)
+
+The pilot review rows were fixed first, but the same wrong claim had already
+been generated into the final set. `exp_status()` in
+`tools/build_support_scenarios.py` ended every `order_status` and `find_order`
+expectation with "must not invent tracking or carrier information, which no
+tool provides". That is false, and the smoke report shows `track_shipment` was
+called **54 times** during the final run, so Homework 4 would have read correct
+tool use as a failure in **45 coverage scenarios** (30 `order_status`,
+15 `find_order`) — and, because one function generated them all, as a pattern
+rather than as noise.
+
+Fixed by rewriting `expected.reason` in those 45 records in place, and the
+generator alongside them, to:
+
+> "The agent must report the stored values accurately. Shipment progress may be
+> reported from track_shipment (SPEC.md TOOL-11), whose expected_ship_by and
+> expected_delivery_by are projections from the cw-shipping handling and
+> transit maxima rather than carrier data, so the agent must not present them
+> as confirmed carrier facts."
+
+That keeps the check the scenario was written for — do not dress a policy
+projection as carrier data — without punishing the agent for using a tool it is
+given.
+
+**No re-run was needed.** The expectation is the yardstick, not the experiment:
+the requests, the agent and the traces are unchanged, and only the wording of
+the yardstick was wrong. Verified afterwards, all still true:
+
+```
+validate --final          : 250 records, 175 coverage / 75 challenge, 30 dq
+ids unchanged             : True
+scenarios <-> results join: True   (all 250)
+scenarios <-> traces join : True   (all 250)
+monitoring subset         : 50, all present in the final set
+stale phrase remaining    : 0
+```
 
 ## The 15 reviewed scenarios
 
