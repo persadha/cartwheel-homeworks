@@ -1,0 +1,15 @@
+{"scenario_id":"support-0001","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0004","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0011","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0016","decision":"reject","reason":"This scenario sounds unrealistic. It would be easier for the merchant to check the price by themselves rather than asking an agent.","change":"A mor realistic scenario would be: \"customer asked what the Heavy-Duty Vase costs in my shop, get all details of the relevant items\""}
+{"scenario_id":"support-0031","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0032","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0043","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0057","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0062","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0184","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0222","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0232","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0239","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0241","decision":"accept","reason":null,"change":null}
+{"scenario_id":"support-0247","decision":"accept","reason":null,"change":null}

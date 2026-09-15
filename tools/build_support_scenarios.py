@@ -641,6 +641,12 @@ def exp_dispute(o):
 records: list[dict] = []
 _seq = 0
 
+# Part C review outcome (scenarios/support_review.jsonl). support-0016 was
+# rejected as unrealistic, so its identifier is retired and the replacement the
+# student wrote is emitted in its place as support-0251. Keyed on the sequence
+# number so every other identifier stays exactly where it was.
+ID_REPLACEMENTS = {16: "support-0251"}
+
 
 def add(group, role, user_id, intent, record_state, policy, tools, difficulty,
         auth, message, expected, followups=None, dq=None, **extra):
@@ -660,7 +666,7 @@ def add(group, role, user_id, intent, record_state, policy, tools, difficulty,
     t.update(extra)
     records.append(
         {
-            "id": f"support-{_seq:04d}",
+            "id": ID_REPLACEMENTS.get(_seq, f"support-{_seq:04d}"),
             "scenario_group": group,
             "data_quality_case_id": dq,
             "tuple": t,
@@ -723,7 +729,8 @@ def build() -> None:
             ("support", "dispute", "order 8003 has a store mismatch and the buyer is unhappy", ["escalate it please"]),
         ],
         "dq-product-duplicate-title": [
-            ("merchant", "product_search", "customer asked what the Heavy-Duty Vase costs in my shop, what do i say", []),
+            # Replacement for the rejected support-0016; wording from the student's review.
+            ("merchant", "product_search", "customer asked what the Heavy-Duty Vase costs in my shop, get all details of the relevant items", []),
             ("shopper", "product_search", "how much is the Heavy-Duty Vase at blue heron ceramics", []),
             ("support", "product_search", "customer quoted a price for the Heavy-Duty Vase, can you confirm it", []),
             ("shopper", "product_search", "whats the price on the heavy duty vase please", []),
