@@ -1,6 +1,7 @@
 # HW3 progress
 
-Last updated: 2026-09-13. Branch `hw-3`. Preparation DONE, Part A in progress.
+Last updated: 2026-09-15. Branch `hw-3`. Parts A-E DONE. What is left is the
+student's own: the handout assessments and the <=5 minute video.
 
 Working style: student drives. Agent proposes each step in plain language and
 waits for an explicit "go" before running or changing anything. The handout's
@@ -307,11 +308,107 @@ claims the agent must record as claims rather than facts.
   the list from the scenario file alone, showing the planned conversation and
   switching to Part C mode automatically. JS re-checked with `node --check`.
 
-## Next
-- **C2, with the student.** Review 15 scenarios into
-  `scenarios/support_review.jsonl` (`scenario_id`, `decision`, `reason`,
-  `change`; accept / revise / reject). Selection below covers both groups, all
-  three roles and all 12 intents; it is also in `tools/c2-selection.txt`.
+### C2 DONE (2026-09-15, the student's own review)
+The student reviewed the 15 selected scenarios outside the session and exported
+`support_review.jsonl`; it was copied into `scenarios/` verbatim. **14 accept,
+1 reject.** The selection covers both groups, all three roles and all 12
+intents; it is also in `tools/c2-selection.txt`.
+
+The rejection: **support-0016**, "This scenario sounds unrealistic. It would be
+easier for the merchant to check the price by themselves rather than asking an
+agent." The student's replacement wording is in the row's `change` field.
+
+Applied as a replacement, not an edit: the identifier `support-0016` is retired
+and the student's version is emitted as **`support-0251`**. The substitution
+lives in `tools/build_support_scenarios.py` (`ID_REPLACEMENTS`, keyed on the
+sequence number) so a rebuild reproduces the reviewed dataset and every other
+identifier stays where it was. Verified: the diff against the previous build is
+exactly that one line, and `validate --final` stays at 250 / 175 / 75 / 30.
+
+### C3 DONE
+`tools/build_monitoring_set.py` (scaffolding) selects
+`scenarios/monitoring_scenarios.jsonl` deterministically: seeded with one
+scenario per documented data quality case, then filled by whichever candidate
+adds the most unseen (role, intent) pair. Damaged records are capped at one per
+case so the other nine challenge slots go to the remaining difficult
+dimensions.
+```
+50 records: challenge 15 / coverage 35
+shopper 28 / merchant 13 / support 9      turns 41 / 6 / 3
+all 12 intents, all 6 data quality cases, 3 human_judgment
+challenge mix: 6 damaged records, 4 store override, 2 denied authorization,
+               1 refund above the threshold, 2 missing information
+no order reused after a write, so Homework 7 can replay the subset as is
+```
+
+### Part D DONE (**LIVE model, glm-5.3 via DeepInfra**)
+- Services restarted first: Langfuse stack via `docker compose ... start`
+  (six containers healthy, `/api/public/health` 200) and the endpoint as a
+  background task on port 8010. Three preflight calls with
+  `scenario_id=preflight-check` confirmed the model call and ClickHouse
+  ingestion before the run; they cannot pollute the export.
+- `uv run python -m seed.generate` reset the data, then the full run.
+- First pass **247/250**, 142 minutes wall clock, median 21.6 s per scenario,
+  mean 32.4 s. Three timed out at the runner's 180 s `REQUEST_TIMEOUT_S`
+  (support-0002, support-0023, support-0187), each with **zero turns recorded**,
+  so nothing had reached the database and none was a write scenario.
+- Reran exactly those three with `--ids`; all three completed (18.4 s, 18.2 s,
+  46.6 s). Final state **250/250 completed**, 175 coverage + 75 challenge,
+  250 unique ids, 305 turns.
+- Tool-layer check against the database, all clean:
+  - 14 refunds created (575-588). Every refund at or below $100 is
+    `auto_approved` and every refund above it is `queued_for_approval`, with no
+    exceptions.
+  - The 7 auto-approved refunds left their orders `refunded`; the 7 queued
+    refunds left their orders `delivered`, which is what ESC-1 requires.
+  - 5 orders cancelled (placed 35 -> 30), 17 escalations created.
+
+### Part E DONE
+- `reports/smoke-output.txt` written from `reports/smoke.sql` through the
+  ClickHouse container. Traces by role 217 shopper / 78 merchant / 67 support
+  (these counts include the pilot and preflight traces in the same project),
+  22 escalations, 35 permission denials, 13 distinct tools called, the busiest
+  being `search_help_center` 232, `get_order` 215, `search_products` 162.
+  **Tokens and cost come back 0 / NULL** — the DeepInfra generations are not
+  carrying usage into Langfuse. The report still ran; the token and cost row is
+  simply empty, and nothing in HW3 depends on it.
+- `uv run python -m scenarios.export_langfuse` -> `traces/support_traces.json`,
+  "Exported 308 traces for 250 of 250 scenarios". Verified: **250 unique
+  `cartwheel_scenario_id`**, none missing, no trace without an id.
+  308 = 305 turns + the 3 abandoned first attempts of the timed-out scenarios.
+  Only those three scenarios have more traces than turns.
+- Three traces opened and confirmed to carry the conversation, the model name
+  `deepinfra/zai-org/GLM-5.3`, tool activity and the scenario id in
+  `metadata.attributes["cartwheel.scenario_id"]`:
+  `support-0251` (challenge, the student's replacement — `search_products` and
+  `list_my_orders` TOOL spans), `support-0004` (challenge, two turns, two
+  traces) and `support-0222` (coverage, two turns).
+
+## Open item for the student
+
+**Three rows of the committed `scenarios/pilot_review.jsonl` say "no tracking
+tool exists among the nine in SPEC.md"** (pilot-002, pilot-003, pilot-025), and
+`hw3-progress.md` repeated it. Half of that is right and half is wrong:
+
+- Right: SPEC.md's tool table lists nine tools, TOOL-1 to TOOL-9, and
+  `track_shipment` is not one of them.
+- Wrong: the agent really does have a `track_shipment` tool
+  (`agent/tools.py:449`, wired to all three roles at `agent/agent.py:458-460`),
+  and the final run called it **54 times**. It returns shipping milestones plus
+  an expected delivery date computed from `cw-shipping`. So when the agent
+  spoke about tracking and an expected delivery date, it was reporting a real
+  tool's output, not inventing one.
+
+The observation the review recorded ("presented as if it were tracking data")
+therefore does not hold as written. The finding underneath it may still be worth
+keeping for Homework 4 — the agent describes a policy-derived estimate in the
+language of carrier tracking — but it is the student's review, so the student
+decides whether to reword those three rows. **The handout requires every
+statement in the video to agree with the committed files, so this is worth
+settling before recording.** The specification and the implementation also
+disagree about the tool list, which is a repository finding in its own right.
+
+## The 15 reviewed scenarios
 
   | id | group | role | intent | why it is in the sample |
   |---|---|---|---|---|
@@ -331,18 +428,15 @@ claims the agent must record as claims rather than facts.
   | support-0241 | coverage | merchant | payout | merchant-only intent |
   | support-0247 | coverage | shopper | out_of_scope | refusal |
 
-- Then C3: pick 50 for `scenarios/monitoring_scenarios.jsonl` (both groups,
-  all three roles), apply every revision and replace every rejection, and
-  re-run `validate --final` before Part D spends anything.
-
 ## State of the database right now
-The pilot mutated it (see B3 above). Part D re-seeds with
-`uv run python -m seed.generate` before the final run, as the handout requires.
-Do not compute new expected results against the current state without
-re-seeding first.
+The final run mutated it (14 refunds, 5 cancellations, 17 escalations; see
+Part D above). Re-seed with `uv run python -m seed.generate` before computing
+any new expected result. The seed is deterministic
+(`tests/test_seed_determinism.py`), so re-seeding reproduces exactly the state
+every expectation in `support_scenarios.jsonl` was computed against.
 
 ## Background processes in this session
-- Cartwheel endpoint: `uv run uvicorn server.app:app --port 8010`, PID 20428,
+- Cartwheel endpoint: `uv run uvicorn server.app:app --port 8010`, PID 25296,
   started as a background task so its log is readable. Restarting it empties
   `_SESSIONS`; harmless between runs, never do it mid-run.
 - Langfuse stack: six containers up.
@@ -351,18 +445,37 @@ re-seeding first.
 - [x] `scenarios/pilot_scenarios.jsonl` (30) — validated
 - [x] `scenarios/pilot-results.jsonl` — 30/30 completed on glm-5.3
 - [x] `scenarios/pilot_review.jsonl` — 30 reviewed, 7 confirmed failures
-- [ ] `scenarios/support_scenarios.jsonl` (250 = 175 coverage + 75 challenge,
+- [x] `scenarios/support_scenarios.jsonl` (250 = 175 coverage + 75 challenge,
       5 per data-quality case, ids distinct from the pilot)
-- [ ] `scenarios/support_review.jsonl` (15 decisions, every revision applied,
-      every rejection replaced)
-- [ ] `scenarios/monitoring_scenarios.jsonl` (50, both groups, all three roles)
-- [ ] `scenarios/final-results.jsonl` (250 `completed`)
-- [ ] `reports/smoke-output.txt`
-- [ ] `traces/support_traces.json` (250 unique `cartwheel_scenario_id`)
+- [x] `scenarios/support_review.jsonl` (15 decisions, the one rejection
+      replaced as support-0251)
+- [x] `scenarios/monitoring_scenarios.jsonl` (50, both groups, all three roles)
+- [x] `scenarios/final-results.jsonl` (250 `completed`)
+- [x] `reports/smoke-output.txt`
+- [x] `traces/support_traces.json` (250 unique `cartwheel_scenario_id`)
 - [ ] Student's own: handout assessments, <=5 minute video
-- [x] Optional scaffolding, not a deliverable: `tools/trace_viewer.html`
-      (side-by-side expected vs. observed + review export). Commit or not is
-      the student's call.
+- [x] Optional scaffolding, not a deliverable: `tools/trace_viewer.html`,
+      `tools/build_support_scenarios.py`, `tools/build_monitoring_set.py`.
 
-## Checks run so far
-All OFFLINE. No live model call yet. No scenario has been generated or run.
+## Which checks used a live model
+- **Live (glm-5.3 via DeepInfra):** the B3 pilot run (30 scenarios), three
+  preflight calls on 2026-09-15, the Part D run (250 scenarios) and the
+  three-scenario rerun.
+- **Offline:** every `validate` run, the rebuild diff, the monitoring
+  selection, the write-ordering check, all database spot checks, the ClickHouse
+  smoke report and the trace export.
+
+## For the video
+The handout asks for four things on screen, and all four have a concrete target:
+1. A pilot scenario that failed, with its expected result and evidence — pick
+   from the seven in "The 7 confirmed failures" above. **Read the open item
+   about `track_shipment` first if you plan to show pilot-002, 003 or 025.**
+2. A final scenario revised after review — **support-0251**, next to the
+   `support-0016` row in `scenarios/support_review.jsonl`.
+3. One complete final trace with its scenario id and tool activity —
+   support-0251's trace shows `search_products` and `list_my_orders` TOOL
+   spans.
+4. The identifier count. No `jq` on this machine; the substitute is:
+   ```
+   uv run python -c "import json;print(len({t['cartwheel_scenario_id'] for t in json.load(open('traces/support_traces.json',encoding='utf-8'))['traces']}))"
+   ```
