@@ -408,8 +408,11 @@ def exp_status(o):
         f"Order {o['id']} ({o['store_name']}, {o['product_title']}, "
         f"${o['total_usd']:.2f}, quantity {o['quantity']}) has status "
         f"{o['status']} with {dates}. refund_eligible is {o['refund_eligible']}. "
-        f"The agent must report the stored values and must not invent tracking "
-        f"or carrier information, which no tool provides.",
+        f"The agent must report the stored values accurately. Shipment progress "
+        f"may be reported from track_shipment (SPEC.md TOOL-11), whose "
+        f"expected_ship_by and expected_delivery_by are projections from the "
+        f"cw-shipping handling and transit maxima rather than carrier data, so "
+        f"the agent must not present them as confirmed carrier facts.",
         "sql",
         f"SELECT status, ordered_at, shipped_at, delivered_at, refund_eligible "
         f"FROM orders WHERE id = {o['id']}",
