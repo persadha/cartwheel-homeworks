@@ -416,10 +416,32 @@ For Homework 4: treat `find_order` behaviour in these traces as historical. A
 failure attributed to it may already be fixed. Everything else in the run is
 unaffected, since no other tool changed.
 
-Tests after the fix: **133 passed, 1 failed**, the failure being
-`test_m2_run_judge_persists_store_predictions_for_prevalence`, which is Module 2
-homework that has not been done yet. Before the fix the same suite reported
-133 passed and 4 failed.
+## Test suite: green as of 2026-09-15
+
+**134 passed, 12 skipped, 21 xfailed, 9 xpassed, 0 failed.** The suite reported
+133 passed and 4 failed at the start of the day: three were the `find_order`
+defects above, and the fourth was a test-isolation fault, not unfinished work.
+
+`test_m2_run_judge_persists_store_predictions_for_prevalence` expects the
+committed 500-row demo export at `analysis/state/store_traces.json`, and it was
+getting 348 rows. Cause: `analysis/helpers/scale.py` `load_store_traces()`
+prefers live Langfuse whenever `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` and
+`LANGFUSE_HOST` are set, and this shell carries all three. The test was reading
+**this project's real traces** — roughly the 308 from the final run plus the
+pilot, HW2 and preflight traces — instead of the fixture data.
+
+Fixed in `tests/conftest.py`: the `analysis_state` fixture now clears those
+three variables for the duration of each test, which is what its docstring
+already promised ("Everything here is offline: no keys, no LLM calls"). No
+assertion was weakened, and the tests that deliberately exercise the configured
+branch are unaffected because they monkeypatch `langfuse_io.is_configured`
+directly rather than relying on the ambient environment.
+
+Worth knowing for Module 2 proper: with Langfuse configured, the error-analysis
+helpers read the live project rather than the demo export. That is the intended
+behaviour there, but it means the demo state and a real run are different
+worlds, and a Module 2 result is only reproducible alongside the trace slice it
+was computed from.
 
 ## The track_shipment correction (2026-09-15, RESOLVED)
 

@@ -49,11 +49,20 @@ def analysis_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     lets the invariant tests exercise writes (freeze, label appends) without
     mutating the checked-in fixture, exactly as ``world_copy`` does for the
     database. Everything here is offline: no keys, no LLM calls.
+
+    Offline is enforced, not assumed. ``scale.load_store_traces`` prefers live
+    Langfuse whenever ``LANGFUSE_*`` is set, so a developer whose shell carries
+    those variables would have these tests read whatever traces their project
+    happens to hold instead of the committed 500-row demo export. The variables
+    are cleared for the duration of each test. A test that wants the configured
+    branch monkeypatches ``langfuse_io.is_configured`` directly.
     """
     src = Path(__file__).resolve().parent.parent / "analysis" / "state"
     dst = tmp_path / "state"
     shutil.copytree(src, dst)
     monkeypatch.setenv("CARTWHEEL_ANALYSIS_STATE", str(dst))
+    for var in ("LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY", "LANGFUSE_HOST"):
+        monkeypatch.delenv(var, raising=False)
     return dst
 
 
