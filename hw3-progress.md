@@ -253,9 +253,11 @@ around it. Do not name or group these as failure modes — that is Homework 4.
 
 ### Observations carried in evidence, not counted as failures
 - `pilot-002`, `pilot-003`, `pilot-025` all describe "tracking", "expected
-  delivery", or "carrier records". No tracking tool exists among the nine and
-  no such field exists on an order; each date is `shipped_at` plus the 7-day
-  transit maximum in `cw-shipping`, presented as tracking data.
+  delivery", or "carrier records". **CORRECTED 2026-09-15** — see "The
+  track_shipment correction" below. Each of the three called `track_shipment`,
+  a real tool, and quoted the date it returned. The observation that survives
+  is that the tool's `expected_delivery_by` is a `cw-shipping` maximum, not a
+  carrier fact, and the agent presents it as tracking.
 - `pilot-009` and `pilot-011` both omitted that a refund above $100 queues for
   human approval, though neither was asked to issue one.
 - The agent is inconsistent with itself on citations: `pilot-010` named
@@ -384,29 +386,48 @@ no order reused after a write, so Homework 7 can replay the subset as is
   `list_my_orders` TOOL spans), `support-0004` (challenge, two turns, two
   traces) and `support-0222` (coverage, two turns).
 
-## Open item for the student
+## The track_shipment correction (2026-09-15, RESOLVED)
 
-**Three rows of the committed `scenarios/pilot_review.jsonl` say "no tracking
-tool exists among the nine in SPEC.md"** (pilot-002, pilot-003, pilot-025), and
-`hw3-progress.md` repeated it. Half of that is right and half is wrong:
+Three rows of `scenarios/pilot_review.jsonl` said "no tracking tool exists among
+the nine in SPEC.md" (pilot-002, pilot-003, pilot-025). Half right, half wrong:
 
 - Right: SPEC.md's tool table lists nine tools, TOOL-1 to TOOL-9, and
   `track_shipment` is not one of them.
-- Wrong: the agent really does have a `track_shipment` tool
-  (`agent/tools.py:449`, wired to all three roles at `agent/agent.py:458-460`),
-  and the final run called it **54 times**. It returns shipping milestones plus
-  an expected delivery date computed from `cw-shipping`. So when the agent
-  spoke about tracking and an expected delivery date, it was reporting a real
-  tool's output, not inventing one.
+- Wrong: the agent does have `track_shipment` (`agent/tools.py:449`, wired to
+  all three roles at `agent/agent.py:458-460`). The final run called it
+  **54 times**, and the smoke report shows **13** distinct tools where SPEC.md
+  documents nine. The four undocumented ones are `track_shipment`,
+  `check_return_eligibility`, `get_store_info` and `summarize_order_history`.
 
-The observation the review recorded ("presented as if it were tracking data")
-therefore does not hold as written. The finding underneath it may still be worth
-keeping for Homework 4 — the agent describes a policy-derived estimate in the
-language of carrier tracking — but it is the student's review, so the student
-decides whether to reword those three rows. **The handout requires every
-statement in the video to agree with the committed files, so this is worth
-settling before recording.** The specification and the implementation also
-disagree about the tool list, which is a repository finding in its own right.
+Checked in the pilot traces rather than assumed. All three scenarios called the
+tool, and each quoted the date it returned:
+
+| scenario | call | tool returned |
+|---|---|---|
+| pilot-002 | `track_shipment(8002)` | `stage` in_transit, `status` delivered, `delivered_at` null, `expected_delivery_by` 2026-06-27, `is_overdue` true, `days_overdue` 4 |
+| pilot-003 | `track_shipment(8001)` | `stage` delivered, `days_in_transit` **-2**, `expected_delivery_by` 2026-07-02 |
+| pilot-025 | `track_shipment(546)` | `stage` in_transit, `expected_delivery_by` 2026-07-07 |
+
+So the agent relayed real tool output; it did not invent tracking data. The
+three `evidence` fields were rewritten to say so, each marked
+`CORRECTED 2026-09-15`. Verdicts were not touched: all three keep
+`scenario_valid: true` and `confirmed_failure: false`, and the file still holds
+30 rows, 7 confirmed failures and the two `scenario_change` entries.
+
+What survives, and is sharper than the original claim:
+- `track_shipment` called order 8002 "in transit" in the same payload that
+  carried `status: delivered` with `delivered_at: null`. The tool is itself
+  confused by the damaged record, and the agent passed that framing on.
+- `expected_delivery_by` is `shipped_at` plus the `cw-shipping` transit maximum,
+  a policy projection rather than a carrier fact, yet
+  `expected_delivery_is_estimate` is `order.shipped_at is None` — false
+  whenever a real ship date exists. The field name invites reading a projection
+  as confirmed, and pilot-003's "verified against carrier records" is exactly
+  that mistake.
+- For order 8001, `days_in_transit` came back **-2**. The tool surfaced the
+  reversed-date defect numerically and the agent still escalated correctly.
+
+The SPEC.md gap is a repository finding in its own right, separate from HW3.
 
 ## The 15 reviewed scenarios
 
@@ -468,8 +489,9 @@ every expectation in `support_scenarios.jsonl` was computed against.
 ## For the video
 The handout asks for four things on screen, and all four have a concrete target:
 1. A pilot scenario that failed, with its expected result and evidence — pick
-   from the seven in "The 7 confirmed failures" above. **Read the open item
-   about `track_shipment` first if you plan to show pilot-002, 003 or 025.**
+   from the seven in "The 7 confirmed failures" above. pilot-002, 003 and 025
+   are not among them and their evidence was corrected on 2026-09-15; the
+   committed file and the traces now agree either way.
 2. A final scenario revised after review — **support-0251**, next to the
    `support-0016` row in `scenarios/support_review.jsonl`.
 3. One complete final trace with its scenario id and tool activity —
