@@ -37,7 +37,7 @@ from seed.eligibility import refund_needs_approval
 #
 # Specification mapping:
 #   PURPOSE-1 and SCOPE-1/2 -> identity, capabilities, and refusal rules
-#   TOOL-1 through TOOL-8   -> tool guidance and the registered tool list
+#   TOOL-1 through TOOL-13  -> tool guidance and the registered tool list
 #   ESC-1 through ESC-4     -> escalation instructions
 #   RESP-1, RESP-4, RESP-5  -> citation, disclosure, and tone guidance
 # AUTH-1 is absent from the prompt mapping because agent/auth.py and the tool
@@ -74,7 +74,8 @@ or credential changes, and anything outside Cartwheel.
 ## Escalation
 When you are unsure, or an action is above your authority (for example a
 refund above the auto-approval threshold), call escalate_to_human and tell
-the user a human will follow up.
+the user a human will follow up. Account changes of any kind always go to a
+human this way, even when the user could also make the change themselves.
 
 ## Tone
 Plain and warm. No legalese.
@@ -109,6 +110,7 @@ DEFAULT_MODEL = "gpt-5.5"
 LITELLM_COURSE_MODELS = {
     "claude-opus-4-6": "anthropic/claude-opus-4-6",
     "glm-5.2": "together_ai/zai-org/GLM-5.2",
+    "glm-5.3": "deepinfra/zai-org/GLM-5.3"
 }
 
 
@@ -421,6 +423,38 @@ def find_order(
     return _call(wrapper, hw_tools.find_order, query)
 
 
+@function_tool
+def check_return_eligibility(
+    wrapper: RunContextWrapper[AuthContext], order_id: int
+) -> dict[str, Any]:
+    """Check whether an order can still be returned or refunded, and why. Reads only."""
+    return _call(wrapper, hw_tools.check_return_eligibility, order_id)
+
+
+@function_tool
+def track_shipment(
+    wrapper: RunContextWrapper[AuthContext], order_id: int
+) -> dict[str, Any]:
+    """Shipping status and the ordered, shipped, and delivered dates for one order."""
+    return _call(wrapper, hw_tools.track_shipment, order_id)
+
+
+@function_tool
+def get_store_info(
+    wrapper: RunContextWrapper[AuthContext], store: str
+) -> dict[str, Any]:
+    """Public details for a store by name, plus its store-specific policy override."""
+    return _call(wrapper, hw_tools.get_store_info, store)
+
+
+@function_tool
+def summarize_order_history(
+    wrapper: RunContextWrapper[AuthContext],
+) -> dict[str, Any]:
+    """Summarize your own recent orders: counts by status, total spend, date range."""
+    return _call(wrapper, hw_tools.summarize_order_history)
+
+
 # Progressive disclosure: a session exposes only the tools its role can use.
 # Fewer tools mean fewer wrong choices and cleaner evals. At dev scale the
 # only difference is that support staff, who have no orders of their own,
@@ -435,9 +469,9 @@ _COMMON_TOOLS = [
     escalate_to_human,
 ]
 TOOLS_BY_ROLE = {
-    "shopper": _COMMON_TOOLS + [list_my_orders, find_order],
-    "merchant": _COMMON_TOOLS + [list_my_orders, find_order],
-    "support": _COMMON_TOOLS + [find_order],
+    "shopper": _COMMON_TOOLS + [list_my_orders, find_order, check_return_eligibility, track_shipment, summarize_order_history],
+    "merchant": _COMMON_TOOLS + [list_my_orders, find_order, check_return_eligibility, track_shipment, get_store_info, summarize_order_history],
+    "support": _COMMON_TOOLS + [find_order, track_shipment, get_store_info, summarize_order_history],
 }
 
 

@@ -18,15 +18,24 @@ They are marked xfail and flip to passing as you implement each function.
 
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any
 
 from agent import db
-from agent.auth import AuthContext, can_cancel_order, permission_denied
+from agent.auth import AuthContext, can_cancel_order, can_view_order, permission_denied
+from agent.config import load_facts
 from agent.helpcenter import load_policy_docs
 from agent.killswitch import kill_switch
 
+from thefuzz import fuzz
+
+
 MAX_SEARCH_LIMIT = 25
 DEFAULT_ORDER_LIMIT = 20
+
+
+MAX_FIND_RESULTS = 5
+FUZZY_THRESHOLD = 70
 
 
 def get_policy(ctx: AuthContext, policy_id: str) -> dict[str, Any]:
@@ -52,8 +61,20 @@ def get_policy(ctx: AuthContext, policy_id: str) -> dict[str, Any]:
     Implementation notes:
         agent.helpcenter.load_policy_docs() returns every parsed doc.
     """
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement get_policy")
+    for doc in load_policy_docs():
+        if doc.policy_id == policy_id:
+            return {
+                "ok": True,
+                "policy_id": doc.policy_id,
+                "title": doc.title,
+                "audience": doc.audience,
+                "body": doc.body,
+            }
+    return {
+        "ok": False,
+        "error": "not_found",
+        "reason": f"No policy doc with id {policy_id!r}.",
+    }
 
 
 def search_products(
@@ -95,8 +116,56 @@ def search_products(
         agent.db.list_products(conn, store_id) gives the candidate set.
         Use `with db.connection() as conn:` to close the database automatically.
     """
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement search_products")
+    tokens = query.split()
+    if not tokens:
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": "query must be non-empty.",
+        }
+    if max_price_usd is not None and max_price_usd <= 0:
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": f"max_price_usd must be strictly positive, got {max_price_usd}.",
+        }
+
+    limit = max(1, min(limit, MAX_SEARCH_LIMIT))
+    lowered = [t.lower() for t in tokens]
+
+    with db.connection() as conn:
+        store_id = None
+        if store is not None:
+            matched = db.get_store_by_name(conn, store)
+            if matched is None:
+                return {
+                    "ok": False,
+                    "error": "not_found",
+                    "reason": f"No store matching {store!r}.",
+                }
+            store_id = matched.id
+
+        matches = []
+        for p in db.list_products(conn, store_id):
+            haystack = f"{p.title} {p.description}".lower()
+            if all(t in haystack for t in lowered):
+                if max_price_usd is not None and p.price_cents > round(
+                    max_price_usd * 100
+                ):
+                    continue
+                matches.append(p)
+
+    matches.sort(key=lambda p: (p.price_cents, p.id))
+    products = [
+        {
+            "product_id": p.id,
+            "store_id": p.store_id,
+            "title": p.title,
+            "price_usd": p.price_cents / 100,
+        }
+        for p in matches[:limit]
+    ]
+    return {"ok": True, "products": products, "count": len(products)}
 
 
 def list_my_orders(ctx: AuthContext) -> dict[str, Any]:
@@ -121,8 +190,34 @@ def list_my_orders(ctx: AuthContext) -> dict[str, Any]:
         scope is baked into which query you run. That is the point of the
         tool: the model cannot ask for someone else's orders through it.
     """
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement list_my_orders")
+    if ctx.role == "support":
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": (
+                "Support staff have no orders of their own; "
+                "look up a specific order with get_order instead."
+            ),
+        }
+
+    with db.connection() as conn:
+        if ctx.role == "shopper":
+            orders = db.list_orders_for_user(
+                conn, ctx.user_id, limit=DEFAULT_ORDER_LIMIT
+            )
+        elif ctx.role == "merchant":
+            orders = db.list_orders_for_store(
+                conn, ctx.store_id, limit=DEFAULT_ORDER_LIMIT
+            )
+        else:
+            return {
+                "ok": False,
+                "error": "invalid_argument",
+                "reason": f"Unknown role {ctx.role!r}.",
+            }
+        public = [o.to_public_dict() for o in orders]
+
+    return {"ok": True, "orders": public, "count": len(public)}
 
 
 def cancel_order(ctx: AuthContext, order_id: int, reason: str) -> dict[str, Any]:
@@ -167,8 +262,33 @@ def cancel_order(ctx: AuthContext, order_id: int, reason: str) -> dict[str, Any]
     paused = kill_switch("cancel_order")
     if paused is not None:
         return {"ok": False, "error": "paused", "reason": paused}
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement cancel_order")
+    with db.connection() as conn:
+        order = db.get_order(conn, order_id)
+        if order is None:
+            return {
+                "ok": False,
+                "error": "not_found",
+                "reason": f"No order with id {order_id}.",
+            }
+
+        if not can_cancel_order(ctx, order.user_id, order.store_id):
+            return permission_denied(
+                f"Role {ctx.role!r} may not cancel order {order_id}."
+            )
+
+        if order.status != "placed":
+            return {
+                "ok": False,
+                "error": "not_eligible",
+                "reason": (
+                    f"Order {order_id} has status {order.status!r}; orders can be "
+                    "cancelled only before shipment (status 'placed')."
+                ),
+            }
+
+        db.set_order_status(conn, order_id, "cancelled")
+
+    return {"ok": True, "order_id": order_id, "status": "cancelled"}
 
 
 def find_order(ctx: AuthContext, query: str) -> dict[str, Any]:
@@ -202,5 +322,301 @@ def find_order(ctx: AuthContext, query: str) -> dict[str, Any]:
         (at most 5), each as the dict returned by agent.db. If no orders
         match, return {"ok": True, "orders": []}.
     """
-    ### YOUR CODE HERE (HW1)
-    raise NotImplementedError("HW1: implement find_order")
+    tokens = [t for t in query.lower().split() if len(t) > 2]
+    if not tokens:
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": "query must contain at least one word of three or more characters.",
+        }
+
+    with db.connection() as conn:
+        # The scope comes from ctx, never from the query, and the candidate
+        # helper returns the whole authorised scope rather than a page of it.
+        if ctx.role == "shopper":
+            orders = db.list_order_search_candidates(conn, user_id=ctx.user_id)
+        elif ctx.role == "merchant":
+            if ctx.store_id is None:
+                return permission_denied(
+                    "Merchant context has no store_id; cannot scope an order search."
+                )
+            orders = db.list_order_search_candidates(conn, store_id=ctx.store_id)
+        elif ctx.role == "support":
+            # Support searches every order (SPEC TOOL-6); all_orders is allowed
+            # for this role and no other.
+            orders = db.list_order_search_candidates(conn, all_orders=True)
+        else:
+            return {
+                "ok": False,
+                "error": "invalid_argument",
+                "reason": f"Unknown role {ctx.role!r}.",
+            }
+
+        titles = {product.id: product.title for product in db.list_products(conn)}
+
+        # Candidates arrive newest first with order ID breaking ties. Match
+        # across all of them and keep that order: truncating before matching
+        # would hide an old order behind twenty newer ones.
+        matches = []
+        for order in orders:
+            title = titles.get(order.product_id, "").lower()
+            best = max((fuzz.partial_ratio(t, title) for t in tokens), default=0)
+            if best >= FUZZY_THRESHOLD:
+                matches.append(order.to_public_dict())
+                if len(matches) == MAX_FIND_RESULTS:
+                    break
+
+    return {"ok": True, "orders": matches}
+
+
+def _titles_for(conn, product_ids: set[int]) -> dict[int, str]:
+    """Map product_id -> title for the given ids, in one query."""
+    if not product_ids:
+        return {}
+    placeholders = ",".join("?" * len(product_ids))
+    rows = conn.execute(
+        f"SELECT id, title FROM products WHERE id IN ({placeholders})",
+        tuple(product_ids),
+    ).fetchall()
+    return {row["id"]: row["title"] for row in rows}
+
+
+# ---------------------------------------------------------------------------
+# Additional tools (HW1 Part A). Gaps noticed while running conversations.
+# Same convention as above: plain functions taking AuthContext, wrapped as SDK
+# tools in agent/agent.py. Authorization is checked before anything is
+# returned, and all date arithmetic uses the world's fixed today
+# (db.world_asof), never the real clock.
+# ---------------------------------------------------------------------------
+
+
+def check_return_eligibility(ctx: AuthContext, order_id: int) -> dict[str, Any]:
+    """Report whether an order can still be returned or refunded, and why.
+
+    Returns "eligible" plus the facts behind it: current status, delivery date,
+    and days elapsed since delivery. Performs no refund.
+    """
+    with db.connection() as conn:
+        order = db.get_order(conn, order_id)
+        if order is None:
+            return {
+                "ok": False,
+                "error": "not_found",
+                "reason": f"no order #{order_id}",
+            }
+        if not can_view_order(ctx, order.user_id, order.store_id):
+            return permission_denied(
+                f"role '{ctx.role}' (user {ctx.user_id}) may not view order #{order_id}"
+            )
+        today = db.world_asof(conn)
+
+    days_since_delivery = (
+        (today - order.delivered_at).days if order.delivered_at is not None else None
+    )
+    if order.status == "cancelled":
+        eligible, why = False, "the order was cancelled; there is nothing to return"
+    elif order.status == "refunded":
+        eligible, why = False, "the order has already been refunded"
+    elif order.delivered_at is None:
+        eligible, why = False, (
+            f"the order has status '{order.status}' and has not been delivered yet; "
+            f"the return window starts at delivery"
+        )
+    elif not order.refund_eligible:
+        eligible, why = False, (
+            f"the order was delivered {days_since_delivery} days ago and is outside "
+            f"the return window"
+        )
+    else:
+        eligible, why = True, (
+            f"the order was delivered {days_since_delivery} days ago and is inside "
+            f"the return window"
+        )
+
+    return {
+        "ok": True,
+        "order_id": order_id,
+        "eligible": eligible,
+        "reason": why,
+        "status": order.status,
+        "delivered_at": order.delivered_at.isoformat() if order.delivered_at else None,
+        "days_since_delivery": days_since_delivery,
+        "asof": today.isoformat(),
+    }
+
+
+def track_shipment(ctx: AuthContext, order_id: int) -> dict[str, Any]:
+    """Track a shipment: where the order is now, when it is expected, and if it is late.
+
+    Reports the shipping milestones plus the expected ship-by and delivery-by
+    dates derived from the Cartwheel shipping policy (cw-shipping), days in
+    transit, and whether the shipment is overdue. Use this for "where is my
+    order" and "is my order late"; use get_order for the order record itself.
+    """
+    with db.connection() as conn:
+        order = db.get_order(conn, order_id)
+        if order is None:
+            return {
+                "ok": False,
+                "error": "not_found",
+                "reason": f"no order #{order_id}",
+            }
+        if not can_view_order(ctx, order.user_id, order.store_id):
+            return permission_denied(
+                f"role '{ctx.role}' (user {ctx.user_id}) may not view order #{order_id}"
+            )
+        today = db.world_asof(conn)
+
+    facts = load_facts()
+    handling_days = facts["shipping_handling_days_max"]
+    transit_days = facts["shipping_transit_days_max"]
+
+    # Policy cw-shipping: stores ship within `handling_days` of purchase, and
+    # standard delivery takes up to `transit_days` in transit after shipment.
+    expected_ship_by = order.ordered_at + timedelta(days=handling_days)
+    ship_basis = order.shipped_at or expected_ship_by
+    expected_delivery_by = ship_basis + timedelta(days=transit_days)
+
+    if order.status == "cancelled":
+        stage = "cancelled"
+    elif order.delivered_at is not None:
+        stage = "delivered"
+    elif order.shipped_at is not None:
+        stage = "in_transit"
+    else:
+        stage = "awaiting_shipment"
+
+    days_in_transit = None
+    if order.shipped_at is not None:
+        end = order.delivered_at or today
+        days_in_transit = (end - order.shipped_at).days
+
+    open_shipment = stage in {"awaiting_shipment", "in_transit"}
+    is_overdue = open_shipment and today > expected_delivery_by
+    days_overdue = (today - expected_delivery_by).days if is_overdue else 0
+
+    return {
+        "ok": True,
+        "order_id": order_id,
+        "stage": stage,
+        "status": order.status,
+        "ordered_at": order.ordered_at.isoformat() if order.ordered_at else None,
+        "shipped_at": order.shipped_at.isoformat() if order.shipped_at else None,
+        "delivered_at": order.delivered_at.isoformat() if order.delivered_at else None,
+        "expected_ship_by": expected_ship_by.isoformat(),
+        "expected_delivery_by": expected_delivery_by.isoformat(),
+        "expected_delivery_is_estimate": order.shipped_at is None,
+        "days_in_transit": days_in_transit,
+        "is_overdue": is_overdue,
+        "days_overdue": days_overdue,
+        "asof": today.isoformat(),
+        "policy_id": "cw-shipping",
+    }
+
+
+def get_store_info(ctx: AuthContext, store: str) -> dict[str, Any]:
+    """Public details for one store, plus its store-specific policy override if any.
+
+    Store information is public to every role, so there is no scope check here.
+    """
+    if not store or not store.strip():
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": "store name must not be empty",
+        }
+    with db.connection() as conn:
+        found = db.get_store_by_name(conn, store.strip())
+        if found is None:
+            return {
+                "ok": False,
+                "error": "not_found",
+                "reason": f"no store named '{store}'",
+            }
+        product_count = len(db.list_products(conn, found.id))
+
+    override = None
+    for doc in load_policy_docs():
+        if doc.policy_id == f"store-{found.slug}-policy":
+            override = {
+                "policy_id": doc.policy_id,
+                "title": doc.title,
+                "body": doc.body,
+            }
+            break
+
+    return {
+        "ok": True,
+        "store_id": found.id,
+        "name": found.name,
+        "slug": found.slug,
+        "product_count": product_count,
+        "policy_override": override,
+    }
+
+
+def summarize_order_history(ctx: AuthContext) -> dict[str, Any]:
+    """Summarize the caller's own recent orders: counts by status, spend, date range.
+
+    Shoppers see their own orders, merchants their store's. Support callers have
+    no orders of their own and should look up a specific order instead.
+    """
+    if ctx.role == "support":
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": (
+                "support staff have no orders of their own; "
+                "look up a specific order with get_order instead"
+            ),
+        }
+    if ctx.role == "merchant" and ctx.store_id is None:
+        return permission_denied("merchant context has no store_id; cannot scope a summary")
+    if ctx.role not in {"shopper", "merchant"}:
+        return {
+            "ok": False,
+            "error": "invalid_argument",
+            "reason": f"unknown role '{ctx.role}'",
+        }
+
+    with db.connection() as conn:
+        if ctx.role == "shopper":
+            orders = db.list_orders_for_user(conn, ctx.user_id, limit=DEFAULT_ORDER_LIMIT)
+        else:
+            orders = db.list_orders_for_store(conn, ctx.store_id, limit=DEFAULT_ORDER_LIMIT)
+        titles = _titles_for(conn, {o.product_id for o in orders})
+
+    if not orders:
+        return {
+            "ok": True,
+            "order_count": 0,
+            "by_status": {},
+            "total_spend_usd": 0.0,
+            "first_ordered_at": None,
+            "last_ordered_at": None,
+            "recent": [],
+        }
+
+    by_status: dict[str, int] = {}
+    for o in orders:
+        by_status[o.status] = by_status.get(o.status, 0) + 1
+    dates = [o.ordered_at for o in orders]
+
+    return {
+        "ok": True,
+        "order_count": len(orders),
+        "by_status": by_status,
+        "total_spend_usd": round(sum(o.total_usd for o in orders), 2),
+        "first_ordered_at": min(dates).isoformat(),
+        "last_ordered_at": max(dates).isoformat(),
+        "recent": [
+            {
+                "order_id": o.id,
+                "title": titles.get(o.product_id),
+                "status": o.status,
+                "ordered_at": o.ordered_at.isoformat(),
+                "total_usd": o.total_usd,
+            }
+            for o in orders[:5]
+        ],
+    }
