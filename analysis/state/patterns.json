@@ -1,1 +1,17 @@
-{"modes": []}
+{
+  "unrequested_information": {
+    "definition": "The reply supplies substantive information the user did not ask for and no requirement obliges, beyond what answers the question.",
+    "status": "candidate",
+    "count": 1,
+    "example_trace_ids": [
+      "support-0084"
+    ],
+    "example_quotes": [
+      "Too much details. The shopper only asked to list the order, not asking about refund."
+    ],
+    "created_from": [
+      "a1789840564485632"
+    ],
+    "requirement_source": "none yet, possible SPEC gap"
+  }
+}

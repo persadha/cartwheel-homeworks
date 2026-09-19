@@ -1,1 +1,11 @@
-{"annotations": []}
+[
+  {
+    "id": "a1789840564485632",
+    "conversation_id": "support-0084",
+    "trace_id": "7b5912ab27be60894aca1da3e0f44945",
+    "quote": "Everything went smoothly on the shipping side — no delays. One thing to note: the order is currently not marked as refund-eligible, which likely has to do with the return window having passed.",
+    "idx": 5,
+    "note": "Too much details. The shopper only asked to list the order, not asking about refund.",
+    "ts": "2026-09-19T17:56:04.485Z"
+  }
+]

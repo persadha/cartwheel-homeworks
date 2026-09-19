@@ -1,0 +1,145 @@
+{
+  "source": "langfuse",
+  "batches": [
+    {
+      "batch": "b1_uniform",
+      "strategy": "random",
+      "k": 15,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0084",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0244",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0040",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0103",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0168",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0013",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0020",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0212",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0139",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0026",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0095",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0151",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0015",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0234",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0131",
+          "reason": "random pick"
+        }
+      ]
+    },
+    {
+      "batch": "b1_cluster",
+      "strategy": "diversity",
+      "k": 15,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0187",
+          "reason": "cluster 0 representative"
+        },
+        {
+          "conversation_id": "support-0011",
+          "reason": "cluster 1 representative"
+        },
+        {
+          "conversation_id": "support-0008",
+          "reason": "cluster 2 representative"
+        },
+        {
+          "conversation_id": "support-0002",
+          "reason": "cluster 3 representative"
+        },
+        {
+          "conversation_id": "support-0001",
+          "reason": "cluster 4 representative"
+        },
+        {
+          "conversation_id": "support-0191",
+          "reason": "cluster 0 representative"
+        },
+        {
+          "conversation_id": "support-0021",
+          "reason": "cluster 1 representative"
+        },
+        {
+          "conversation_id": "support-0017",
+          "reason": "cluster 2 representative"
+        },
+        {
+          "conversation_id": "support-0004",
+          "reason": "cluster 3 representative"
+        },
+        {
+          "conversation_id": "support-0003",
+          "reason": "cluster 4 representative"
+        },
+        {
+          "conversation_id": "support-0214",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0222",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0233",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0141",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0116",
+          "reason": "random pick"
+        }
+      ]
+    }
+  ],
+  "total_conversations": 30,
+  "total_raw_traces": 39
+}

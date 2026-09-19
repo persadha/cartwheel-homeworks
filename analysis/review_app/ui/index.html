@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<!--
+  Homework 4 review interface.
+
+  Forked from analysis/ui/index.html (the instructor's reference UI) and adapted
+  after reviewing eight Cartwheel conversations in the stock Langfuse annotation
+  view. Each change below answers something that view made slow or unreliable;
+  the observations are recorded verbatim in hw4-progress.md.
+
+    R1  Langfuse hides a tool's output and metadata behind a click on the tool
+        name. The reference reproduced this: tool arguments sat in <details>,
+        and any result over 240 characters sat in <details> too. Both are gone.
+        Everything needed to judge a reply renders open. A result over 2000
+        characters (26 of 890, all list_my_orders or search_products, never a
+        write result) is clipped with a visible "show the remaining N
+        characters" control, so the page stays readable without hiding
+        evidence.
+    R3  One reading column. Kept from the reference, which already had it.
+    R4  Cartwheel opens one Langfuse trace per user turn, so a conversation is
+        several traces. In the stock view that meant separate tabs, and the
+        only way to tell the turns apart was to compare user_id and timestamps
+        by hand. The reference rendered messages as one flat list with no turn
+        boundary at all. This fork draws a turn separator carrying the turn
+        number, its timestamp, its tool count and a link to that turn in
+        Langfuse.
+    R5  resourceAttributes and scope are never rendered.
+
+  Also added, because the handout requires them and the reference has neither:
+    * a Label view, one present/absent decision per conversation and final mode
+    * a progress view that reports incomplete judgments, not just a treemap
+    * write-tool spans carry a red badge, since RESP-2 failures can only exist
+      where a write happened
+
+  Four views:
+
+    trace     read one conversation, annotate the first failure in place
+    label     apply the final taxonomy, present or absent, per conversation
+    map       a 2D projection of the whole store
+    progress  the failure-mode treemap, labeling completeness, suggestion queue
+
+  Talks to the file-backed API in server.py:
+    GET/POST /api/samples  /api/annotations  /api/patterns  /api/suggestions
+    GET/POST /api/labels
+    GET      /api/graph
+
+  Visual encoding (SKILL.md phase 2): color hue = message role, container = a
+  tool call grouped with its result, spacing = step and turn hierarchy,
+  monospace = tool arguments and structured results. Opacity is reduced only
+  for content that is identical across traces, never for a whole role, because
+  tool results and system content are exactly where failures hide. No CDN
+  dependencies: the whole thing is inline so it works offline and commits as
+  one artifact.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cartwheel error analysis</title>
+<style>
+  :root {
+    /* role hues (Gestalt similarity: one hue per role, full saturation) */
+    --role-user: #2563eb;
+    --role-assistant: #059669;
+    --role-tool-call: #b45309;
+    --role-tool-result: #7c3aed;
+    --role-system: #6b7280;
+    --role-retrieval: #0891b2;
+
+    --bg: #f7f7f8;
+    --panel: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --hl: #fde68a;             /* human annotation highlight */
+    --hl-pending: #fef08a;     /* mid-annotation, before save */
+    --sugg: #ddd6fe;           /* agent suggestion highlight tint */
+    --sugg-border: #7c3aed;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+  }
+  code, pre, .mono { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; }
+
+  /* ---- top bar ---- */
+  header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 10px 18px; background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 50;
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 700; }
+  header h1 .dim { color: var(--muted); font-weight: 400; }
+  .views { display: flex; gap: 4px; }
+  .views button {
+    border: 1px solid var(--line); background: var(--bg);
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font: inherit;
+  }
+  .views button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .spacer { flex: 1; }
+  .counts { color: var(--muted); font-size: 13px; }
+  .nav { display: flex; gap: 4px; align-items: center; }
+  .nav button {
+    border: 1px solid var(--line); background: var(--bg);
+    width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font: inherit;
+  }
+  .nav .pos { color: var(--muted); font-size: 13px; min-width: 74px; text-align: center; }
+
+  /* ---- toast banner for new samples/suggestions ---- */
+  #toast {
+    position: fixed; right: 18px; bottom: 18px; z-index: 100;
+    background: var(--ink); color: #fff; padding: 10px 16px;
+    border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none;
+    transition: opacity .2s; max-width: 320px;
+  }
+  #toast.show { opacity: 1; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---- trace view: two columns, body + margin ---- */
+  #trace-view { padding: 20px 18px 120px; }
+  .trace-header {
+    display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline;
+    max-width: 980px; margin: 0 auto 14px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .trace-header .tid { font-weight: 700; }
+  .trace-header .meta { color: var(--muted); font-size: 13px; }
+  .trace-header .flag {
+    font-size: 11px; background: #fef3c7; color: #92400e;
+    padding: 2px 7px; border-radius: 10px;
+  }
+  .trace-body-wrap {
+    display: flex; gap: 24px; max-width: 980px; margin: 0 auto;
+    align-items: flex-start; position: relative;
+  }
+  .trace-body { flex: 1; max-width: 720px; }
+  .margin-col { width: 240px; position: relative; flex-shrink: 0; }
+
+  /* a step groups a tool call + its result (Gestalt common region) */
+  .step {
+    border: 1px solid var(--line); border-radius: 8px;
+    margin-bottom: 20px; overflow: hidden; background: var(--panel);
+  }
+  .step.tight { margin-bottom: 8px; }         /* tight within a logical group */
+
+  .msg { padding: 10px 14px; border-left: 4px solid var(--line); }
+  .msg + .msg { border-top: 1px solid var(--line); }
+  .msg .role {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em; margin-bottom: 5px;
+  }
+  .msg[data-role="user"]        { border-left-color: var(--role-user); }
+  .msg[data-role="user"] .role        { color: var(--role-user); }
+  .msg[data-role="assistant"]   { border-left-color: var(--role-assistant); }
+  .msg[data-role="assistant"] .role   { color: var(--role-assistant); }
+  .msg[data-role="tool_call"]   { border-left-color: var(--role-tool-call); }
+  .msg[data-role="tool_call"] .role   { color: var(--role-tool-call); }
+  .msg[data-role="tool_result"] { border-left-color: var(--role-tool-result); }
+  .msg[data-role="tool_result"] .role { color: var(--role-tool-result); }
+  .msg[data-role="system"]      { border-left-color: var(--role-system); opacity: .55; }
+  .msg[data-role="system"] .role      { color: var(--role-system); }
+  .msg[data-role="retrieval"]   { border-left-color: var(--role-retrieval); }
+  .msg[data-role="retrieval"] .role   { color: var(--role-retrieval); }
+  .msg.boiler { opacity: .5; }                /* identical-across-traces content */
+
+  .msg .text { white-space: pre-wrap; word-wrap: break-word; }
+  .fn { font-weight: 700; }
+  pre.json {
+    background: #f3f4f6; border-radius: 6px; padding: 8px 10px; margin: 6px 0 0;
+    font-size: 12.5px; overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+  }
+  /* R1: nothing essential hides behind a click. A very long list result is
+     clipped, and the control that reveals the rest says how much is left. */
+  .more {
+    display: inline-block; margin-top: 6px; font: inherit; font-size: 12px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--muted);
+    padding: 3px 9px; border-radius: 5px; cursor: pointer;
+  }
+  .more:hover { color: var(--ink); }
+
+  /* write tools are the only place a RESP-2 failure can exist */
+  .badge-write {
+    float: right; font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    background: #fee2e2; color: #b91c1c; padding: 2px 7px; border-radius: 10px;
+  }
+  .step.write { border-color: #fca5a5; }
+
+  /* R4: the turn boundary the stock view never drew */
+  .turn-sep {
+    display: flex; align-items: center; gap: 10px;
+    margin: 34px 0 18px; color: var(--muted); font-size: 12px;
+  }
+  .turn-sep:first-child { margin-top: 4px; }
+  .turn-sep .bar { flex: 1; height: 1px; background: var(--line); }
+  .turn-sep .n {
+    font-weight: 700; color: var(--ink); font-size: 12px;
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 2px 10px; border-radius: 12px;
+  }
+  .turn-sep a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--line); }
+  .turn-sep a:hover { color: var(--role-user); }
+
+  /* R2: the header never scrolls away */
+  .trace-header { position: sticky; top: 51px; background: var(--bg); z-index: 40; padding-top: 10px; }
+  .trace-header .sid { font-weight: 700; font-size: 16px; }
+  .trace-header .reason { width: 100%; color: var(--muted); font-size: 12px; }
+
+  /* ---- label view ---- */
+  #label-view { padding: 18px; max-width: 1180px; margin: 0 auto; }
+  .grid-wrap { overflow-x: auto; background: var(--panel);
+               border: 1px solid var(--line); border-radius: 8px; }
+  table.grid { border-collapse: collapse; width: 100%; font-size: 13px; }
+  table.grid th, table.grid td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+  table.grid th { position: sticky; top: 0; background: var(--panel); z-index: 5;
+                  font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+                  color: var(--muted); font-family: ui-monospace, monospace; }
+  table.grid td.cid { font-family: ui-monospace, monospace; cursor: pointer; white-space: nowrap; }
+  table.grid td.cid:hover { color: var(--role-user); }
+  table.grid tr.done { background: #fcfdfc; }
+  .judg { display: flex; gap: 3px; }
+  .judg button {
+    border: 1px solid var(--line); background: var(--bg); font: inherit;
+    font-size: 11px; padding: 2px 7px; border-radius: 5px; cursor: pointer; color: var(--muted);
+  }
+  .judg button.on.fail { background: #fee2e2; border-color: #dc2626; color: #b91c1c; font-weight: 700; }
+  .judg button.on.pass { background: #d1fae5; border-color: #059669; color: #065f46; font-weight: 700; }
+  .grid-note { color: var(--muted); font-size: 12.5px; margin: 10px 0; }
+
+  /* ---- progress: completeness ---- */
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 13px; }
+  .bar-row .name { font-family: ui-monospace, monospace; min-width: 220px; }
+  .bar-row .track { flex: 1; height: 9px; background: var(--line); border-radius: 5px; overflow: hidden; }
+  .bar-row .fill { height: 100%; background: var(--role-assistant); }
+  .bar-row .num { color: var(--muted); min-width: 110px; text-align: right; }
+
+  /* ---- highlights + margin notes ---- */
+  .hl { background: var(--hl); border-radius: 2px; cursor: pointer; }
+  .hl.pending-highlight { background: var(--hl-pending); }
+  .hl.sugg { background: var(--sugg); border-bottom: 2px dashed var(--sugg-border); }
+  .hl.outline { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+  .mnote {
+    position: absolute; left: 0; width: 100%;
+    background: var(--panel); border-left: 3px solid var(--hl);
+    border-radius: 4px; padding: 7px 9px; font-size: 12.5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .mnote.sugg { border-left-color: var(--sugg-border); background: #faf5ff; }
+  .mnote.outline { box-shadow: 0 0 0 2px var(--ink); }
+  .mnote .quote { color: var(--muted); font-style: italic; margin-bottom: 3px; }
+  .mnote .body { white-space: pre-wrap; }
+  .mnote .tag {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    color: var(--sugg-border); text-transform: uppercase; margin-bottom: 3px;
+  }
+  .mnote .acts { margin-top: 5px; display: flex; gap: 6px; }
+  .mnote .acts button {
+    border: 1px solid var(--line); background: var(--bg); font: inherit;
+    font-size: 11px; padding: 2px 8px; border-radius: 5px; cursor: pointer;
+  }
+  .mnote .acts .accept { border-color: var(--role-assistant); color: var(--role-assistant); }
+  .mnote .acts .reject { border-color: #dc2626; color: #dc2626; }
+  .mnote.human .acts { visibility: hidden; }
+  .mnote.human:hover .acts { visibility: visible; }
+
+  /* ---- annotation popover ---- */
+  #popover {
+    position: absolute; z-index: 200; display: none;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.16); padding: 8px;
+  }
+  #popover input {
+    border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px;
+    font: inherit; width: 280px;
+  }
+  #popover .hint { color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+  /* ---- map view ---- */
+  #map-view { padding: 18px; }
+  #map-wrap { max-width: 980px; margin: 0 auto; }
+  #map { width: 100%; height: 620px; background: var(--panel);
+         border: 1px solid var(--line); border-radius: 8px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+
+  /* ---- progress view ---- */
+  #progress-view { padding: 18px; max-width: 980px; margin: 0 auto; }
+  .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase;
+                   letter-spacing: .04em; color: var(--muted); margin: 18px 0 10px; }
+  #treemap { display: flex; flex-wrap: wrap; gap: 10px; }
+  .mode-block {
+    border: 1px solid var(--line); border-radius: 8px; padding: 12px;
+    background: var(--panel); min-width: 210px; flex: 1 1 210px;
+  }
+  .mode-block h3 { margin: 0 0 4px; font-size: 14px; font-family: ui-monospace, monospace; }
+  .mode-block .count { float: right; color: var(--muted); font-weight: 400; }
+  .mode-block .def { color: var(--muted); font-size: 12.5px; margin: 4px 0 8px; }
+  .mode-block .notes { list-style: none; margin: 0; padding: 0; }
+  .mode-block .notes li { font-size: 12.5px; padding: 3px 0; border-top: 1px dashed var(--line); cursor: pointer; }
+  .mode-block .notes li:hover { color: var(--role-user); }
+  .mode-block .status {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    padding: 1px 6px; border-radius: 8px; margin-left: 6px;
+  }
+  .status.candidate { background: #fef3c7; color: #92400e; }
+  .status.confirmed { background: #d1fae5; color: #065f46; }
+  .status.frozen    { background: #e0e7ff; color: #3730a3; }
+
+  #sugg-queue { background: var(--panel); border: 1px solid var(--line);
+                border-radius: 8px; padding: 12px; }
+  .queue-tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .queue-tools button {
+    border: 1px solid var(--line); background: var(--bg); font: inherit;
+    font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer;
+  }
+  .queue-tools .accept { border-color: var(--role-assistant); color: var(--role-assistant); }
+  .queue-tools .dismiss { border-color: #dc2626; color: #dc2626; }
+  .sugg-row { display: flex; gap: 8px; align-items: flex-start; padding: 7px 0;
+              border-top: 1px solid var(--line); font-size: 13px; }
+  .sugg-row .mode { font-family: ui-monospace, monospace; font-size: 12px;
+                    color: var(--sugg-border); min-width: 170px; }
+  .sugg-row .quote { flex: 1; cursor: pointer; }
+  .sugg-row .quote:hover { color: var(--role-user); }
+  .empty { color: var(--muted); font-size: 13px; padding: 10px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cartwheel <span class="dim">error analysis</span></h1>
+  <div class="views">
+    <button data-view="trace" class="active">Trace</button>
+    <button data-view="label">Label</button>
+    <button data-view="map">Map</button>
+    <button data-view="progress">Progress</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="nav" id="trace-nav">
+    <button id="prev">&larr;</button>
+    <span class="pos" id="pos">0 / 0</span>
+    <button id="next">&rarr;</button>
+  </div>
+  <div class="counts" id="counts"></div>
+</header>
+
+<div id="trace-view" class="view active">
+  <div class="trace-header" id="trace-header"></div>
+  <div class="trace-body-wrap">
+    <div class="trace-body" id="trace-body"></div>
+    <div class="margin-col" id="margin-col"></div>
+  </div>
+</div>
+
+<div id="label-view" class="view">
+  <div class="section-title">Structured labeling</div>
+  <div class="grid-note" id="label-note"></div>
+  <div class="grid-wrap"><table class="grid" id="label-grid"></table></div>
+</div>
+
+<div id="map-view" class="view">
+  <div id="map-wrap">
+    <div class="legend">
+      <span><span class="dot" style="background:#94a3b8"></span> trace</span>
+      <span><span class="dot" style="background:#1a1a1a"></span> in sample</span>
+      <span><span class="dot" style="background:#f97316"></span> annotated</span>
+    </div>
+    <canvas id="map"></canvas>
+  </div>
+</div>
+
+<div id="progress-view" class="view">
+  <div class="section-title">Review coverage</div>
+  <div id="coverage"></div>
+  <div class="section-title">Failure modes</div>
+  <div id="treemap"></div>
+  <div class="section-title">Labeling completeness</div>
+  <div id="completeness"></div>
+  <div class="section-title">Agent suggestions to review</div>
+  <div id="sugg-queue"></div>
+</div>
+
+<div id="popover"><input id="note-input" placeholder="what went wrong? (Enter to save)" /><div class="hint">first failure only, in your own words</div></div>
+<div id="toast"></div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ * State + API                                                         *
+ * ------------------------------------------------------------------ */
+const state = {
+  // A sample is one conversation: every turn of one cartwheel.scenario_id,
+  // carrying each turn's own Langfuse trace id (see build_samples.py).
+  samples: [],       // [{conversation_id, trace_id, turn_trace_ids, turns, turn_starts, trace, meta, features, flags, reason, batch}]
+  annotations: [],   // [{id, conversation_id, trace_id, quote, idx, note, ts}]
+  suggestions: [],   // [{id, conversation_id, trace_id, mode, quote, idx}]
+  patterns: {},      // {mode: {definition, status, count, example_trace_ids, example_quotes}}
+  labels: {},        // {mode: {conversation_id: 0|1}}
+  graph: {nodes: [], clusters: []},
+  cur: 0,            // index into samples
+};
+
+const api = {
+  async get(path) { const r = await fetch(path); return r.json(); },
+  async post(path, body) {
+    const r = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'},
+                                 body: JSON.stringify(body)});
+    try { return await r.json(); } catch (e) { return {}; }
+  },
+};
+
+/* The conversation is the unit a human judges. An annotation or a label made
+   before conversation ids existed falls back to the anchor trace id. */
+function convId(x) { return (x && (x.conversation_id || x.trace_id)) || null; }
+
+/* Annotations on disk are usually a bare array (what this app POSTs), but the
+   committed demo seed wraps them as {"annotations": [...]} with a little
+   metadata. Accept either on read; we always write the bare array. */
+function asAnnotationList(a) {
+  if (Array.isArray(a)) return a;
+  if (a && Array.isArray(a.annotations)) return a.annotations;
+  return [];
+}
+
+async function loadAll() {
+  const [samples, annotations, suggestions, patterns, graph, labels] = await Promise.all([
+    api.get('/api/samples'), api.get('/api/annotations'),
+    api.get('/api/suggestions'), api.get('/api/patterns'), api.get('/api/graph'),
+    api.get('/api/labels'),
+  ]);
+  state.samples = Array.isArray(samples) ? samples : [];
+  state.annotations = asAnnotationList(annotations);
+  state.suggestions = Array.isArray(suggestions) ? suggestions : [];
+  state.patterns = patterns && typeof patterns === 'object' ? patterns : {};
+  state.graph = graph && graph.nodes ? graph : {nodes: [], clusters: []};
+  state.labels = labels && typeof labels === 'object' ? labels : {};
+}
+
+/* localStorage backup of human annotations, per SKILL.md */
+function backupAnnotations() {
+  try { localStorage.setItem('cartwheel_annotations', JSON.stringify(state.annotations)); }
+  catch (e) {}
+}
+async function saveAnnotations() {
+  backupAnnotations();
+  await api.post('/api/annotations', state.annotations);
+}
+
+/* ------------------------------------------------------------------ *
+ * Rendering: the trace view                                          *
+ * ------------------------------------------------------------------ */
+function curTrace() { return state.samples[state.cur]; }
+
+/* R2: identity and shape stay on screen while you scroll. The scenario id
+   leads, because that is the conversation key; `store` is dropped, because no
+   Cartwheel trace carries it at trace level. */
+function renderHeader() {
+  const s = curTrace();
+  const h = document.getElementById('trace-header');
+  if (!s) { h.innerHTML = '<span class="meta">no samples yet</span>'; return; }
+  const m = s.meta || {}, f = s.features || {};
+  const bits = [];
+  bits.push(`<span class="sid">${escape(convId(s))}</span>`);
+  if (m.role) bits.push(`<span class="meta">${escape(m.role)}</span>`);
+  bits.push(`<span class="meta">${f.turn_count || 1} turn${(f.turn_count || 1) > 1 ? 's' : ''}</span>`);
+  bits.push(`<span class="meta">${f.tool_call_count || 0} tool calls</span>`);
+  if (f.has_retrieval) bits.push(`<span class="meta">retrieval</span>`);
+  if ((s.writes || []).length) {
+    bits.push(`<span class="badge-write" style="float:none">⚠ ${escape(s.writes.join(', '))}</span>`);
+  }
+  (s.flags || []).forEach(x => bits.push(`<span class="flag">${escape(x)}</span>`));
+  if (s.reason) bits.push(`<div class="reason">${escape(s.batch || '')} · ${escape(s.reason)}</div>`);
+  h.innerHTML = bits.join(' ');
+}
+
+/* Render one conversation. Two groupings, both Gestalt:
+   - common region: a tool_call and the tool_result that follows it share one
+     .step box, so the evidence sits against the claim.
+   - proximity: a turn separator and a large gap mark where one Langfuse trace
+     ends and the next begins (R4). Turn starts come from build_samples.py,
+     which keeps each turn's own trace id and timestamp. */
+function renderTrace() {
+  const s = curTrace();
+  const body = document.getElementById('trace-body');
+  if (!s || !Array.isArray(s.trace)) { body.innerHTML = ''; return; }
+  const msgs = s.trace;
+  const turns = s.turns || [];
+  const startAt = {};
+  turns.forEach(t => { startAt[t.start] = t; });
+
+  const html = [];
+  let i = 0;
+  while (i < msgs.length) {
+    if (startAt[i] !== undefined) html.push(renderTurnSep(startAt[i]));
+    const m = msgs[i];
+    if (m.role === 'tool_call') {
+      const isWrite = (s.writes || []).includes(m.name);
+      const parts = [renderMsg(m, i, isWrite)];
+      if (i + 1 < msgs.length && msgs[i + 1].role === 'tool_result') {
+        parts.push(renderMsg(msgs[i + 1], i + 1, false));
+        i++;
+      }
+      html.push(`<div class="step${isWrite ? ' write' : ''}">${parts.join('')}</div>`);
+    } else {
+      html.push(`<div class="step">${renderMsg(m, i, false)}</div>`);
+    }
+    i++;
+  }
+  body.innerHTML = html.join('');
+  body.querySelectorAll('button.more').forEach(b => {
+    b.onclick = () => {
+      const pre = b.previousElementSibling;
+      pre.textContent = pre.dataset.full;
+      b.remove();
+      applyHighlights(); layoutMargin();
+    };
+  });
+  applyHighlights();
+  layoutMargin();
+}
+
+/* The boundary the stock Langfuse view never drew: which turn, when, how much
+   tool activity, and a link to that turn's own trace. */
+function renderTurnSep(t) {
+  const when = t.timestamp ? String(t.timestamp).replace('T', ' ').slice(0, 19) : '';
+  const bits = [];
+  if (when) bits.push(escape(when));
+  if (t.tool_calls) bits.push(t.tool_calls + ' tool calls');
+  if ((t.writes || []).length) bits.push('⚠ ' + escape(t.writes.join(', ')));
+  if (t.permalink) {
+    bits.push(`<a href="${escape(t.permalink)}" target="_blank" rel="noopener">${escape(String(t.trace_id).slice(0, 8))}…</a>`);
+  }
+  return `<div class="turn-sep"><span class="n">turn ${t.n}</span>` +
+         `<span>${bits.join(' · ')}</span><span class="bar"></span></div>`;
+}
+
+/* R1: arguments and results render open. Nothing you need in order to judge a
+   reply sits behind a click. Only a result past CLIP (26 of 890 in this store,
+   all list_my_orders or search_products) is shortened, and the control that
+   restores it states how much is hidden. */
+const CLIP = 2000;
+
+function renderMsg(m, idx, isWrite) {
+  const role = m.role || 'assistant';
+  const label = (m.label || role).replace(/_/g, ' ');
+  const boiler = m.boilerplate ? ' boiler' : '';
+  const badge = isWrite ? '<span class="badge-write">write</span>' : '';
+  let inner = '';
+  if (role === 'tool_call') {
+    inner = `<div class="fn">${escape(m.name || 'tool')}()</div>`;
+    if (m.arguments !== undefined) {
+      inner += `<pre class="json">${escape(pretty(m.arguments))}</pre>`;
+    }
+  } else if (role === 'tool_result') {
+    const full = pretty(m.content !== undefined ? m.content : m.text);
+    if (full.length > CLIP) {
+      const rest = full.length - CLIP;
+      inner = `<pre class="json annotatable" data-idx="${idx}" data-full="${attr(full)}">` +
+              `${escape(full.slice(0, CLIP))}</pre>` +
+              `<button class="more">show the remaining ${rest} characters</button>`;
+    } else {
+      inner = `<pre class="json annotatable" data-idx="${idx}">${escape(full)}</pre>`;
+    }
+  } else {
+    const text = m.text !== undefined ? m.text : pretty(m.content);
+    inner = `<div class="text annotatable" data-idx="${idx}">${md(text)}</div>`;
+  }
+  return `<div class="msg${boiler}" data-role="${role}" data-idx="${idx}">` +
+         `<div class="role">${badge}${escape(label)}</div>${inner}</div>`;
+}
+
+/* ------------------------------------------------------------------ *
+ * Highlights + margin notes                                          *
+ * ------------------------------------------------------------------ */
+function itemsForTrace() {
+  const cid = curTrace() ? convId(curTrace()) : null;
+  const anns = state.annotations.filter(a => convId(a) === cid).map(a => ({...a, kind: 'human'}));
+  const sugg = state.suggestions.filter(s => convId(s) === cid && !s.decision)
+                                .map(s => ({...s, kind: 'sugg'}));
+  return [...anns, ...sugg];
+}
+
+/* Wrap each item's [start,end] span within its target block in a <span.hl>.
+   We re-render text then walk offsets, so overlapping spans stay simple: we
+   only highlight the first occurrence of the quote inside its block. */
+function applyHighlights() {
+  const items = itemsForTrace();
+  document.querySelectorAll('.annotatable').forEach(el => {
+    const idx = parseInt(el.dataset.idx, 10);
+    const mine = items.filter(it => it.idx === idx || it.idx === undefined);
+    if (!mine.length) return;
+    let text = el.textContent;
+    // Build a list of [start, end, item] ranges found by quote match.
+    const ranges = [];
+    mine.forEach(it => {
+      if (!it.quote) return;
+      const pos = text.indexOf(it.quote);
+      if (pos >= 0) ranges.push([pos, pos + it.quote.length, it]);
+    });
+    if (!ranges.length) return;
+    ranges.sort((a, b) => a[0] - b[0]);
+    let out = '', cursor = 0;
+    ranges.forEach(([s, e, it]) => {
+      if (s < cursor) return; // skip overlaps
+      out += escape(text.slice(cursor, s));
+      const cls = it.kind === 'sugg' ? 'hl sugg' : 'hl';
+      out += `<span class="${cls}" data-item="${it.id}">${escape(text.slice(s, e))}</span>`;
+      cursor = e;
+    });
+    out += escape(text.slice(cursor));
+    el.innerHTML = out;
+  });
+}
+
+/* Position margin notes absolutely, top offset = highlight top relative to the
+   margin container (NO scrollTop; that double-counts). Stack with a min gap. */
+function layoutMargin() {
+  const col = document.getElementById('margin-col');
+  col.innerHTML = '';
+  const items = itemsForTrace();
+  if (!items.length) return;
+  const colRect = col.getBoundingClientRect();
+  const placed = [];
+  let lastBottom = 0;
+  // order by vertical position of the highlight
+  const withPos = items.map(it => {
+    const hl = document.querySelector(`.hl[data-item="${it.id}"]`);
+    const top = hl ? (hl.getBoundingClientRect().top - colRect.top) : 0;
+    return {it, top, hl};
+  }).sort((a, b) => a.top - b.top);
+
+  withPos.forEach(({it, top, hl}) => {
+    const note = document.createElement('div');
+    note.className = 'mnote ' + (it.kind === 'sugg' ? 'sugg' : 'human');
+    note.dataset.item = it.id;
+    let html = '';
+    if (it.kind === 'sugg') html += `<div class="tag">agent · ${escape(it.mode || '')}</div>`;
+    if (it.quote) html += `<div class="quote">"${escape(clip(it.quote, 80))}"</div>`;
+    html += `<div class="body">${escape(it.note || (it.kind === 'sugg' ? '(suggested instance)' : ''))}</div>`;
+    if (it.kind === 'sugg') {
+      html += `<div class="acts"><button class="accept" data-accept="${it.id}">accept</button>` +
+              `<button class="reject" data-reject="${it.id}">dismiss</button></div>`;
+    } else {
+      html += `<div class="acts"><button data-del="${it.id}">delete</button></div>`;
+    }
+    note.innerHTML = html;
+    const y = Math.max(top, lastBottom);
+    note.style.top = y + 'px';
+    col.appendChild(note);
+    lastBottom = y + note.offsetHeight + 8;
+
+    // hover linking between note and highlight
+    if (hl) {
+      note.addEventListener('mouseenter', () => hl.classList.add('outline'));
+      note.addEventListener('mouseleave', () => hl.classList.remove('outline'));
+      hl.addEventListener('mouseenter', () => note.classList.add('outline'));
+      hl.addEventListener('mouseleave', () => note.classList.remove('outline'));
+    }
+    placed.push(note);
+  });
+
+  col.querySelectorAll('[data-accept]').forEach(b =>
+    b.onclick = () => acceptSuggestion(b.dataset.accept));
+  col.querySelectorAll('[data-reject]').forEach(b =>
+    b.onclick = () => dismissSuggestion(b.dataset.reject));
+  col.querySelectorAll('[data-del]').forEach(b =>
+    b.onclick = () => deleteAnnotation(b.dataset.del));
+}
+
+/* ------------------------------------------------------------------ *
+ * In-place annotation                                                *
+ * ------------------------------------------------------------------ */
+let pendingRange = null;   // the wrapped pending-highlight span
+let pendingCtx = null;     // {trace_id, quote, idx}
+
+document.getElementById('trace-body').addEventListener('mouseup', () => {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  const text = sel.toString().trim();
+  if (!text) return;
+  const anchor = sel.anchorNode && sel.anchorNode.parentElement
+    ? sel.anchorNode.parentElement.closest('.annotatable') : null;
+  if (!anchor) return;
+
+  // Wrap the range in a pending highlight BEFORE focusing the input, so the
+  // native selection clearing does not lose the reviewer's context.
+  const range = sel.getRangeAt(0);
+  const span = document.createElement('span');
+  span.className = 'hl pending-highlight';
+  try { range.surroundContents(span); } catch (e) { return; }
+  pendingRange = span;
+  pendingCtx = {
+    conversation_id: convId(curTrace()),
+    trace_id: curTrace().trace_id,
+    quote: text,
+    idx: parseInt(anchor.dataset.idx, 10),
+  };
+  sel.removeAllRanges();
+
+  const rect = span.getBoundingClientRect();
+  const pop = document.getElementById('popover');
+  pop.style.display = 'block';
+  pop.style.left = (window.scrollX + rect.left) + 'px';
+  pop.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+  const input = document.getElementById('note-input');
+  input.value = '';
+  input.focus();
+});
+
+document.getElementById('note-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { commitAnnotation(); }
+  else if (e.key === 'Escape') { cancelAnnotation(); }
+});
+document.addEventListener('mousedown', (e) => {
+  const pop = document.getElementById('popover');
+  if (pop.style.display === 'block' && !pop.contains(e.target)) cancelAnnotation();
+});
+
+function clearPending() {
+  if (pendingRange && pendingRange.parentNode) {
+    const parent = pendingRange.parentNode;
+    while (pendingRange.firstChild) parent.insertBefore(pendingRange.firstChild, pendingRange);
+    parent.removeChild(pendingRange);
+    parent.normalize();
+  }
+  pendingRange = null; pendingCtx = null;
+  document.getElementById('popover').style.display = 'none';
+}
+function cancelAnnotation() { clearPending(); renderTrace(); }
+
+async function commitAnnotation() {
+  const note = document.getElementById('note-input').value.trim();
+  if (!note || !pendingCtx) { clearPending(); return; }
+  state.annotations.push({
+    id: 'a' + Date.now() + Math.floor(Math.random() * 1000),
+    conversation_id: pendingCtx.conversation_id,
+    trace_id: pendingCtx.trace_id,
+    quote: pendingCtx.quote,
+    idx: pendingCtx.idx,
+    note, ts: new Date().toISOString(),
+  });
+  clearPending();
+  await saveAnnotations();
+  renderTrace();
+  renderProgress();
+  toast('saved · the agent is grouping your notes');
+}
+
+async function deleteAnnotation(id) {
+  state.annotations = state.annotations.filter(a => a.id !== id);
+  await saveAnnotations();
+  renderTrace(); renderProgress();
+}
+
+/* Accepting a suggestion promotes it to a human-confirmed annotation with
+   source accepted_suggestion, and removes it from the queue. */
+async function acceptSuggestion(id) {
+  const s = state.suggestions.find(x => x.id === id);
+  if (!s) return;
+  state.annotations.push({
+    id: 'a' + Date.now() + Math.floor(Math.random() * 1000),
+    conversation_id: convId(s),
+    trace_id: s.trace_id, quote: s.quote, idx: s.idx,
+    note: s.note || (s.mode ? `[${s.mode}]` : '(accepted)'),
+    source: 'accepted_suggestion', mode: s.mode, ts: new Date().toISOString(),
+  });
+  markDecided(id, 'accepted');
+  await saveAnnotations();
+  await api.post('/api/suggestions', state.suggestions);
+  renderTrace(); renderProgress();
+}
+
+/* The handout requires the saved state to contain at least one rejected
+   suggestion, and review-loop.md requires the accept/reject decision itself to
+   stay inspectable. So a decided suggestion is kept with its decision recorded
+   rather than deleted from the file. */
+function markDecided(id, decision) {
+  state.suggestions = state.suggestions.map(x =>
+    x.id === id ? {...x, decision, decided_at: new Date().toISOString()} : x);
+}
+function pendingSuggestions() { return state.suggestions.filter(s => !s.decision); }
+
+async function dismissSuggestion(id) {
+  markDecided(id, 'rejected');
+  await api.post('/api/suggestions', state.suggestions);
+  renderTrace(); renderProgress();
+}
+
+/* ------------------------------------------------------------------ *
+ * Progress view                                                      *
+ * ------------------------------------------------------------------ */
+function renderProgress() {
+  renderCoverage();
+  renderTreemap();
+  renderCompleteness();
+  renderQueue();
+}
+
+/* ------------------------------------------------------------------ *
+ * Label view: apply the final taxonomy                               *
+ * ------------------------------------------------------------------ *
+ * The handout requires a present/absent judgment for every trace and every
+ * final mode, and a trace may carry more than one mode, so this is a grid
+ * rather than a single choice per conversation.
+ *
+ * A judgment is made against the conversation, because a failure that only
+ * exists across turns cannot be judged from one turn. The server expands it
+ * into one row and one Langfuse score per turn trace id, so every trace ends
+ * up scored. */
+function modeNames() { return normalizePatterns(state.patterns).map(m => m.name); }
+
+function labelOf(mode, cid) {
+  const m = state.labels[mode];
+  return m && m[cid] !== undefined ? m[cid] : null;
+}
+
+function renderLabels() {
+  const modes = modeNames();
+  const note = document.getElementById('label-note');
+  const grid = document.getElementById('label-grid');
+  if (!modes.length) {
+    note.textContent = '';
+    grid.innerHTML = '<tr><td class="empty">No final modes yet. The taxonomy is built in Part D; ' +
+                     'this view applies it in Part E.</td></tr>';
+    return;
+  }
+  const total = state.samples.length * modes.length;
+  let done = 0;
+  state.samples.forEach(s => modes.forEach(mo => {
+    if (labelOf(mo, convId(s)) !== null) done++;
+  }));
+  note.textContent =
+    `${state.samples.length} conversations x ${modes.length} modes = ${total} judgments. ` +
+    `${done} recorded, ${total - done} outstanding. ` +
+    `Fail = the failure is present. Each judgment writes one Langfuse score per turn.`;
+
+  const head = '<tr><th>conversation</th><th>role</th>' +
+    modes.map(m => `<th>${escape(m)}</th>`).join('') + '</tr>';
+  const rows = state.samples.map(s => {
+    const cid = convId(s);
+    const complete = modes.every(m => labelOf(m, cid) !== null);
+    const cells = modes.map(m => {
+      const v = labelOf(m, cid);
+      return `<td><div class="judg" data-cid="${attr(cid)}" data-mode="${attr(m)}">` +
+        `<button class="fail${v === 1 ? ' on' : ''}" data-v="1">Fail</button>` +
+        `<button class="pass${v === 0 ? ' on' : ''}" data-v="0">Pass</button>` +
+        `<button data-v="">-</button></div></td>`;
+    }).join('');
+    return `<tr class="${complete ? 'done' : ''}"><td class="cid" data-goto="${attr(cid)}">${escape(cid)}</td>` +
+           `<td>${escape((s.meta || {}).role || '')}</td>${cells}</tr>`;
+  }).join('');
+  grid.innerHTML = head + rows;
+
+  grid.querySelectorAll('td.cid').forEach(td =>
+    td.onclick = () => gotoTrace(td.dataset.goto));
+  grid.querySelectorAll('.judg button').forEach(b => {
+    b.onclick = () => {
+      const box = b.parentElement;
+      const raw = b.dataset.v;
+      saveLabel(box.dataset.cid, box.dataset.mode, raw === '' ? null : parseInt(raw, 10));
+    };
+  });
+}
+
+async function saveLabel(cid, mode, label) {
+  const s = state.samples.find(x => convId(x) === cid);
+  if (!s) return;
+  const res = await api.post('/api/labels', {
+    conversation_id: cid,
+    mode,
+    label,
+    turn_trace_ids: s.turn_trace_ids || [s.trace_id],
+  });
+  if (res && res.error) {
+    toast(res.cached_locally ? 'saved locally, Langfuse write failed' : res.error);
+  } else if (label === null) {
+    toast('judgment cleared');
+  } else {
+    const n = (res && res.langfuse_scores_written) || 0;
+    toast(`${label === 1 ? 'Fail' : 'Pass'} saved · ${n} Langfuse score${n === 1 ? '' : 's'}`);
+  }
+  state.labels = await api.get('/api/labels');
+  renderLabels(); renderProgress(); updateCounts();
+}
+
+/* ------------------------------------------------------------------ *
+ * Progress: coverage and labeling completeness                       *
+ * ------------------------------------------------------------------ */
+function renderCoverage() {
+  const el = document.getElementById('coverage');
+  const reviewed = new Set(state.annotations.map(convId));
+  const byBatch = {};
+  state.samples.forEach(s => {
+    const b = s.batch || '(unassigned)';
+    byBatch[b] = byBatch[b] || {n: 0, done: 0};
+    byBatch[b].n++;
+    if (reviewed.has(convId(s))) byBatch[b].done++;
+  });
+  const traces = state.samples.reduce((a, s) => a + (s.turn_trace_ids || []).length, 0);
+  const rows = Object.entries(byBatch).map(([b, v]) => bar(b, v.done, v.n)).join('');
+  el.innerHTML = rows +
+    `<div class="grid-note">${state.samples.length} conversations in the sample ` +
+    `(${traces} raw Langfuse traces). ${reviewed.size} carry at least one open code.</div>`;
+}
+
+function renderCompleteness() {
+  const el = document.getElementById('completeness');
+  const modes = modeNames();
+  if (!modes.length) { el.innerHTML = '<div class="empty">No final modes yet.</div>'; return; }
+  el.innerHTML = modes.map(m => {
+    const done = state.samples.filter(s => labelOf(m, convId(s)) !== null).length;
+    const fails = state.samples.filter(s => labelOf(m, convId(s)) === 1).length;
+    return bar(m, done, state.samples.length, `${fails} fail`);
+  }).join('');
+}
+
+function bar(name, done, total, extra) {
+  const pct = total ? Math.round(done / total * 100) : 0;
+  return `<div class="bar-row"><span class="name">${escape(name)}</span>` +
+         `<span class="track"><span class="fill" style="width:${pct}%"></span></span>` +
+         `<span class="num">${done}/${total}${extra ? ' · ' + escape(extra) : ''}</span></div>`;
+}
+
+/* Normalize the taxonomy into [{name, ...}] regardless of on-disk shape.
+   During a live session the agent pushes a flat map {mode_name: {...}} as it
+   groups notes. The committed demo/final state uses the Artifact L schema:
+   {modes: [{name, ...}], human_signoff, reconciliation}. Accept both. */
+function normalizePatterns(p) {
+  if (!p || typeof p !== 'object') return [];
+  if (Array.isArray(p.modes)) return p.modes.filter(m => m && m.name);
+  return Object.entries(p).map(([name, m]) => ({name, ...(m || {})}));
+}
+function modeCount(m) {
+  // a live mode carries `count`; a final mode carries the any-instance count.
+  if (typeof m.count === 'number') return m.count;
+  if (typeof m.any_instance_count === 'number') return m.any_instance_count;
+  if (typeof m.first_failure_count === 'number') return m.first_failure_count;
+  return (m.example_trace_ids || []).length;
+}
+
+function renderTreemap() {
+  const el = document.getElementById('treemap');
+  const modes = normalizePatterns(state.patterns);
+  if (!modes.length) { el.innerHTML = '<div class="empty">No modes yet. As you annotate, the agent groups your notes here.</div>'; return; }
+  // block area roughly proportional to count via flex-grow
+  modes.sort((a, b) => modeCount(b) - modeCount(a));
+  el.innerHTML = modes.map(m => {
+    // a live mode has free-text example_quotes; a final mode lists trace ids.
+    const ids = m.example_trace_ids || [];
+    const quotes = m.example_quotes || [];
+    const items = (quotes.length ? quotes : ids).slice(0, 6).map((val, i) =>
+      `<li data-tid="${escape(quotes.length ? (ids[i] || '') : val)}">${escape(clip(val, 90))}</li>`).join('');
+    const status = m.status || 'candidate';
+    const grow = Math.max(1, modeCount(m));
+    const sev = typeof m.severity === 'number' ? ` · sev ${m.severity}` : '';
+    return `<div class="mode-block" style="flex-grow:${grow}">` +
+      `<h3>${escape(m.name)}<span class="status ${status}">${status}</span>` +
+      `<span class="count">${modeCount(m)}${sev}</span></h3>` +
+      `<div class="def">${escape(m.definition || '')}</div>` +
+      `<ul class="notes">${items}</ul></div>`;
+  }).join('');
+  el.querySelectorAll('li[data-tid]').forEach(li => {
+    li.onclick = () => { if (li.dataset.tid) gotoTrace(li.dataset.tid); };
+  });
+}
+
+function renderQueue() {
+  const el = document.getElementById('sugg-queue');
+  const pending = pendingSuggestions();
+  const decided = state.suggestions.length - pending.length;
+  const tail = decided
+    ? `<div class="empty">${decided} already decided (kept in suggestions.json with the decision).</div>`
+    : '';
+  if (!pending.length) { el.innerHTML = '<div class="empty">No pending suggestions.</div>' + tail; return; }
+  const rows = pending.map(s =>
+    `<div class="sugg-row"><input type="checkbox" data-id="${s.id}" checked />` +
+    `<span class="mode">${escape(s.mode || '')}</span>` +
+    `<span class="quote" data-tid="${attr(convId(s))}">"${escape(clip(s.quote || '', 110))}"</span></div>`
+  ).join('');
+  el.innerHTML =
+    `<div class="queue-tools">` +
+    `<label><input type="checkbox" id="sel-all" checked /> select all</label>` +
+    `<button class="accept" id="accept-sel">Accept selected</button>` +
+    `<button class="dismiss" id="dismiss-sel">Dismiss selected</button>` +
+    `<span class="empty" style="padding:0">${pending.length} pending · favor recall, prune the rest</span>` +
+    `</div>` + rows + tail;
+
+  document.getElementById('sel-all').onchange = (e) => {
+    el.querySelectorAll('.sugg-row input[type=checkbox]').forEach(c => c.checked = e.target.checked);
+  };
+  el.querySelectorAll('.quote[data-tid]').forEach(q =>
+    q.onclick = () => gotoTrace(q.dataset.tid));
+  document.getElementById('accept-sel').onclick = () => bulkQueue(true);
+  document.getElementById('dismiss-sel').onclick = () => bulkQueue(false);
+}
+
+async function bulkQueue(accept) {
+  const el = document.getElementById('sugg-queue');
+  const ids = [...el.querySelectorAll('.sugg-row input[type=checkbox]:checked')].map(c => c.dataset.id);
+  for (const id of ids) { accept ? await acceptSuggestion(id) : await dismissSuggestion(id); }
+}
+
+/* ------------------------------------------------------------------ *
+ * Map view (canvas scatter of the 2D projection)                     *
+ * ------------------------------------------------------------------ */
+function renderMap() {
+  const canvas = document.getElementById('map');
+  const nodes = state.graph.nodes || [];
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 620;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+  if (!nodes.length) {
+    ctx.fillStyle = '#9ca3af'; ctx.font = '13px sans-serif';
+    ctx.fillText('No projection yet (GET /api/graph is empty).', 20, 30);
+    return;
+  }
+  const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const pad = 30;
+  const sx = v => pad + (v - minX) / ((maxX - minX) || 1) * (w - 2 * pad);
+  const sy = v => pad + (v - minY) / ((maxY - minY) || 1) * (h - 2 * pad);
+  const hues = ['#94a3b8','#a78bfa','#60a5fa','#34d399','#fbbf24','#f472b6','#22d3ee','#fb923c'];
+  const sampleIds = new Set(state.samples.map(convId));
+  const annIds = new Set(state.annotations.map(convId));
+
+  nodes.forEach(n => {
+    const annotated = annIds.has(n.trace_id);
+    const sampled = sampleIds.has(n.trace_id);
+    ctx.beginPath();
+    ctx.arc(sx(n.x), sy(n.y), sampled ? 6 : 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = annotated ? '#f97316' : hues[(n.cluster || 0) % hues.length];
+    ctx.fill();
+    if (sampled) { ctx.lineWidth = 1.5; ctx.strokeStyle = '#1a1a1a'; ctx.stroke(); }
+  });
+
+  canvas._nodes = nodes.map(n => ({...n, px: sx(n.x), py: sy(n.y)}));
+}
+document.getElementById('map').addEventListener('click', (e) => {
+  const canvas = document.getElementById('map');
+  const nodes = canvas._nodes || [];
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  let best = null, bestD = 1e9;
+  const sampleIds = new Set(state.samples.map(s => s.trace_id));
+  nodes.forEach(n => {
+    if (!sampleIds.has(n.trace_id)) return;
+    const d = (n.px - mx) ** 2 + (n.py - my) ** 2;
+    if (d < bestD) { bestD = d; best = n; }
+  });
+  if (best && bestD < 200) gotoTrace(best.trace_id);
+});
+
+/* ------------------------------------------------------------------ *
+ * Navigation + view switching                                        *
+ * ------------------------------------------------------------------ */
+/* Accepts a conversation id or any of its turn trace ids, because the taxonomy
+   and the suggestion queue may name either. */
+function gotoTrace(tid) {
+  const i = state.samples.findIndex(s =>
+    convId(s) === tid || s.trace_id === tid || (s.turn_trace_ids || []).includes(tid));
+  if (i < 0) { toast('that conversation is not in the current sample'); return; }
+  state.cur = i;
+  switchView('trace');
+  renderHeader(); renderTrace(); updatePos();
+}
+function updatePos() {
+  document.getElementById('pos').textContent =
+    state.samples.length ? `${state.cur + 1} / ${state.samples.length}` : '0 / 0';
+}
+document.getElementById('prev').onclick = () => {
+  if (state.cur > 0) { state.cur--; renderHeader(); renderTrace(); updatePos(); }
+};
+document.getElementById('next').onclick = () => {
+  if (state.cur < state.samples.length - 1) { state.cur++; renderHeader(); renderTrace(); updatePos(); }
+};
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'j' || e.key === 'ArrowDown' || e.key === 'ArrowRight') document.getElementById('next').click();
+  if (e.key === 'k' || e.key === 'ArrowUp' || e.key === 'ArrowLeft') document.getElementById('prev').click();
+});
+
+function switchView(name) {
+  document.querySelectorAll('.views button').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === name));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(name + '-view').classList.add('active');
+  document.getElementById('trace-nav').style.display = name === 'trace' ? 'flex' : 'none';
+  if (name === 'map') renderMap();
+  if (name === 'label') renderLabels();
+  if (name === 'progress') renderProgress();
+}
+document.querySelectorAll('.views button').forEach(b =>
+  b.onclick = () => switchView(b.dataset.view));
+
+function updateCounts() {
+  const reviewed = new Set(state.annotations.map(convId)).size;
+  const modes = modeNames();
+  let done = 0;
+  state.samples.forEach(s => modes.forEach(m => {
+    if (labelOf(m, convId(s)) !== null) done++;
+  }));
+  const target = state.samples.length * modes.length;
+  document.getElementById('counts').textContent =
+    `${reviewed}/${state.samples.length} reviewed · ${state.annotations.length} notes · ` +
+    `${modes.length} modes · ${done}/${target} judgments · ` +
+    `${pendingSuggestions().length} suggestions`;
+}
+
+/* ------------------------------------------------------------------ *
+ * Polling: pick up agent pushes (samples, suggestions, patterns) and *
+ * replayed annotations. Compare-and-render, ~2s, like the watcher.   *
+ * ------------------------------------------------------------------ */
+let lastSig = '';
+async function poll() {
+  try {
+    const [samples, suggestions, patterns, annotations, labels] = await Promise.all([
+      api.get('/api/samples'), api.get('/api/suggestions'),
+      api.get('/api/patterns'), api.get('/api/annotations'), api.get('/api/labels'),
+    ]);
+    const newSampleCount = Array.isArray(samples) ? samples.length : 0;
+    const grewSamples = newSampleCount > state.samples.length;
+    const newSuggCount = Array.isArray(suggestions)
+      ? suggestions.filter(s => !s.decision).length : 0;
+    const grewSugg = newSuggCount > pendingSuggestions().length;
+
+    // Merge remote annotations that this client did not create (replay demo,
+    // or a second reviewer). De-dup by id, falling back to a content key for
+    // seeded items that arrive without one.
+    const key = a => a.id || `${a.trace_id}::${(a.note || '').slice(0, 40)}`;
+    const seen = new Set(state.annotations.map(key));
+    const remote = asAnnotationList(annotations);
+    const merged = [...state.annotations];
+    remote.forEach(a => { const k = key(a); if (!seen.has(k)) { seen.add(k); merged.push(a); } });
+
+    const sig = JSON.stringify([newSampleCount, newSuggCount,
+      normalizePatterns(patterns).length, merged.length, JSON.stringify(labels).length]);
+    if (sig === lastSig) return;
+    lastSig = sig;
+
+    state.samples = Array.isArray(samples) ? samples : state.samples;
+    state.suggestions = Array.isArray(suggestions) ? suggestions : state.suggestions;
+    state.patterns = patterns && typeof patterns === 'object' ? patterns : state.patterns;
+    state.annotations = merged;
+    state.labels = labels && typeof labels === 'object' ? labels : state.labels;
+
+    if (grewSamples) toast(`new conversations added to your batch (${newSampleCount})`);
+    if (grewSugg) toast(`new agent suggestions to review (${newSuggCount})`);
+
+    renderHeader(); renderTrace(); renderProgress(); updatePos(); updateCounts();
+    if (document.getElementById('label-view').classList.contains('active')) renderLabels();
+  } catch (e) { /* server not up yet; keep trying */ }
+}
+
+/* ------------------------------------------------------------------ *
+ * Utilities                                                          *
+ * ------------------------------------------------------------------ */
+function escape(s) {
+  return String(s === undefined || s === null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+/* Attribute-safe: a tool result is JSON and is full of double quotes, which
+   would otherwise close the attribute early. */
+function attr(s) { return escape(s).replace(/"/g, '&quot;'); }
+function md(s) {
+  return escape(s)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n/g, '<br>');
+}
+function pretty(v) {
+  if (typeof v === 'string') return v;
+  try { return JSON.stringify(v, null, 2); } catch (e) { return String(v); }
+}
+function clip(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n) + '…' : s; }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+window.addEventListener('resize', () => {
+  if (document.getElementById('map-view').classList.contains('active')) renderMap();
+  else layoutMargin();
+});
+
+/* ------------------------------------------------------------------ *
+ * Boot                                                               *
+ * ------------------------------------------------------------------ */
+(async function boot() {
+  await loadAll();
+  renderHeader(); renderTrace(); renderProgress(); updatePos(); updateCounts();
+  setInterval(poll, 2000);
+})();
+</script>
+</body>
+</html>
