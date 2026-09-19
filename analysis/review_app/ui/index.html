@@ -134,6 +134,22 @@
     font-size: 11px; background: #fef3c7; color: #92400e;
     padding: 2px 7px; border-radius: 10px;
   }
+  /* "No failure observed": the handout needs a reviewed-and-clean conversation
+     to be distinguishable from an unreviewed one, and a clean conversation has
+     no text worth quoting, so it cannot be recorded by selection. */
+  .trace-header .clean-btn {
+    margin-left: auto; font-size: 12px; cursor: pointer;
+    padding: 4px 10px; border-radius: 6px;
+    border: 1px solid var(--line); background: #fff; color: var(--muted);
+  }
+  .trace-header .clean-btn:hover { border-color: #9ca3af; color: #374151; }
+  .trace-header .clean-btn.on {
+    background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600;
+  }
+  .trace-header .reviewed-tag {
+    margin-left: auto; font-size: 12px; color: #166534;
+    background: #dcfce7; padding: 3px 9px; border-radius: 10px;
+  }
   .trace-body-wrap {
     display: flex; gap: 24px; max-width: 980px; margin: 0 auto;
     align-items: flex-start; position: relative;
@@ -472,8 +488,59 @@ function renderHeader() {
     bits.push(`<span class="badge-write" style="float:none">⚠ ${escape(s.writes.join(', '))}</span>`);
   }
   (s.flags || []).forEach(x => bits.push(`<span class="flag">${escape(x)}</span>`));
+
+  // Reviewed state. A conversation carrying a real open code is already
+  // reviewed, and "no failure observed" would contradict it, so the button is
+  // replaced by a tag. Otherwise the button toggles the clean marker.
+  const mine = state.annotations.filter(a => convId(a) === convId(s));
+  const failures = mine.filter(a => a.source !== CLEAN_SOURCE);
+  if (failures.length) {
+    bits.push(`<span class="reviewed-tag">✓ reviewed · ${failures.length} ` +
+              `note${failures.length > 1 ? 's' : ''}</span>`);
+  } else {
+    const on = mine.some(a => a.source === CLEAN_SOURCE);
+    bits.push(`<button class="clean-btn${on ? ' on' : ''}" id="clean-btn">` +
+              `${on ? '✓ no failure observed' : 'No failure observed'}</button>`);
+  }
+
   if (s.reason) bits.push(`<div class="reason">${escape(s.batch || '')} · ${escape(s.reason)}</div>`);
   h.innerHTML = bits.join(' ');
+  const cb = document.getElementById('clean-btn');
+  if (cb) cb.onclick = toggleNoFailure;
+}
+
+/* Marks the conversation reviewed with no failure found. The annotation
+   carries no quote, so applyHighlights skips it and layoutMargin renders it in
+   the margin without a highlight to anchor to. Clicking again clears it. */
+const CLEAN_SOURCE = 'no_failure_observed';
+
+async function toggleNoFailure() {
+  const s = curTrace();
+  if (!s) return;
+  const cid = convId(s);
+  const existing = state.annotations.filter(a => convId(a) === cid);
+  if (existing.some(a => a.source === CLEAN_SOURCE)) {
+    state.annotations = state.annotations.filter(
+      a => !(convId(a) === cid && a.source === CLEAN_SOURCE));
+    await saveAnnotations();
+    renderHeader(); renderTrace(); renderProgress(); updateCounts();
+    toast('cleared · this conversation counts as unreviewed again');
+    return;
+  }
+  if (existing.length) { toast('this conversation already has an open code'); return; }
+  state.annotations.push({
+    id: 'a' + Date.now() + Math.floor(Math.random() * 1000),
+    conversation_id: cid,
+    trace_id: s.trace_id,
+    quote: null,
+    idx: null,
+    note: 'no failure observed',
+    source: CLEAN_SOURCE,
+    ts: new Date().toISOString(),
+  });
+  await saveAnnotations();
+  renderHeader(); renderTrace(); renderProgress(); updateCounts();
+  toast('recorded · reviewed, no failure found');
 }
 
 /* Render one conversation. Two groupings, both Gestalt:
@@ -638,6 +705,7 @@ function layoutMargin() {
     note.dataset.item = it.id;
     let html = '';
     if (it.kind === 'sugg') html += `<div class="tag">agent · ${escape(it.mode || '')}</div>`;
+    if (it.source === CLEAN_SOURCE) html += `<div class="tag">reviewed · clean</div>`;
     if (it.quote) html += `<div class="quote">"${escape(clip(it.quote, 80))}"</div>`;
     html += `<div class="body">${escape(it.note || (it.kind === 'sugg' ? '(suggested instance)' : ''))}</div>`;
     if (it.kind === 'sugg') {
@@ -744,15 +812,17 @@ async function commitAnnotation() {
   });
   clearPending();
   await saveAnnotations();
+  renderHeader();
   renderTrace();
   renderProgress();
+  updateCounts();
   toast('saved · the agent is grouping your notes');
 }
 
 async function deleteAnnotation(id) {
   state.annotations = state.annotations.filter(a => a.id !== id);
   await saveAnnotations();
-  renderTrace(); renderProgress();
+  renderHeader(); renderTrace(); renderProgress(); updateCounts();
 }
 
 /* Accepting a suggestion promotes it to a human-confirmed annotation with

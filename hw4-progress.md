@@ -6,15 +6,29 @@ verified Langfuse score write.
 
 **Step 4 (Part B, open coding) is IN PROGRESS and PAUSED.** Batch 1 is built
 (30 conversations) and 1 of those 30 is open-coded. Nothing is running: the review
-app server has no live process and the Docker/Langfuse stack is stopped. No volume
-was destroyed. Before open coding can resume, read "Blocker found 2026-09-19"
-below — the interface cannot currently record "no failure observed".
+app server was stopped deliberately and the Docker/Langfuse stack is down. No
+volume was destroyed.
+
+The blocker that stopped the previous pause is **resolved**: the interface now has
+a "No failure observed" control. All three questions left open at that pause were
+settled by the student on 2026-09-19 (see "Settled 2026-09-19"). **Open coding can
+resume immediately** — start the server and read, nothing else is in the way.
 
 Working style: student drives. The agent proposes each step in plain language
 and waits for an explicit "go" before running or changing anything. Every
 judgment about what counts as a failure is the student's. The agent organizes,
 computes and scales; the human notices and decides. Assessments and the
 <=5 minute video are the student's own work.
+
+## Settled 2026-09-19
+
+Three decisions the student made when resuming; none is open any more.
+
+| Question | Decision |
+| --- | --- |
+| Recording a clean conversation | Add a "No failure observed" button to the interface (built, see Step 4b) |
+| Langfuse during Part B | Review offline, `--no-langfuse`. Docker is needed only from Part E |
+| What "100 traces" counts | **Conversations.** 100 conversations is roughly 128 raw traces, clearing the bar either way. State the convention in `review_summary.md` |
 
 ## Restarting after the pause
 
@@ -89,14 +103,12 @@ then carry both identifiers. Record the substitution in
   raw traces. Reviewing 100 conversations covers 100 to ~130 raw traces, which
   clears the bar either way. Proposal: count conversations, and state the
   convention explicitly in `analysis/report/review_summary.md`.
-  **Still open** — put to the student on 2026-09-19, not yet answered. The
-  alternative is counting raw traces, which would stop the review at roughly 78
-  conversations.
+  **DECIDED 2026-09-19: count conversations.**
 - **Trace source while Docker is down.** Open coding needs nothing from Langfuse:
   `analysis/state/samples.json` already carries every conversation's text, tool
   calls and tool results. Running `--no-langfuse` costs only the turn permalinks,
   which will not open. Docker becomes necessary again at Part E, for the score
-  writes. **Still open** — put to the student on 2026-09-19, not yet answered.
+  writes. **DECIDED 2026-09-19: review offline.**
 
 ## Done
 
@@ -308,7 +320,7 @@ Remaining work in Part B: **29 conversations left in batch 1**, then batch 2
 outcomes), batch 3 (25 from depth searches, including close negatives) and
 batch 4 (15 uniform, the stability check).
 
-## Blocker found 2026-09-19, resolve before open coding resumes
+## Blocker found 2026-09-19, RESOLVED the same day (see Step 4b)
 
 The handout requires recording "no failure observed" for a clean conversation, so
 that the saved annotations distinguish a reviewed trace from an unreviewed one.
@@ -324,16 +336,43 @@ that the saved annotations distinguish a reviewed trace from an unreviewed one.
   carrying no annotation can therefore never be counted as reviewed, and the
   coverage bars will under-report the batch.
 
-Proposed fix, needing the student's approval: a "No failure observed" button in the
-trace header that pushes an annotation with `quote: null`,
-`note: "no failure observed"`, `source: "clean"`. No server change is needed, and
-no renderer change either — `layoutMargin` already guards on `it.quote`
-(line ~641) and `applyHighlights` already skips quote-less items (line ~599), so
-the note lands in the margin column without a highlight. Optional companion: a
-"jump to next unreviewed" control beside the existing prev/next buttons.
+The student approved the button and declined the optional "jump to next
+unreviewed" companion. Built the same day; see Step 4b below.
 
-This fix would itself be a further honest adaptation of the reference interface,
-and belongs in `analysis/report/interface_comparison.md` if it is made.
+### Step 4b, the "No failure observed" control (2026-09-19)
+
+Adaptation 8 of the review interface, and the one that unblocked Part B. Three
+edits to `analysis/review_app/ui/index.html`, no server change:
+
+1. A `No failure observed` button at the right of the sticky header. It writes an
+   annotation with `quote: null`, `idx: null`, `note: "no failure observed"` and
+   `source: "no_failure_observed"` (the constant `CLEAN_SOURCE`). Clicking again
+   removes it, so the mark is reversible.
+2. A conversation that already carries a real open code shows a
+   `✓ reviewed · N notes` tag instead of the button, so a conversation can never
+   be marked clean and failed at once.
+3. The clean marker renders in the margin column tagged `reviewed · clean`, and
+   is deletable there. `renderHeader` and `updateCounts` are now also called from
+   `commitAnnotation` and `deleteAnnotation`, so the header and the counter stay
+   in step with the margin.
+
+Why it was needed: the handout requires a reviewed-but-clean conversation to be
+distinguishable from an unreviewed one, "reviewed" is derived from the annotation
+list, and a clean conversation has no text worth quoting.
+
+Verified offline, no model and no Langfuse write:
+
+- the extracted script passes `node --check`;
+- `const CLEAN_SOURCE` is initialised before `boot()` runs, so there is no
+  temporal-dead-zone hazard despite `renderHeader` referring to it earlier in
+  the file;
+- `GET /` 200, 57 KB; `GET /api/samples` returns the 30 conversations;
+- a clean record posted to `/api/annotations` round-trips with `quote` still
+  null and lands in the reviewed set. The test record was then removed and
+  `git diff` on `annotations.json` confirmed empty.
+
+Record this as an eighth adaptation in
+`analysis/report/interface_comparison.md` before the deliverables are final.
 
 ## Data gotchas found while reading the traces
 
