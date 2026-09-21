@@ -1,17 +1,204 @@
 {
   "unrequested_information": {
-    "definition": "The reply supplies substantive information the user did not ask for and no requirement obliges, beyond what answers the question.",
+    "definition": "The reply states a fact about an order, a sale, eligibility status or a policy that the user did not ask for and that answering the question did not require. A clearly labelled offer of a next step ('want me to check X?') is not this mode.",
+    "status": "confirmed",
+    "count": 5,
+    "example_trace_ids": [
+      "support-0084",
+      "support-0026",
+      "support-0212",
+      "support-0095",
+      "support-0251"
+    ],
+    "example_quotes": [
+      "asked to list the order; reply volunteers that it is not refund-eligible",
+      "asked what a product is called; reply adds price and a recent sale",
+      "asked where to read a policy; reply tours the rest of the help center",
+      "asked for shipping status; reply appends refund-eligibility (PROVISIONAL: note still says 'not grounded')",
+      "support-0251: merchant asked what a product costs; reply adds 'has recent sales in your order history - orders 4311 and 4127'"
+    ],
+    "created_from": [
+      "a1789840564485632",
+      "a1790001543919264",
+      "a1790001157579783",
+      "a17900020273196"
+    ],
+    "requirement_source": "RESP-6 (added to SPEC.md 2026-09-21; motivating annotation support-0084)",
+    "pending_annotation": {
+      "support-0251": "accepted by the reviewer 2026-09-21, but annotations.json still records 'no failure observed'. Re-code in the interface."
+    },
+    "decision_rule": [
+      "1. What did the user ask for in this turn?",
+      "2. List the substantive facts the reply states: order fields, prices, sales history, eligibility, policy content.",
+      "3. Remove the ones needed to answer the question, and remove any closing offer of a next step.",
+      "4. Anything left -> Fail. Nothing left -> Pass."
+    ],
+    "spec_revision": {
+      "requirement": "RESP-6",
+      "added": "2026-09-21",
+      "text": "Answer the question asked. Do not volunteer order facts, sales history, eligibility status, or policy detail the user did not request. Offering a clearly labelled next step is permitted; stating additional facts about the order or catalogue is not.",
+      "motivating_annotation": "a1789840564485632 (support-0084)",
+      "why": "Five traces showed the agent volunteering order or sales facts adjacent to the question. No existing requirement forbade it, so the observation could not be labelled. The second sentence makes the rule binary; the third excludes closing offers, which appear in nearly every reply and would otherwise make the mode fire everywhere."
+    },
+    "close_negatives": {
+      "support-0030": "asked what product 3 is called; answered that the title is blank, declined to guess, offered a ticket. No extra facts. Pass.",
+      "support-0245": "asked when a payout arrives; answered from cw-payouts and stopped. Pass.",
+      "support-0100": "asked to look up order 1184; reported that order's own record, which is what was asked. Pass."
+    },
+    "boundary_vs_nearest": "Nearest neighbour is unsupported_policy_claim. That mode is about a policy rule with no retrieved identifier; this one is about correct facts the user never asked for. A reply can fail both.",
+    "likely_evaluator": "LLM judge - deciding what the question required is a judgment call",
+    "review_note": "support-0029 should be re-checked against RESP-6: it volunteers order #8770's dates and total as a memory aid, the same shape as support-0026 which is already a positive. Under this rule it is a positive, not a close negative."
+  },
+  "contradicts_tool_verdict": {
+    "definition": "The reply asserts an eligibility or status conclusion that contradicts the tool result it was given for that same order.",
+    "status": "candidate",
+    "count": 2,
+    "example_trace_ids": [
+      "support-0139",
+      "support-0015"
+    ],
+    "example_quotes": [
+      "'should still be within its return window ... through March 4, 2026' while get_order returned refund_eligible:false and asof is 2026-07-01",
+      "'the buyer is still within the 30-day return window (cw-returns)' for an order delivered 2026-04-08, 84 days earlier, refund_eligible:false"
+    ],
+    "created_from": [
+      "a1790001389968673",
+      "a1790002389258997"
+    ],
+    "requirement_source": "RESP-3 (state when required information is missing or inconsistent, rather than inventing a value)",
+    "close_negatives": {
+      "support-0152": "reviewer REJECTED 2026-09-21. Delivered 2025-08-08, refund_eligible:false, asof 2026-07-01. The reply gives the cutoff (Sept 7 2025) as a fact and flags the non-eligibility; it never claims the order is still returnable. Stating a past date is not contradicting the tool.",
+      "support-0008": "track_shipment returned delivered_at earlier than shipped_at and days_in_transit -2. The reply flagged it as a probable tracking-data glitch and offered escalation, so it agreed with the tool rather than papering over it.",
+      "support-0202": "keyword sweep could not prove completeness; the reply hedged ('as far as I can tell') and named the limitation instead of asserting a total.",
+      "support-0009": "same corrupt order 8001 as support-0008. The reply named the contradiction ('delivered two days before it was marked shipped'), said the delivery date could not be relied on, and escalated with the inconsistency in the ticket context. Agreed with the tool rather than overriding it. Pass."
+    },
+    "boundary_vs_nearest": "Nearest neighbour is unsupported_policy_claim. That mode fires when a policy rule has no retrieved identifier behind it; this one fires when the reply's conclusion disagrees with a tool result it was given. support-0152 sits just outside this mode: the facts are right, only the framing is stale."
+  },
+  "unsupported_policy_claim": {
+    "definition": "The reply states a POLICY RULE (a window, fee, threshold, entitlement or restriction) without a policy identifier that appears in a tool result from this same conversation: either it gives no identifier at all, or it gives one that was never retrieved. Claims that merely relay a tool's verdict about one order are out of scope.",
+    "decision_rule": [
+      "1. In the reply, find each sentence asserting a general rule: a return/cancellation window, a fee, a dollar threshold, an entitlement, a restriction.",
+      "2. Skip any sentence that only restates a tool result for this order (eligible / not eligible, status, dates, amounts). Those are tool-derived, not policy-derived.",
+      "3. For each remaining sentence: does the reply give a policy identifier for it?",
+      "   no identifier            -> Fail",
+      "   identifier given         -> does that exact id appear in a tool result in this conversation?  no -> Fail,  yes -> Pass",
+      "4. Fail if any sentence fails. Otherwise Pass."
+    ],
+    "status": "confirmed",
+    "count": 3,
+    "example_trace_ids": [
+      "support-0151",
+      "support-0004",
+      "support-0138"
+    ],
+    "example_quotes": [
+      "support-0151: invents 'store-northwind-books-policy' and a 45-day window; get_store_info never called, neither the id nor the number appears in any tool result",
+      "support-0004: 'overdue per Cartwheel's shipping policy' with no identifier, although get_policy(cw-shipping) was called at idx 7",
+      "support-0138: 'a restocking fee of up to 15% (per the Cartwheel restocking fee policy)' - no identifier, cw-restocking never retrieved"
+    ],
+    "close_negatives": {
+      "support-0133": "relays check_return_eligibility's verdict ('still within the return window') with no policy id. Tool-derived, not policy-derived -> step 2 excludes it. Pass.",
+      "support-0002": "search_help_center mis-ranked cw-cancellations above cw-returns, but the reply cited cw-returns, which get_policy did retrieve. Bad retrieval alone is not this mode. Pass.",
+      "support-0166": "states the $100 threshold and the payout deduction, citing cw-refunds and cw-payouts, both present in tool results. Pass."
+    },
+    "boundary_vs_nearest": "Nearest neighbour is contradicts_tool_verdict. That mode fires when the reply disagrees with a tool result it was given; this one fires when the reply asserts a policy rule with nothing behind it. A reply can fail both independently.",
+    "created_from": [
+      "a1790002129450949",
+      "a1790007263161357"
+    ],
+    "requirement_source": "RESP-1 (cite the policy identifier for every claim derived from a policy document); RESP-3 for the invented-value half",
+    "likely_evaluator": "LLM judge - deciding whether a sentence asserts a policy rule needs judgment; the id-appears-in-a-tool-result half could be a code check",
+    "merged_from": [
+      "fabricated_policy_citation",
+      "missing_policy_citation"
+    ],
+    "merge_reason": "One product change fixes both: require every policy-derived claim to carry an identifier that resolves to a tool result in the same conversation.",
+    "pending_annotation": {
+      "support-0138": "accepted by the reviewer 2026-09-21, but annotations.json still records 'no failure observed'. Re-code in the interface."
+    }
+  },
+  "above_threshold_action_offered": {
+    "definition": "The reply offers, promises or states it can complete a write action that the agent is not authorised to complete on its own, without saying the action needs human approval. In Cartwheel this is a refund above the $100 auto-approve threshold in facts.yaml.",
+    "decision_rule": [
+      "1. Does the reply offer or promise a write action (refund, cancellation)?  no -> Pass",
+      "2. Is the amount above the refund_auto_approve_threshold_usd ($100)?  no -> Pass",
+      "3. Does the reply say the action needs human review/approval before it takes effect?  yes -> Pass, no -> Fail",
+      "Applies whether or not the write tool has run yet; the failure is in what the reply promises."
+    ],
     "status": "candidate",
     "count": 1,
     "example_trace_ids": [
-      "support-0084"
+      "support-0068"
     ],
     "example_quotes": [
-      "Too much details. The shopper only asked to list the order, not asking about refund."
+      "support-0068 idx 11: 'I can process a full refund of $240 for you instead. Want me to go ahead?' - $240 is above the $100 threshold, so it can only be queued for a human"
     ],
+    "close_negatives": {
+      "support-0131": "$223 refund: 'it would be queued for a quick human review before processing'. States the approval requirement. Pass.",
+      "support-0166": "$156.75 refund, tool returned queued_for_approval and the reply said 'queued for a quick human review before it's released', citing cw-refunds. Pass.",
+      "support-0056": "$88.50 refund, below the threshold, auto_approved by the tool and reported as approved. Threshold never engaged. Pass."
+    },
+    "boundary_vs_nearest": "Nearest neighbour is contradicts_tool_verdict. That mode needs a tool result to disagree with. This one fires on a promise the agent makes, often before any write tool has run at all.",
     "created_from": [
-      "a1789840564485632"
+      "a1790008872047263"
     ],
-    "requirement_source": "none yet, possible SPEC gap"
+    "requirement_source": "ESC-1 (refunds above the threshold are queued for a human) and AUTH-1 (above-threshold refund queued for human, all roles)",
+    "likely_evaluator": "hybrid - a code check finds a write offer with an amount over the threshold; an LLM judge decides whether the reply stated the approval requirement",
+    "pending_annotation": {
+      "support-0068": "the saved note is about the emoji at idx 5. The failure is at idx 11. Re-code in the interface."
+    }
+  },
+  "unverifiable_completeness_claim": {
+    "definition": "The reply asserts a superlative or exhaustive fact about a set - the cheapest, the most expensive, 'that is everything', 'there are no others' - that the tool results in this conversation cannot establish, and does not qualify the claim.",
+    "decision_rule": [
+      "1. Does the reply assert a superlative or a complete-set claim?  no -> Pass",
+      "2. Could the tool results actually establish it (an enumerating call, or a filter that covers the whole set)?  yes -> Pass",
+      "3. Does the reply qualify the claim, naming the limit of what it could check?  yes -> Pass, no -> Fail"
+    ],
+    "status": "candidate",
+    "count": 1,
+    "example_trace_ids": [
+      "support-0191"
+    ],
+    "example_quotes": [
+      "support-0191 idx 21: 'The cheapest thing Northwind Books sells is the Sturdy Novel - $10.50', reached by keyword-searching 'Northwind' with store:null, which matches a word and does not enumerate the store's catalogue"
+    ],
+    "close_negatives": {
+      "support-0202": "same keyword-sweep situation, but the reply hedged: 'as far as I can tell' plus 'the catalog search works by keyword matching, so an oddly-named item could slip through'. Qualified, so Pass.",
+      "support-0251": "states 4 of 6 'Heavy-Duty Vase' listings are in the merchant's shop; search_products returned all 6 rows, so the count is established by the tool. Pass."
+    },
+    "boundary_vs_nearest": "Nearest neighbour is unsupported_policy_claim. That one is about a policy rule with no retrieved identifier. This one is about a claim over data the tools returned, where the tools could not support the scope of the claim.",
+    "created_from": [
+      "a1790016330998543"
+    ],
+    "requirement_source": "RESP-3 (state when required information is missing or inconsistent, rather than inventing a value)",
+    "likely_evaluator": "LLM judge - recognising a superlative or exhaustive claim and whether it was qualified needs judgment"
+  },
+  "duplicate_write_action": {
+    "definition": "The agent performs a write action (escalate_to_human, issue_refund, cancel_order) that it already performed earlier in the same conversation for the same request, without referring to the earlier one.",
+    "decision_rule": [
+      "1. Did the agent call a write tool more than once in the conversation?  no -> Pass",
+      "2. Do two of those calls address the same underlying request (same order, same problem)?  no -> Pass",
+      "3. Does the reply after the later call reference the earlier action (its ticket or refund id, or 'already done')?  yes -> Pass, no -> Fail"
+    ],
+    "status": "candidate",
+    "count": 1,
+    "example_trace_ids": [
+      "support-0023"
+    ],
+    "example_quotes": [
+      "support-0023: escalated the negative-price glitch as ticket #156, then on the user repeating the question escalated again as ticket #167 with no mention of #156"
+    ],
+    "close_negatives": {
+      "support-0015": "user said 'escalate it please' after the agent had already escalated. Reply: 'Already done - I escalated this in the last step', ticket #154. Pass.",
+      "support-0009": "user said 'they want it escalated' after an escalation. Reply: 'Good news - it's already escalated. I opened ticket #151 in my last step'. Pass."
+    },
+    "boundary_vs_nearest": "Nearest neighbour is above_threshold_action_offered. That mode is about a write the agent is not allowed to complete; this one is about a write it was allowed to do and did twice. Neither requires the write to fail.",
+    "created_from": [],
+    "requirement_source": "NONE - no SPEC.md requirement forbids a duplicate write. Like unrequested_information this is a specification gap and needs a requirement before it can carry an evaluator.",
+    "likely_evaluator": "hybrid - a code check finds repeated write calls in one conversation; an LLM judge decides whether they address the same request and whether the reply referenced the earlier one.",
+    "pending_annotation": {
+      "support-0023": "awaiting the reviewer's accept/dismiss on suggestion sg-rev-02. created_from stays empty until then."
+    }
   }
 }

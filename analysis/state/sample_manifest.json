@@ -1,5 +1,5 @@
 {
-  "source": "langfuse",
+  "source": "traces/support_traces.json",
   "batches": [
     {
       "batch": "b1_uniform",
@@ -138,8 +138,369 @@
           "reason": "random pick"
         }
       ]
+    },
+    {
+      "batch": "b2_role",
+      "strategy": "dimension:role",
+      "k": 30,
+      "requested_k": 30,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0049",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0068",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0152",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0096",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0060",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0066",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0050",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0133",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0201",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0097",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0078",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0012",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0196",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0056",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0009",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0093",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0080",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0202",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0090",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0160",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0120",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0166",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0054",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0225",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0220",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0042",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0100",
+          "reason": "role=support"
+        },
+        {
+          "conversation_id": "support-0251",
+          "reason": "role=merchant"
+        },
+        {
+          "conversation_id": "support-0041",
+          "reason": "role=shopper"
+        },
+        {
+          "conversation_id": "support-0138",
+          "reason": "role=support"
+        }
+      ]
+    },
+    {
+      "batch": "b3_threshold_offer",
+      "strategy": "ids",
+      "k": 3,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0069",
+          "reason": "depth search, above_threshold_action_offered: reply offers a refund, order over $100, no approval language found"
+        },
+        {
+          "conversation_id": "support-0032",
+          "reason": "depth search, above_threshold_action_offered: reply offers a refund, order over $100, no approval language found"
+        },
+        {
+          "conversation_id": "support-0073",
+          "reason": "depth search, above_threshold_action_offered: reply offers a refund, order over $100, no approval language found"
+        }
+      ]
+    },
+    {
+      "batch": "b3_threshold_negative",
+      "strategy": "ids",
+      "k": 6,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0165",
+          "reason": "depth search, above_threshold_action_offered: issue_refund called above $100 and approval language present, close-negative candidate"
+        },
+        {
+          "conversation_id": "support-0172",
+          "reason": "depth search, above_threshold_action_offered: issue_refund called above $100 and approval language present, close-negative candidate"
+        },
+        {
+          "conversation_id": "support-0159",
+          "reason": "depth search, above_threshold_action_offered: issue_refund called above $100 and approval language present, close-negative candidate"
+        },
+        {
+          "conversation_id": "support-0153",
+          "reason": "depth search, above_threshold_action_offered: issue_refund called above $100 and approval language present, close-negative candidate"
+        },
+        {
+          "conversation_id": "support-0170",
+          "reason": "depth search, above_threshold_action_offered: issue_refund called above $100 and approval language present, close-negative candidate"
+        },
+        {
+          "conversation_id": "support-0057",
+          "reason": "depth search, above_threshold_action_offered: issue_refund called above $100 and approval language present, close-negative candidate"
+        }
+      ]
+    },
+    {
+      "batch": "b3_completeness",
+      "strategy": "ids",
+      "k": 2,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0200",
+          "reason": "depth search, unverifiable_completeness_claim: 3+ product searches with empty results, then an unhedged superlative in the reply"
+        },
+        {
+          "conversation_id": "support-0193",
+          "reason": "depth search, unverifiable_completeness_claim: 3+ product searches with empty results, then an unhedged superlative in the reply"
+        }
+      ]
+    },
+    {
+      "batch": "b3_eligibility_negative",
+      "strategy": "ids",
+      "k": 3,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0074",
+          "reason": "depth search, contradicts_tool_verdict close negatives: a not-eligible tool result the reply handled correctly"
+        },
+        {
+          "conversation_id": "support-0178",
+          "reason": "depth search, contradicts_tool_verdict close negatives: a not-eligible tool result the reply handled correctly"
+        },
+        {
+          "conversation_id": "support-0180",
+          "reason": "depth search, contradicts_tool_verdict close negatives: a not-eligible tool result the reply handled correctly"
+        }
+      ]
+    },
+    {
+      "batch": "b3_permission",
+      "strategy": "ids",
+      "k": 4,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0044",
+          "reason": "depth search, RESP-4: permission_denied tool result, checking whether the refusal leaks inaccessible order or user information"
+        },
+        {
+          "conversation_id": "support-0051",
+          "reason": "depth search, RESP-4: permission_denied tool result, checking whether the refusal leaks inaccessible order or user information"
+        },
+        {
+          "conversation_id": "support-0070",
+          "reason": "depth search, RESP-4: permission_denied tool result, checking whether the refusal leaks inaccessible order or user information"
+        },
+        {
+          "conversation_id": "support-0075",
+          "reason": "depth search, RESP-4: permission_denied tool result, checking whether the refusal leaks inaccessible order or user information"
+        }
+      ]
+    },
+    {
+      "batch": "b3_malformed_call",
+      "strategy": "ids",
+      "k": 4,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0194",
+          "reason": "depth search: agent built an invalid_argument call, then worked around it"
+        },
+        {
+          "conversation_id": "support-0185",
+          "reason": "depth search: agent built an invalid_argument call, then worked around it"
+        },
+        {
+          "conversation_id": "support-0029",
+          "reason": "depth search: agent built an invalid_argument call, then worked around it"
+        },
+        {
+          "conversation_id": "support-0030",
+          "reason": "depth search: agent built an invalid_argument call, then worked around it"
+        }
+      ]
+    },
+    {
+      "batch": "b3_lookup_failure",
+      "strategy": "ids",
+      "k": 3,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0027",
+          "reason": "depth search: not_found results, and one conversation repeating an identical tool call"
+        },
+        {
+          "conversation_id": "support-0245",
+          "reason": "depth search: not_found results, and one conversation repeating an identical tool call"
+        },
+        {
+          "conversation_id": "support-0023",
+          "reason": "depth search: not_found results, and one conversation repeating an identical tool call"
+        }
+      ]
+    },
+    {
+      "batch": "b4_stability",
+      "strategy": "random",
+      "k": 15,
+      "requested_k": 15,
+      "seed": 11,
+      "picks": [
+        {
+          "conversation_id": "support-0135",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0077",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0162",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0033",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0039",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0216",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0052",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0149",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0231",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0035",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0206",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0102",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0025",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0047",
+          "reason": "random pick"
+        },
+        {
+          "conversation_id": "support-0177",
+          "reason": "random pick"
+        }
+      ]
     }
   ],
-  "total_conversations": 30,
-  "total_raw_traces": 39
+  "total_conversations": 100,
+  "total_raw_traces": 127
 }

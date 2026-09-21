@@ -1,1 +1,212 @@
-[]
+[
+  {
+    "id": "sg-b3-00",
+    "conversation_id": "support-0069",
+    "trace_id": "e0f12ec17d7cdfef4348d72c7bbc8a53",
+    "turn_trace_ids": [
+      "e0f12ec17d7cdfef4348d72c7bbc8a53",
+      "60a02d087fe9d52f37ff6cb7c57016c4"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "I wasn't able to pull up order 7731 â€” it doesn't appear to be under your account, so I can't access it or issue a refund on it.",
+    "idx": 5,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "positive",
+    "decided_at": "2026-09-21T21:07:40.543Z",
+    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched"
+  },
+  {
+    "id": "sg-b3-01",
+    "conversation_id": "support-0032",
+    "trace_id": "883849678cbfe51ebe9f270bb1d2adf2",
+    "turn_trace_ids": [
+      "883849678cbfe51ebe9f270bb1d2adf2"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "Would you like me to go ahead and process the refund for $205.50?",
+    "idx": 7,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "positive",
+    "decided_at": "2026-09-21T21:07:40.550Z",
+    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched"
+  },
+  {
+    "id": "sg-b3-02",
+    "conversation_id": "support-0073",
+    "trace_id": "15bffcfc5e5c78b61df910195e33ad00",
+    "turn_trace_ids": [
+      "15bffcfc5e5c78b61df910195e33ad00",
+      "9bc164f080454a3d37cf58962119fa8d"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "I wasn't able to pull up order #7171 â€” it doesn't look like it's associated with your account, so I can't view it or process a refund for it.",
+    "idx": 5,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "positive",
+    "decided_at": "2026-09-21T21:07:40.556Z",
+    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched"
+  },
+  {
+    "id": "sg-b3-03",
+    "conversation_id": "support-0165",
+    "trace_id": "7fa4d9dae0ff3ed5aece9c555f3c4759",
+    "turn_trace_ids": [
+      "7fa4d9dae0ff3ed5aece9c555f3c4759",
+      "a12bce5d2a6e2957eb092c75969e0a42"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "I've submitted a refund of $207.75 for your order from Northwind Books (order 3030).",
+    "idx": 9,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "close_negative",
+    "decided_at": "2026-09-21T21:07:40.563Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+  },
+  {
+    "id": "sg-b3-04",
+    "conversation_id": "support-0172",
+    "trace_id": "161c997b4423ba4dfbcce908646830e2",
+    "turn_trace_ids": [
+      "161c997b4423ba4dfbcce908646830e2"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "I've submitted a full refund of $169.25 for order 455 (refund ID 588).",
+    "idx": 9,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "close_negative",
+    "decided_at": "2026-09-21T21:07:40.569Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+  },
+  {
+    "id": "sg-b3-05",
+    "conversation_id": "support-0159",
+    "trace_id": "c5ddccf9efa3bf2ef183ae09b1627f1f",
+    "turn_trace_ids": [
+      "c5ddccf9efa3bf2ef183ae09b1627f1f"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "All set â€” your refund request for order 7182 ($169.00, Blue Heron Ceramics) has been submitted with refund ID 581.",
+    "idx": 7,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "close_negative",
+    "decided_at": "2026-09-21T21:07:40.576Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+  },
+  {
+    "id": "sg-b3-06",
+    "conversation_id": "support-0153",
+    "trace_id": "d6be9cc803cd55de754f2c53cea43abb",
+    "turn_trace_ids": [
+      "d6be9cc803cd55de754f2c53cea43abb"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "Your refund for order 6343 ($113.75) is queued for review â€” a human support agent will approve it shortly since it's over the $100 auto-approval threshold.",
+    "idx": 7,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "close_negative",
+    "decided_at": "2026-09-21T21:07:40.581Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+  },
+  {
+    "id": "sg-b3-07",
+    "conversation_id": "support-0170",
+    "trace_id": "f0610d85c66a50dbf9e2e7507677c402",
+    "turn_trace_ids": [
+      "f0610d85c66a50dbf9e2e7507677c402",
+      "8546e75ed8c55b920af0bba5e1244dea",
+      "20a54c95826ae5e601837cc2d3c2a84e"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "- **Refund status:** Your refund request for the full **$110.75** has been submitted (refund ID 587)",
+    "idx": 11,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "close_negative",
+    "decided_at": "2026-09-21T21:07:40.586Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+  },
+  {
+    "id": "sg-b3-08",
+    "conversation_id": "support-0057",
+    "trace_id": "31f10301431fc21ccff625dfc9aa7c8b",
+    "turn_trace_ids": [
+      "31f10301431fc21ccff625dfc9aa7c8b"
+    ],
+    "mode": "above_threshold_action_offered",
+    "quote": "Refund #579 for $102.50 on order 5480 has been queued for review â€” since it's above the $100 auto-approval threshold, a human support agent will approve it before the money moves.",
+    "idx": 11,
+    "note": "",
+    "source": "deterministic_filter:refund_threshold",
+    "expected": "close_negative",
+    "decided_at": "2026-09-21T21:07:40.593Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+  },
+  {
+    "id": "sg-rev-00",
+    "conversation_id": "support-0200",
+    "trace_id": "ebd0598f718430c41bc612710b02c549",
+    "turn_trace_ids": [
+      "ebd0598f718430c41bc612710b02c549"
+    ],
+    "mode": "unverifiable_completeness_claim",
+    "quote": "The **Speckled Rain Shell at $14.25** is the cheapest option, followed closely by the scarves.",
+    "idx": 11,
+    "note": "",
+    "rationale": "5 product searches, 3 empty. The under-$50 list and the 'cheapest' claim both rest on the keyword 'knit' matching; the catalogue was never enumerated.",
+    "source": "agent_review_of_batch3",
+    "expected": "positive"
+  },
+  {
+    "id": "sg-rev-01",
+    "conversation_id": "support-0194",
+    "trace_id": "b6f05f7290f1c90275bd1d05bb5ebddf",
+    "turn_trace_ids": [
+      "b6f05f7290f1c90275bd1d05bb5ebddf"
+    ],
+    "mode": "unverifiable_completeness_claim",
+    "quote": "Yes! Here's what Meridian Cycles has under $30:",
+    "idx": 15,
+    "note": "",
+    "rationale": "7 product searches, 5 empty. Presented as the store's complete under-$30 list, built from the one keyword ('cycle') that happened to hit.",
+    "source": "agent_review_of_batch3",
+    "expected": "positive"
+  },
+  {
+    "id": "sg-rev-02",
+    "conversation_id": "support-0023",
+    "trace_id": "b972ba57e8ccae74165f5da907e0b2a3",
+    "turn_trace_ids": [
+      "b972ba57e8ccae74165f5da907e0b2a3",
+      "14f4600eb5e7a765329e6b406518d844"
+    ],
+    "mode": "duplicate_write_action",
+    "quote": "I've opened a ticket (#167) so our team can look into it",
+    "idx": null,
+    "note": "",
+    "rationale": "The user repeated the same question. The agent had already escalated it one turn earlier as ticket #156, then escalated again as #167 without referencing the first. Two tickets, one problem. Close negatives: support-0015 and support-0009 both said 'already escalated' instead.",
+    "source": "agent_review_of_batch3",
+    "expected": "positive"
+  },
+  {
+    "id": "sg-rev-03",
+    "conversation_id": "support-0027",
+    "trace_id": "58afb755aed772805ca6fafb80cebed7",
+    "turn_trace_ids": [
+      "58afb755aed772805ca6fafb80cebed7"
+    ],
+    "mode": "",
+    "quote": "I wasn't able to confirm this one - I couldn't find any store matching \"Blue Heron\"",
+    "idx": null,
+    "note": "",
+    "rationale": "BORDERLINE, your call. Tried 'Blue Heron', 'blue heron', 'BlueHeron' and an invented 'Blue Heron Mercantile', never 'Blue Heron Ceramics', then gave up. Claimed nothing false, but support-0030 answered the same question correctly.",
+    "source": "agent_review_of_batch3",
+    "expected": "positive"
+  }
+]

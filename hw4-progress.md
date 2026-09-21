@@ -1,18 +1,20 @@
 # HW4 progress
 
-Last updated: 2026-09-19. Branch `hw-4`. Steps 0 to 3 DONE (preparation,
-stock-view review, layout proposal, interface fork). Part A complete, including the
+Last updated: 2026-09-21. Branch `hw-4`. Part A complete. Steps 0 to 3 DONE
+(preparation, stock-view review, layout proposal, interface fork), including the
 verified Langfuse score write.
 
-**Step 4 (Part B, open coding) is IN PROGRESS and PAUSED.** Batch 1 is built
-(30 conversations) and 1 of those 30 is open-coded. Nothing is running: the review
-app server was stopped deliberately and the Docker/Langfuse stack is down. No
-volume was destroyed.
+**Part B (open coding) is IN PROGRESS.** All four batches are built — 100
+conversations, 127 raw traces — and **60 of 100 are reviewed**. Six failure modes
+are drafted, two confirmed. `SPEC.md` has been revised (RESP-6). Part C has not
+started.
 
-The blocker that stopped the previous pause is **resolved**: the interface now has
-a "No failure observed" control. All three questions left open at that pause were
-settled by the student on 2026-09-19 (see "Settled 2026-09-19"). **Open coding can
-resume immediately** — start the server and read, nothing else is in the way.
+**Start here tomorrow: 40 conversations to review and 13 suggestions to decide.**
+See "Session 2026-09-21" at the end of this file for the exact list and the
+recommended verdict on each.
+
+Nothing is running. The review server was stopped at the end of the session and
+the Docker/Langfuse stack is down. No volume was destroyed.
 
 Working style: student drives. The agent proposes each step in plain language
 and waits for an explicit "go" before running or changing anything. Every
@@ -428,3 +430,225 @@ proceeds.
 6. One relationship between a mode and `SPEC.md` — pending (Step 6).
 7. The number of new modes found in the final 15 reviewed traces — pending
    (Step 7).
+
+---
+
+# Session 2026-09-21
+
+## State at the end of the session
+
+| | |
+| --- | --- |
+| Sample | **100 conversations, 127 raw traces** (all four batches built) |
+| Reviewed | **60 of 100** |
+| Annotations | 61 (21 open codes, 39 clean) |
+| Suggestions | 13, **all pending** |
+| Failure modes | **6** (2 confirmed, 4 candidate) |
+| `SPEC.md` | revised, **RESP-6** added |
+| Part C | not started |
+
+Uncommitted: `SPEC.md`, `analysis/state/{annotations,patterns,samples,sample_manifest,suggestions}.json`.
+
+## START HERE
+
+### 1. Start the server, then do not let the agent POST while the tab is open
+
+```bash
+uv run python analysis/review_app/server.py --port 8021 --no-langfuse
+```
+
+**Workflow hazard found the hard way.** Late in the session the agent POSTed to
+`/api/annotations` and `/api/suggestions` while the student's browser tab was
+open. The page polls and replaces its state from the server, so a round of queue
+work (13 accept/dismiss decisions plus 12 clean marks) was lost. Newest saved
+annotation is `2026-09-21T20:07:46Z`; the file was rewritten by the agent at
+23:15 local.
+
+Rule for the rest of the assignment: **the agent does not write to the API while
+the student is working in the browser.** Either the student closes the tab first,
+or the agent waits. After any agent write, hard-reload before clicking anything.
+
+### 2. Decide the 13 pending suggestions
+
+The agent read all 25 batch-3 conversations. Its recommendation per suggestion —
+the decision is the student's:
+
+| Suggestion | Conversation | Agent's read |
+| --- | --- | --- |
+| sg-b3-01 | support-0032 | **Accept.** $205.50, "go ahead and process the refund", no approval mentioned |
+| sg-rev-00 | support-0200 | **Accept.** "the cheapest option" off a keyword match |
+| sg-rev-01 | support-0194 | **Accept.** "here's what Meridian Cycles has under $30" off one keyword |
+| sg-rev-02 | support-0023 | **Accept.** escalated the same glitch twice, tickets #156 and #167 |
+| sg-b3-00 | support-0069 | **Dismiss.** permission denial, not a refund offer |
+| sg-b3-02 | support-0073 | **Dismiss.** permission denial, not a refund offer |
+| sg-b3-03..08 | 0165 0172 0159 0153 0170 0057 | **Dismiss.** all six said "queued for human review" |
+| sg-rev-03 | support-0027 | **Student's call.** gave up on a findable store; support-0030 answered the same question |
+
+At least one dismissal is a hard requirement of the handout. The 0069/0073 pair is
+also the natural video answer for "a rejected search suggestion and the boundary
+excluding it" — a refusal to act is not an offer to act.
+
+### 3. Review the remaining 40
+
+**25 from batch 3.** The agent read all of these; its verdict in brackets.
+
+- `0044 0051 0070 0075` [clean] permission refusals, none leak anything. **RESP-4 holds** — checked deliberately, no sixth mode here.
+- `0178 0180` [clean] correctly refuse post-shipment cancellation, cite cw-cancellations + cw-returns.
+- `0074` [clean] correctly refuses a 215-day-old order.
+- `0185 0030` [clean] honest about the broken catalogue data.
+- `0193` [clean] hedges its keyword search; the close negative that pairs with `0200`.
+- `0245` [clean] answers from cw-payouts.
+- `0029` [**likely Fail**] volunteers order #8770's dates and total unasked — same shape as `0026`. Under RESP-6 this is a positive. The agent first called it clean and corrected itself once RESP-6 was written; treat it as a positive.
+- the 9 in the suggestion queue, above.
+
+**15 from batch 4 (`b4_stability`), review these LAST.** Their only job is to answer
+"does a genuinely new mode still appear?". Read them without hunting for the six
+known modes. The count of new consequential modes goes in `review_summary.md` and
+the video.
+
+`0135 0077 0162 0033 0039 0216 0052 0149 0231 0035 0206 0102 0025 0047 0177`
+
+## The taxonomy
+
+| Mode | Pos | Neg | Requirement | Evaluator |
+| --- | ---: | ---: | --- | --- |
+| `unrequested_information` | 5 | 3 | **RESP-6** (new) | LLM judge |
+| `unsupported_policy_claim` | 3 | 3 | RESP-1, RESP-3 | LLM judge |
+| `contradicts_tool_verdict` | 2 | 4 | RESP-3 | LLM judge |
+| `above_threshold_action_offered` | 1 | 3 | ESC-1, AUTH-1 | hybrid |
+| `unverifiable_completeness_claim` | 1 | 2 | RESP-3 | LLM judge |
+| `duplicate_write_action` | 1 | 2 | **none — spec gap** | hybrid |
+
+Every mode carries a binary `decision_rule`, close negatives drawn from real
+traces, a `boundary_vs_nearest`, and a `likely_evaluator`, all in `patterns.json`.
+
+Positive counts for the bottom four are low only because the queue decisions have
+not landed. Accepting the four recommended suggestions takes
+`above_threshold_action_offered` to 2, `unverifiable_completeness_claim` to 3, and
+confirms `duplicate_write_action`'s single positive.
+
+### Taxonomy revision to write up (handout requires one)
+
+`fabricated_policy_citation` and `missing_policy_citation` were **merged** into
+`unsupported_policy_claim`. Merge test: one product change — "every policy claim
+must carry an identifier that resolves to a tool result in the same conversation" —
+fixes both `support-0151` (invented `store-northwind-books-policy`) and
+`support-0004` (named the shipping policy with no id). Recorded in the mode's
+`merged_from` and `merge_reason`.
+
+### The SPEC.md revision (handout requires it documented)
+
+**RESP-6**, added to section 6 on 2026-09-21:
+
+> Answer the question asked. Do not volunteer order facts, sales history,
+> eligibility status, or policy detail the user did not request. Offering a
+> clearly labelled next step is permitted; stating additional facts about the
+> order or catalogue is not.
+
+Motivating annotation: `a1789840564485632` (`support-0084` — shopper asked to list
+an order, reply volunteered refund-eligibility). The third sentence is load
+bearing: without it, closing offers like `support-0116`'s "Want me to pull up more
+details?" become violations, and since nearly every reply ends with one the mode
+would fire everywhere and discriminate nothing.
+
+`duplicate_write_action` has the same gap and no requirement yet. Either write a
+second rule or drop the mode — five still clears the handout's 5-to-8 minimum.
+Decide after batch 4, in case more instances appear.
+
+## Batches, and why each was selected
+
+| Batch | n | Selection |
+| --- | ---: | --- |
+| `b1_uniform` | 15 | random, seed 7 |
+| `b1_cluster` | 15 | diversity, seed 7 |
+| `b2_role` | 30 | balanced across role, 10/10/10 — dimension chosen before looking at outcomes |
+| `b3_threshold_offer` | 3 | filter: refund offered, order over $100, no approval language |
+| `b3_threshold_negative` | 6 | filter: `issue_refund` above $100 with approval language — close negatives |
+| `b3_completeness` | 2 | filter: 3+ product searches with empty results, then an unhedged superlative |
+| `b3_eligibility_negative` | 3 | filter: not-eligible tool result the reply handled correctly |
+| `b3_permission` | 4 | filter: `permission_denied` — RESP-4 check |
+| `b3_malformed_call` | 4 | filter: `invalid_argument` the agent worked around |
+| `b3_lookup_failure` | 3 | filter: `not_found`, and one repeated identical call |
+| `b4_stability` | 15 | random, seed 11 |
+
+Population is 250 conversations; the role split is shopper 149 / merchant 58 /
+support 43, and only 35 conversations call a write tool.
+
+## What the searches actually taught us
+
+Worth a line in `review_summary.md`, and honest:
+
+- **Retrieval filters were wrong more often than right.** Of 3 predicted
+  `above_threshold` positives, 1 survived reading. Of 3 predicted
+  `contradicts_tool_verdict` positives, **0** survived. Two agent filter bugs were
+  caught by reading traces: `json.loads` on an already-parsed dict silently
+  returned "0 candidates" when the truth was 64; and `refund_eligible: false` was
+  treated as one signal when it has two unrelated causes (window expired vs. not
+  yet delivered).
+- **The modes are rare.** Roughly 1-2 genuine positives per targeted search across
+  ~180 conversations. Real signal, not search failure.
+- **Review bar drifted mid-assignment.** Batch 1 produced 16 open codes from 28
+  conversations; batch 2 produced 2 from 28. A 6-trace random spot-check of batch 2's
+  clean marks found 2 plausible misses, both the same bug shape already coded in
+  batch 1. Partly a real difference (batch 1 was half cluster representatives),
+  partly a bar that tightened after five batch-1 codes were pushed back on. Worth
+  stating plainly in the summary.
+
+## Consequences for HW5
+
+HW5 needs **>=30 Pass and >=30 Fail labels per mode**. Current positives are 1-5.
+Expect to synthetically generate scenarios targeting each mode, as the handout's
+prep section allows. The crisp `decision_rule` on each mode makes that generation
+much easier — that is what those rules are for.
+
+## Deliverable checklist
+
+- [x] Review interface code under `analysis/review_app/`
+- [x] `analysis/state/sample_manifest.json` (100 conversations, 11 batches, each with its selection reason)
+- [~] `analysis/state/annotations.json` (61; 40 conversations still unreviewed)
+- [x] `analysis/state/patterns.json` (6 modes)
+- [ ] `analysis/state/suggestions.json` — 13 present but **all pending**; needs >=1 recorded rejection
+- [ ] One label file per final mode under `analysis/state/labels/` (Part E)
+- [ ] `analysis/report/review_summary.md`
+- [ ] `analysis/report/workshop_notes.md` (Part C)
+- [x] `analysis/report/interface_comparison.md`
+- [x] `SPEC.md` revision (RESP-6) with its motivating annotation identified
+- [ ] Video (student's own work)
+
+**Leftover from the earlier session, still unresolved:** `analysis/state/labels/`
+holds the course's demo file `unsupported_policy_claim.jsonl`. It is shipped sample
+data, not student work, and the mode name now collides with a real student mode.
+Delete or move it before Part E writes labels.
+
+## Part C, when it is reached
+
+Decided: **do Part C** (it is optional on upstream `main`, commit `f3fbacb`, but the
+student chose to do it). Plan agreed, nothing executed:
+
+1. Commit the analysis state first, so anything Workshop changes is revertible.
+2. Fetch Workshop's current install instructions (read-only) and review before installing.
+3. Show exactly what `/instrument-agent` will change **before** it runs. The handout
+   requires preserving the existing OpenTelemetry and Langfuse instrumentation
+   (`observability/instrument.py`, `agent/cli.py:128`, `server/app.py:190`), and
+   those traces are the basis of both HW4 and HW5.
+4. Pick 5-10 runs spanning roles and tools, biased toward write tools.
+5. Draft `analysis/report/workshop_notes.md`.
+
+Three approvals needed before anything happens: installing third-party software,
+letting `/instrument-agent` modify agent code, and spending real API credit
+(`replay/` makes live model calls).
+
+Note for `review_summary.md`: Part C will have run at 60-100 conversations reviewed
+rather than strictly after open coding. Record the sequence honestly.
+
+## Notes carried forward
+
+- Grouping key is `cartwheel.scenario_id`, not `cartwheel.session_id` — see
+  "Deviation from the handout" above. Unchanged.
+- "100 traces" is counted as **100 conversations** (127 raw traces). State the
+  convention in `review_summary.md`.
+- Reading state files in Python on this machine needs `encoding='utf-8'` and
+  `PYTHONIOENCODING=utf-8`; the default cp1252 now fails on annotation text.
+- Backups from the suggestion reset live in the session temp dir
+  (`annotations.pre-fix.json`, `suggestions.pre-fix.json`, `patterns.backup.json`)
+  and will not survive a reboot — ignore them if gone.

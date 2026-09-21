@@ -134,3 +134,7 @@ Requirements that do not fit in the sections above, including tone and style gui
 - **RESP-3.** State when required information is missing or inconsistent, rather than inventing a value.
 - **RESP-4.** Explain refusals and escalations without revealing inaccessible order or user information.
 - **RESP-5.** Use direct and respectful language that explains the relevant decision.
+- **RESP-6.** Answer the question asked. Do not volunteer order facts, sales history,
+  eligibility status, or policy detail the user did not request. Offering a clearly
+  labelled next step is permitted; stating additional facts about the order or catalogue
+  is not.

@@ -7,5 +7,584 @@
     "idx": 5,
     "note": "Too much details. The shopper only asked to list the order, not asking about refund.",
     "ts": "2026-09-19T17:56:04.485Z"
+  },
+  {
+    "id": "a1789999298826311",
+    "conversation_id": "support-0244",
+    "trace_id": "9505f691615626263e8aacda78cdb576",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T14:01:38.826Z"
+  },
+  {
+    "id": "a1790000148624581",
+    "conversation_id": "support-0040",
+    "trace_id": "d44fcef289de9a92d365d1e9fa99d0ba",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T14:15:48.624Z"
+  },
+  {
+    "id": "a1790000384388674",
+    "conversation_id": "support-0103",
+    "trace_id": "b8c7ebdc6f7b159c98be9ee76d62989d",
+    "quote": "cw-shipping",
+    "idx": 7,
+    "note": "cw_shipping does note exist",
+    "ts": "2026-09-21T14:19:44.388Z"
+  },
+  {
+    "id": "a1790000889278531",
+    "conversation_id": "support-0168",
+    "trace_id": "59589ce2d19bf1a0b16f0d114e0ef997",
+    "quote": "Done! The refund on order 2056 went through.",
+    "idx": 11,
+    "note": "It doesn't say whether the order has exceed the 30 days delivery window",
+    "ts": "2026-09-21T14:28:09.278Z"
+  },
+  {
+    "id": "a1790001038780814",
+    "conversation_id": "support-0020",
+    "trace_id": "cbf125595de863a8a851bd307d02a961",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T14:30:38.780Z"
+  },
+  {
+    "id": "a1790001157579783",
+    "conversation_id": "support-0212",
+    "trace_id": "abdb4a1e7d56bc77e0560edd555b26cf",
+    "quote": "The help center is also where all our other policy pages live (returns, refunds, store overrides, and so on), and I cite the policy id behind anything I tell you, so you can always look up the source yourself.",
+    "idx": 7,
+    "note": "Too much info. The shopper does not ask for other policy",
+    "ts": "2026-09-21T14:32:37.579Z"
+  },
+  {
+    "id": "a1790001389968673",
+    "conversation_id": "support-0139",
+    "trace_id": "77fc20371078dd6cce1e5f3eb8eae7f1",
+    "quote": "Good news — yes, order 2910 should still be within its return window.",
+    "idx": 9,
+    "note": "The answer does not state the policy name called in tool_call (cw_returns, cw_refunds",
+    "ts": "2026-09-21T14:36:29.968Z"
+  },
+  {
+    "id": "a1790001543919264",
+    "conversation_id": "support-0026",
+    "trace_id": "40fad7da75e3b00d891d35c40bdad33a",
+    "quote": "- Price: $9.75\n- Recent sale: Order #8770 (1 unit, delivered June 25, 2026)",
+    "idx": 11,
+    "note": "Too much info",
+    "ts": "2026-09-21T14:39:03.919Z"
+  },
+  {
+    "id": "a17900020273196",
+    "conversation_id": "support-0095",
+    "trace_id": "e46667a581386a17191535e372dce47d",
+    "quote": "not refund-eligible",
+    "idx": 5,
+    "note": "This claim is not grounded on any called tool",
+    "ts": "2026-09-21T14:47:07.319Z"
+  },
+  {
+    "id": "a1790002129450949",
+    "conversation_id": "support-0151",
+    "trace_id": "8338bdf1f2156de80f9bacb1ae133bb3",
+    "quote": "store-meridian-cycles-policy",
+    "idx": 2,
+    "note": "The agent retrieves an external store's policy",
+    "ts": "2026-09-21T14:48:49.450Z"
+  },
+  {
+    "id": "a1790002389258997",
+    "conversation_id": "support-0015",
+    "trace_id": "434d94f7a1a4a9c232378caff56cd580",
+    "quote": "buyer unhappy",
+    "idx": 17,
+    "note": "It is not a good practice to explicitly say that the buyer unhappy",
+    "ts": "2026-09-21T14:53:09.258Z"
+  },
+  {
+    "id": "a1790002521910211",
+    "conversation_id": "support-0234",
+    "trace_id": "153f495f5636baedc75efec486a17c75",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T14:55:21.910Z"
+  },
+  {
+    "id": "a179000265449590",
+    "conversation_id": "support-0131",
+    "trace_id": "2ce9f554e55a230403d3e5e1eba6c04d",
+    "quote": "Good news — yes, you can return it!",
+    "idx": 7,
+    "note": "claims successes but escalate the case to human.",
+    "ts": "2026-09-21T14:57:34.495Z"
+  },
+  {
+    "id": "a1790005292997498",
+    "conversation_id": "support-0187",
+    "trace_id": "2f15b6b3df6b63ab89ad60096057888f",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T15:41:32.997Z"
+  },
+  {
+    "id": "a1790005353161412",
+    "conversation_id": "support-0011",
+    "trace_id": "0229bc3c1b0f59cea612246d5eb222d2",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T15:42:33.161Z"
+  },
+  {
+    "id": "a1790005490164287",
+    "conversation_id": "support-0008",
+    "trace_id": "a11bfffeaa33c1daf97624dc2459dd5a",
+    "quote": "- Shipped: June 25, 2026\n- Delivered: June 23, 2026",
+    "idx": 3,
+    "note": "Date if delivery is smaller than date of shipped. Not possible",
+    "ts": "2026-09-21T15:44:50.165Z"
+  },
+  {
+    "id": "a1790005583701830",
+    "conversation_id": "support-0002",
+    "trace_id": "b0e229efc9588f29cb6d8d2857cf5d8a",
+    "quote": "\"policy_id\": \"cw-cancellations\",",
+    "idx": 4,
+    "note": "Why does cw-cancellation came out as the higherst tool result cw-returns should be the tool with the highest score",
+    "ts": "2026-09-21T15:46:23.701Z"
+  },
+  {
+    "id": "a1790006808799791",
+    "conversation_id": "support-0001",
+    "trace_id": "63a08965c94da8f81f655330591b7283",
+    "quote": "- It's also running late. It was expected to arrive by June 27 and is now 4 days past that (as of today, July 1). Standard delivery is supposed to take up to 7 days in transit, and yours has been traveling for 11 (cw-shipping).",
+    "idx": 11,
+    "note": "the agent does not need to do analysis. Simply give the fact.",
+    "ts": "2026-09-21T16:06:48.799Z"
+  },
+  {
+    "id": "a1790007190024744",
+    "conversation_id": "support-0021",
+    "trace_id": "f503aafcc78cf02a2ee65185d76cf719",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:13:10.024Z"
+  },
+  {
+    "id": "a179000721035793",
+    "conversation_id": "support-0017",
+    "trace_id": "72a5828b65517d75916b77598e4b46eb",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:13:30.357Z"
+  },
+  {
+    "id": "a1790007263161357",
+    "conversation_id": "support-0004",
+    "trace_id": "26c623caeeb59f53658385572d41be06",
+    "quote": "w-returns",
+    "idx": 9,
+    "note": "cw-shipping policy was not cited in the response",
+    "ts": "2026-09-21T16:14:23.161Z"
+  },
+  {
+    "id": "a179000731874673",
+    "conversation_id": "support-0003",
+    "trace_id": "79a7b0b9153bfb2b6fa64f992d5355eb",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:15:18.746Z"
+  },
+  {
+    "id": "a1790007403786883",
+    "conversation_id": "support-0214",
+    "trace_id": "2adeb6190b5a599fe7df3c835cfec420",
+    "quote": "The platform enforces these limits in its systems, so there's no way around them — even support assistants can't grant exceptions.",
+    "idx": 7,
+    "note": "should escalate to human if there are unresolved issues",
+    "ts": "2026-09-21T16:16:43.786Z"
+  },
+  {
+    "id": "a179000741411863",
+    "conversation_id": "support-0222",
+    "trace_id": "2250fce9caa2b57b183e0a9d07b50138",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:16:54.118Z"
+  },
+  {
+    "id": "a1790007415647316",
+    "conversation_id": "support-0233",
+    "trace_id": "fa6baec8aa81425b5e57488ae3253b89",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:16:55.647Z"
+  },
+  {
+    "id": "a1790007417072140",
+    "conversation_id": "support-0141",
+    "trace_id": "1fa13d70b6219ad9a00671990ed81ed4",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:16:57.072Z"
+  },
+  {
+    "id": "a1790007466109118",
+    "conversation_id": "support-0116",
+    "trace_id": "8ba170536299e64fdf5020c5e1ff633a",
+    "quote": "Want me to pull up more details on order #6427 or check its return eligibility?",
+    "idx": 7,
+    "note": "No need to offer for details when not asked",
+    "ts": "2026-09-21T16:17:46.109Z"
+  },
+  {
+    "id": "a1790008806118980",
+    "conversation_id": "support-0049",
+    "trace_id": "9903190a6847dbd40d187147c89f283f",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:40:06.118Z"
+  },
+  {
+    "id": "a1790008872047263",
+    "conversation_id": "support-0068",
+    "trace_id": "c73dd06a04ca5e304c594b021d9fac6b",
+    "quote": "🙂",
+    "idx": 5,
+    "note": "no emoticon. keep the answer formal.",
+    "ts": "2026-09-21T16:41:12.047Z"
+  },
+  {
+    "id": "a1790008894776228",
+    "conversation_id": "support-0152",
+    "trace_id": "13df81e0d471077511c8ff0857fd656d",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:41:34.776Z"
+  },
+  {
+    "id": "a179000889585713",
+    "conversation_id": "support-0096",
+    "trace_id": "488f5dc29def362f39202576106ad12e",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:41:35.857Z"
+  },
+  {
+    "id": "a179000889857935",
+    "conversation_id": "support-0060",
+    "trace_id": "7fcdf3a22fb9cb9123d33b71019e47c6",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:41:38.579Z"
+  },
+  {
+    "id": "a1790008916204731",
+    "conversation_id": "support-0066",
+    "trace_id": "182dacb80a5c41a0f538f00463608fe2",
+    "quote": "Happy to help! To get started, could you share a bit more:",
+    "idx": 1,
+    "note": "no tool_call or other details",
+    "ts": "2026-09-21T16:41:56.204Z"
+  },
+  {
+    "id": "a1790008925302498",
+    "conversation_id": "support-0050",
+    "trace_id": "db0396b999bec89f686584661f6ef43e",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:05.302Z"
+  },
+  {
+    "id": "a1790008926314867",
+    "conversation_id": "support-0133",
+    "trace_id": "4734e1ca7ac7a70ff16054155038ba57",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:06.314Z"
+  },
+  {
+    "id": "a1790008927410595",
+    "conversation_id": "support-0201",
+    "trace_id": "a6a55ea6cff224b41aabec45844e2c72",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:07.410Z"
+  },
+  {
+    "id": "a1790008928309227",
+    "conversation_id": "support-0097",
+    "trace_id": "bc02d45d94588369f2c5f4037925bce4",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:08.309Z"
+  },
+  {
+    "id": "a1790008929088835",
+    "conversation_id": "support-0078",
+    "trace_id": "4df29d1afb95df0e807259530813fd99",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:09.088Z"
+  },
+  {
+    "id": "a1790008930139775",
+    "conversation_id": "support-0012",
+    "trace_id": "4607cc1b732a8d6a5439b1cebaac5bc7",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:10.139Z"
+  },
+  {
+    "id": "a1790008932164996",
+    "conversation_id": "support-0196",
+    "trace_id": "c464cdec7736907acb4db66a474f735b",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:12.164Z"
+  },
+  {
+    "id": "a1790008932997622",
+    "conversation_id": "support-0056",
+    "trace_id": "db9e42e7aa460d20167ee606b38e463d",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:12.997Z"
+  },
+  {
+    "id": "a1790008935082234",
+    "conversation_id": "support-0093",
+    "trace_id": "9b6aaf2cc00847b8fe60501de5ae2675",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:15.082Z"
+  },
+  {
+    "id": "a1790008936050435",
+    "conversation_id": "support-0080",
+    "trace_id": "11ad0f885184ab9f95de87d3682b6836",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:16.050Z"
+  },
+  {
+    "id": "a1790008937512976",
+    "conversation_id": "support-0202",
+    "trace_id": "cf975bd98facd23e287903ce17baaf79",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:17.512Z"
+  },
+  {
+    "id": "a1790008938403998",
+    "conversation_id": "support-0090",
+    "trace_id": "d60813603acfcc4da3c71f13f28265ce",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:18.403Z"
+  },
+  {
+    "id": "a1790008939273316",
+    "conversation_id": "support-0160",
+    "trace_id": "3d65f5395d52ca1bf7a342b35d9391b0",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:19.273Z"
+  },
+  {
+    "id": "a1790008940131756",
+    "conversation_id": "support-0120",
+    "trace_id": "f8ea6e92d1dfbc499e7f4faaeff60b00",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:20.131Z"
+  },
+  {
+    "id": "a1790008941907503",
+    "conversation_id": "support-0166",
+    "trace_id": "1ad2909a8a66bf7e7def1eb207f81428",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:21.907Z"
+  },
+  {
+    "id": "a1790008943100764",
+    "conversation_id": "support-0054",
+    "trace_id": "850bc860eb6fb17f04eeed9a647ed663",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:23.100Z"
+  },
+  {
+    "id": "a1790008944165363",
+    "conversation_id": "support-0225",
+    "trace_id": "195078c616120aa29b7fefa2bbd6423c",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:24.165Z"
+  },
+  {
+    "id": "a1790008947021731",
+    "conversation_id": "support-0042",
+    "trace_id": "325feaaa08649c39fb817765e1431c73",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:27.021Z"
+  },
+  {
+    "id": "a1790008948763981",
+    "conversation_id": "support-0100",
+    "trace_id": "284cade6df8843a11c21b8f9fa685125",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:28.763Z"
+  },
+  {
+    "id": "a1790008950472997",
+    "conversation_id": "support-0041",
+    "trace_id": "9295e3f4e8732ccf90559c9ff71eca3f",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:30.472Z"
+  },
+  {
+    "id": "a1790008952091493",
+    "conversation_id": "support-0138",
+    "trace_id": "073102ca1cf3a20713010fcbf38520d1",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T16:42:32.091Z"
+  },
+  {
+    "id": "a1790015673818894",
+    "conversation_id": "support-0220",
+    "trace_id": "ca46ecfc302e3aa8f0f4a2def24b5f01",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T18:34:33.818Z"
+  },
+  {
+    "id": "a1790015755433768",
+    "conversation_id": "support-0009",
+    "trace_id": "ccc8d56b2970d9866cd7dfffec5c3fb8",
+    "quote": "\"days_in_transit\": -2,",
+    "idx": 2,
+    "note": "Incorrect transit days",
+    "ts": "2026-09-21T18:35:55.433Z"
+  },
+  {
+    "id": "a1790016330998543",
+    "conversation_id": "support-0191",
+    "trace_id": "6e50dc1a4ea0f39e180010d70cf973c3",
+    "quote": "\"reason\": \"query must be non-empty.\"\n}",
+    "idx": 2,
+    "note": "Tool returns an error, empty query, while the user gave a valid question.",
+    "ts": "2026-09-21T18:45:30.998Z"
+  },
+  {
+    "id": "a1790017772681658",
+    "conversation_id": "support-0013",
+    "trace_id": "5effa7189e2ca0c701dfaf5f82647456",
+    "quote": null,
+    "idx": null,
+    "note": "no failure observed",
+    "source": "no_failure_observed",
+    "ts": "2026-09-21T19:09:32.681Z"
+  },
+  {
+    "id": "a1790020652538781",
+    "conversation_id": "support-0251",
+    "trace_id": "7fd57ec190166c1f4c0ad1d35e8582b5",
+    "quote": "- The other two \"Heavy-Duty Vase\" listings ($149.50 and $254.75) belong to a different store, so if your customer saw one of those prices, that's likely the source of any confusion.",
+    "idx": 5,
+    "note": "The agent give information about items from  in other store. Violates merchant permission.",
+    "ts": "2026-09-21T19:57:32.538Z"
+  },
+  {
+    "id": "a179002126614311",
+    "conversation_id": "support-0068",
+    "trace_id": "c73dd06a04ca5e304c594b021d9fac6b",
+    "quote": "full refund of $240",
+    "idx": 11,
+    "note": "Refund request with more that USD100 need to be escalated",
+    "ts": "2026-09-21T20:07:46.143Z"
   }
 ]
