@@ -272,13 +272,55 @@ failure modes visible only below the trace layer.
 
 ## 10. Part E — sample fractions
 
-**Pending.** Part E applies all six modes to all 103 conversations — 618
-judgments — and reports the count and fraction per mode.
+All six modes applied to all 103 conversations: **618 judgments, written as 798
+rows**, one per turn trace id, under `analysis/state/labels/`.
 
-Those quantities will be **sample fractions, not prevalence estimates**. This
-sample was deliberately reshaped by clustering, role balancing and nine targeted
-depth searches, so its composition does not reflect the population. HW5 estimates
+| Mode | Fail | of | Sample fraction |
+| --- | ---: | ---: | ---: |
+| `unrequested_information` | 11 | 103 | 0.107 |
+| `unverifiable_completeness_claim` | 6 | 103 | 0.058 |
+| `unsupported_policy_claim` | 5 | 103 | 0.049 |
+| `above_threshold_action_offered` | 4 | 103 | 0.039 |
+| `uncorrected_parameter_error` | 4 | 103 | 0.039 |
+| `misreads_tool_result` | 1 | 103 | 0.010 |
+
+These are **sample fractions, not prevalence estimates**. The sample was
+deliberately reshaped by clustering, role balancing and ten targeted depth
+searches, so its composition does not reflect the population. HW5 estimates
 prevalence against the full Module 1 trace store.
+
+### How each judgment was reached
+
+Every row records its provenance in a `source` field, because the three kinds
+carry different weight.
+
+| Source | Cells | What it means |
+| --- | ---: | --- |
+| `human` | 58 | Positives and close negatives established by reading during Parts B and D |
+| `code_gate` | 251 | Cells where the mode's **own decision rule step 1** cannot fire, so Pass is certain — no rejected tool call, no order over $100 with a refund discussion, no superlative. Each row names its gate |
+| `agent_proposed` | 309 | **Not yet confirmed by the reviewer.** Each carries a one-line rationale |
+
+**397 Langfuse scores were written, for the `human` and `code_gate` cells only.**
+The proposals are deliberately held local: `write_label_score` calls
+`create_score` without a score id, so Langfuse appends rather than upserts, and an
+overridden proposal would leave both values on the trace permanently. The
+proposals sync once confirmed.
+
+**Six proposals assert a Fail** and should be reviewed before anything is
+finalised — `support-0090`, `support-0077` and `support-0234` for
+`unrequested_information`; `support-0231` for `unsupported_policy_claim`;
+`support-0201` and `support-0196` for `unverifiable_completeness_claim`. Every
+other proposal is a Pass. Three are flagged in their comments as borderline.
+
+**Two proposals were withdrawn during the pass, and how is worth recording.**
+`support-0057` and `support-0076` were first proposed as
+`unsupported_policy_claim` Fails, for stating a return window or the $100
+threshold without an identifier. Both in fact relay `check_return_eligibility`'s
+own `reason` string — which is precisely the basis on which `support-0133` had
+already been passed as a close negative by hand. The existing human label caught
+the inconsistency in the automated proposals, which is the argument for keeping
+human and proposed labels distinguishable rather than merging them into one
+undifferentiated set.
 
 ## 11. Consequences for HW5
 
