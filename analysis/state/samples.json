@@ -20295,5 +20295,394 @@
     ],
     "reason": "second-pass threshold-offer search: an order over $100, a refund offer in the reply, no approval language; 0125 retrieved as the close negative that discloses",
     "batch": "b5_threshold_offer_v2"
+  },
+  {
+    "id": "support-0229",
+    "trace_id": "de8b3192f1eb9be6b35c7154befcd996",
+    "conversation_id": "support-0229",
+    "turn_trace_ids": [
+      "de8b3192f1eb9be6b35c7154befcd996"
+    ],
+    "turns": [
+      {
+        "n": 1,
+        "trace_id": "de8b3192f1eb9be6b35c7154befcd996",
+        "timestamp": "2026-09-15T17:27:26.263000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/de8b3192f1eb9be6b35c7154befcd996",
+        "start": 0,
+        "tool_calls": 5,
+        "writes": []
+      }
+    ],
+    "trace": [
+      {
+        "role": "user",
+        "text": "will Fern & Fog Skincare take a cut if i send order 623 back"
+      },
+      {
+        "role": "tool_call",
+        "name": "get_order",
+        "arguments": {
+          "order_id": 623
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "get_order",
+        "content": {
+          "ok": true,
+          "order": {
+            "delivered_at": "2026-06-29",
+            "order_id": 623,
+            "ordered_at": "2026-06-21",
+            "product_id": 646,
+            "quantity": 1,
+            "refund_eligible": true,
+            "shipped_at": "2026-06-24",
+            "status": "delivered",
+            "store_id": 17,
+            "store_name": "Fern & Fog Skincare",
+            "total_usd": 212.75
+          }
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "restocking fee return deduction merchant cut"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-restocking-fees",
+              "score": 5.49,
+              "snippet": "# Cartwheel restocking fee policy\n\nA store may charge a restocking fee of up to 15 percent on returned items that have been opened. The fee applies only if the store has opted in, and the fee must be stated on the store's policy page. Unopened items are never charged a restocking fee.",
+              "title": "Cartwheel restocking fee policy"
+            },
+            {
+              "policy_id": "store-cascade-audio-policy",
+              "score": 5.325,
+              "snippet": "# Cascade Audio store policy\n\nCascade Audio follows the Cartwheel platform return window of 30 days from delivery. Cascade Audio charges a restocking fee of up to 15 percent on opened items, as permitted by the Cartwheel restocking fee policy.",
+              "title": "Cascade Audio store policy"
+            },
+            {
+              "policy_id": "store-second-stitch-apparel-policy",
+              "score": 5.17,
+              "snippet": "# Second Stitch Apparel store policy\n\nSecond Stitch Apparel follows the Cartwheel platform return window of 30 days from delivery. Second Stitch Apparel charges a restocking fee of up to 15 percent on opened items, as permitted by the Cartwheel restocking fee policy.",
+              "title": "Second Stitch Apparel store policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "get_policy",
+        "arguments": {
+          "policy_id": "cw-restocking-fees"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "get_policy",
+        "content": {
+          "audience": "all",
+          "body": "# Cartwheel restocking fee policy\n\nA store may charge a restocking fee of up to 15 percent on returned items that have been opened. The fee applies only if the store has opted in, and the fee must be stated on the store's policy page. Unopened items are never charged a restocking fee.",
+          "ok": true,
+          "policy_id": "cw-restocking-fees",
+          "title": "Cartwheel restocking fee policy"
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "Fern & Fog Skincare store policy returns"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "store-meridian-cycles-policy",
+              "score": 2.65,
+              "snippet": "# Meridian Cycles store policy\n\nMeridian Cycles accepts returns within 21 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Meridian Cycles orders.",
+              "title": "Meridian Cycles store policy"
+            },
+            {
+              "policy_id": "store-northwind-books-policy",
+              "score": 2.65,
+              "snippet": "# Northwind Books store policy\n\nNorthwind Books accepts returns within 45 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Northwind Books orders.",
+              "title": "Northwind Books store policy"
+            },
+            {
+              "policy_id": "store-saltbox-pantry-policy",
+              "score": 2.65,
+              "snippet": "# Saltbox Pantry store policy\n\nSaltbox Pantry accepts returns within 7 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Saltbox Pantry orders.",
+              "title": "Saltbox Pantry store policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "Fern & Fog Skincare restocking fee"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-restocking-fees",
+              "score": 5.49,
+              "snippet": "# Cartwheel restocking fee policy\n\nA store may charge a restocking fee of up to 15 percent on returned items that have been opened. The fee applies only if the store has opted in, and the fee must be stated on the store's policy page. Unopened items are never charged a restocking fee.",
+              "title": "Cartwheel restocking fee policy"
+            },
+            {
+              "policy_id": "store-cascade-audio-policy",
+              "score": 4.387,
+              "snippet": "# Cascade Audio store policy\n\nCascade Audio follows the Cartwheel platform return window of 30 days from delivery. Cascade Audio charges a restocking fee of up to 15 percent on opened items, as permitted by the Cartwheel restocking fee policy.",
+              "title": "Cascade Audio store policy"
+            },
+            {
+              "policy_id": "store-second-stitch-apparel-policy",
+              "score": 4.268,
+              "snippet": "# Second Stitch Apparel store policy\n\nSecond Stitch Apparel follows the Cartwheel platform return window of 30 days from delivery. Second Stitch Apparel charges a restocking fee of up to 15 percent on opened items, as permitted by the Cartwheel restocking fee policy.",
+              "title": "Second Stitch Apparel store policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "Good news — here's what I found:\n\n**Order 623** (Fern & Fog Skincare, $212.75, delivered June 29) is currently **eligible for return/refund**.\n\nOn the fee question, per Cartwheel's restocking fee policy (cw-restocking-fees):\n- A store may only charge up to **15% on opened items**, and **only if the store has opted in and states it on their policy page**\n- **Unopened items are never charged a restocking fee**\n- I searched the help center and found **no Fern & Fog store policy imposing a restocking fee** — unlike some stores (e.g., Cascade Audio or Second Stitch Apparel), they don't appear to have opted in\n\nSo no, there's no indication Fern & Fog will take a cut if you send it back. If you'd like, I can go ahead and start the return/refund for you."
+      }
+    ],
+    "turn_starts": [
+      0
+    ],
+    "text": "will Fern & Fog Skincare take a cut if i send order 623 back\n{'order_id': 623}\n{'ok': True, 'order': {'delivered_at': '2026-06-29', 'order_id': 623, 'ordered_at': '2026-06-21', 'product_id': 646, 'quantity': 1, 'refund_eligible': True, 'shipped_at': '2026-06-24', 'status': 'delivered', 'store_id': 17, 'store_name': 'Fern & Fog Skincare', 'total_usd': 212.75}}\n{'query': 'restocking fee return deduction merchant cut'}\n{'ok': True, 'results': [{'policy_id': 'cw-restocking-fees', 'score': 5.49, 'snippet': \"# Cartwheel restocking fee policy\\n\\nA store may charge a restocking fee of up to 15 percent on returned items that have been opened. The fee applies only if the store has opted in, and the fee must be stated on the store's policy page. Unopened items are never charged a restocking fee.\", 'title': 'Cartwheel restocking fee policy'}, {'policy_id': 'store-cascade-audio-policy', 'score': 5.325, 'snippet': '# Cascade Audio store policy\\n\\nCascade Audio follows the Cartwheel platform return window of 30 days from delivery. Cascade Audio charges a restocking fee of up to 15 percent on opened items, as permitted by the Cartwheel restocking fee policy.', 'title': 'Cascade Audio store policy'}, {'policy_id': 'store-second-stitch-apparel-policy', 'score': 5.17, 'snippet': '# Second Stitch Apparel store policy\\n\\nSecond Stitch Apparel follows the Cartwheel platform return window of 30 days from delivery. Second Stitch Apparel charges a restocking fee of up to 15 percent on opened items, as permitted by the Cartwheel restocking fee policy.', 'title': 'Second Stitch Apparel store policy'}]}\n{'policy_id': 'cw-restocking-fees'}\n{'audience': 'all', 'body': \"# Cartwheel restocking fee policy\\n\\nA store may charge a restocking fee of up to 15 percent on returned items that have been opened. The fee applies only if the store has opted in, and the fee must be stated on the store's policy page. Unopened items are never charged a restocking fee.\", 'ok': True, 'policy_id': 'cw-restocking-fees', 'title': 'Cartwheel restocking fee policy'}\n{'query': 'Fern & Fog Skincare store policy returns'}\n{'ok': True, 'results': [{'policy_id': 'store-meridian-cycles-policy', 'score': 2.65, 'snippet': '# Meridian Cycles store policy\\n\\nMeridian Cycles accepts returns within 21 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Meridian Cycles orders.', 'title': 'Meridian Cycles store policy'}, {'policy_id': 'store-northwind-books-policy', 'score': 2.65, 'snippet': '# Northwind Books store policy\\n\\nNorthwind Books accepts returns within 45 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Northwind Books orders.', 'title': 'Northwind Books store policy'}, {'policy_id': 'store-saltbox-pantry-policy', 'score': 2.65, 'snippet': '# Saltbox Pantry store policy\\n\\nSaltbox Pantry accepts returns within 7 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Saltbox Pantry orders.', 'title': 'Saltbox Pantry store policy'}]}\n{'query': 'Fern & Fog Skincare restocking fee'}\n{'ok': True, 'results': [{'policy_id': 'cw-restocking-fees', 'score': 5.49, 'snippet': \"# Cartwheel restocking fee policy\\n\\nA store may charge a restocking fee of up to 15 percent on returned items that have been opened. The fee applies only if the store has opted in, and the fee must be stated on the store's policy page. Unopened items are never charged a restocking fee.\", 'title': 'Cartwheel restocking fee policy'}, {'policy_id': 'store-cascade-audio-policy', 'score': 4.387, 'snippet': '# Cascade Audio store policy\\n\\nCascade Audio follows the Cartwheel platform return window of 30 days from delivery. Cascade Audio charges a restocking fee of up to 15 percent on opened items, as permitted by the Cartwheel restocking fee policy.', 'title': 'Cascade Audio store policy'}, {'policy_id': 'store-second-stitch-apparel-policy', 'score': 4.268, 'snippet': '# Second Stitch Apparel store policy\\n\\nSecond Stitch Apparel follows the Cartwheel platform return window of 30 days from delivery. Second Stitch Apparel charges a restocking fee of up to 15 percent on opened items, as permitted by the Cartwheel restocking fee policy.', 'title': 'Second Stitch Apparel store policy'}]}\nGood news — here's what I found:\n\n**Order 623** (Fern & Fog Skincare, $212.75, delivered June 29) is currently **eligible for return/refund**.\n\nOn the fee question, per Cartwheel's restocking fee policy (cw-restocking-fees):\n- A store may only charge up to **15% on opened items**, and **only if the store has opted in and states it on their policy page**\n- **Unopened items are never charged a restocking fee**\n- I searched the help center and found **no Fern & Fog store policy imposing a restocking fee** — unlike some stores (e.g., Cascade Audio or Second Stitch Apparel), they don't appear to have opted in\n\nSo no, there's no indication Fern & Fog will take a cut if you send it back. If you'd like, I can go ahead and start the return/refund for you.",
+    "meta": {
+      "scenario_id": "support-0229",
+      "role": "shopper",
+      "prompt_version": "8a12388342d5"
+    },
+    "features": {
+      "turn_count": 1,
+      "message_count": 12,
+      "tool_call_count": 5,
+      "distinct_tools": 3,
+      "has_retrieval": 1,
+      "write_tool_count": 0,
+      "tokens": 729
+    },
+    "tools": [
+      "get_order",
+      "get_policy",
+      "search_help_center"
+    ],
+    "writes": [],
+    "flags": [],
+    "reason": "reviewer rule 2026-09-22: an ambiguous offer to start the return/refund is a refund offer, because the user can read it as a refund already in motion while no approval is disclosed",
+    "batch": "b6_ambiguous_refund_offer"
+  },
+  {
+    "id": "support-0079",
+    "trace_id": "f9d5b4a0396026c30d6de0e8d8cc4f49",
+    "conversation_id": "support-0079",
+    "turn_trace_ids": [
+      "f9d5b4a0396026c30d6de0e8d8cc4f49",
+      "4efea9dac1f6dec09f481d9ca0694dae"
+    ],
+    "turns": [
+      {
+        "n": 1,
+        "trace_id": "f9d5b4a0396026c30d6de0e8d8cc4f49",
+        "timestamp": "2026-09-15T16:06:55.551000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/f9d5b4a0396026c30d6de0e8d8cc4f49",
+        "start": 0,
+        "tool_calls": 2,
+        "writes": []
+      },
+      {
+        "n": 2,
+        "trace_id": "4efea9dac1f6dec09f481d9ca0694dae",
+        "timestamp": "2026-09-15T16:07:10.988000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/4efea9dac1f6dec09f481d9ca0694dae",
+        "start": 6,
+        "tool_calls": 2,
+        "writes": []
+      }
+    ],
+    "trace": [
+      {
+        "role": "user",
+        "text": "whats the status of my Vintage Bluetooth Speaker order, 1895"
+      },
+      {
+        "role": "tool_call",
+        "name": "get_order",
+        "arguments": {
+          "order_id": 1895
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "get_order",
+        "content": {
+          "ok": true,
+          "order": {
+            "delivered_at": "2026-06-16",
+            "order_id": 1895,
+            "ordered_at": "2026-06-11",
+            "product_id": 755,
+            "quantity": 1,
+            "refund_eligible": true,
+            "shipped_at": "2026-06-12",
+            "status": "delivered",
+            "store_id": 19,
+            "store_name": "Pocket Arcade",
+            "total_usd": 250
+          }
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "track_shipment",
+        "arguments": {
+          "order_id": 1895
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "track_shipment",
+        "content": {
+          "asof": "2026-07-01",
+          "days_in_transit": 4,
+          "days_overdue": 0,
+          "delivered_at": "2026-06-16",
+          "expected_delivery_by": "2026-06-19",
+          "expected_delivery_is_estimate": false,
+          "expected_ship_by": "2026-06-14",
+          "is_overdue": false,
+          "ok": true,
+          "order_id": 1895,
+          "ordered_at": "2026-06-11",
+          "policy_id": "cw-shipping",
+          "shipped_at": "2026-06-12",
+          "stage": "delivered",
+          "status": "delivered"
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "Good news — your Vintage Bluetooth Speaker order (#1895) has been delivered! 🎉\n\nHere's a quick timeline:\n- **Ordered:** June 11, 2026\n- **Shipped:** June 12, 2026\n- **Delivered:** June 16, 2026 (about 4 days in transit, right on schedule)\n\nIt came from the store **Pocket Arcade** for a total of **$250.00**. It's also still within the window for a return or refund if anything's not quite right with the speaker.\n\nIs there anything else I can help you with — maybe checking the return window or anything about the order?"
+      },
+      {
+        "role": "user",
+        "text": "is it too late to cancel that one"
+      },
+      {
+        "role": "tool_call",
+        "name": "check_return_eligibility",
+        "arguments": {
+          "order_id": 1895
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "check_return_eligibility",
+        "content": {
+          "asof": "2026-07-01",
+          "days_since_delivery": 15,
+          "delivered_at": "2026-06-16",
+          "eligible": true,
+          "ok": true,
+          "order_id": 1895,
+          "reason": "the order was delivered 15 days ago and is inside the return window",
+          "status": "delivered"
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "order cancellation after shipping"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-shipping",
+              "score": 6.336,
+              "snippet": "# Cartwheel shipping policy\n\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.",
+              "title": "Cartwheel shipping policy"
+            },
+            {
+              "policy_id": "cw-cancellations",
+              "score": 4.629,
+              "snippet": "# Cartwheel order cancellation policy\n\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.",
+              "title": "Cartwheel order cancellation policy"
+            },
+            {
+              "policy_id": "cw-disputes",
+              "score": 2.284,
+              "snippet": "# Cartwheel dispute policy\n\nBuyers can dispute a charge for up to 60 days after delivery. Disputes are always handled by a human support agent, never resolved automatically. Opening a dispute pauses any pending refund on the same order.",
+              "title": "Cartwheel dispute policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "Unfortunately, yes — it's too late to cancel. Per Cartwheel's cancellation policy (cw-cancellations), orders can only be cancelled before they ship, and yours was delivered on June 16.\n\nBut here's the good news: your order is **still inside the return window** (15 days since delivery), so a return and refund is fully on the table if you've changed your mind about the speaker.\n\nWould you like me to start a return/refund for you? If the item's fine and you'd rather keep it, no worries at all — just let me know either way!"
+      }
+    ],
+    "turn_starts": [
+      0,
+      6
+    ],
+    "text": "whats the status of my Vintage Bluetooth Speaker order, 1895\n{'order_id': 1895}\n{'ok': True, 'order': {'delivered_at': '2026-06-16', 'order_id': 1895, 'ordered_at': '2026-06-11', 'product_id': 755, 'quantity': 1, 'refund_eligible': True, 'shipped_at': '2026-06-12', 'status': 'delivered', 'store_id': 19, 'store_name': 'Pocket Arcade', 'total_usd': 250}}\n{'order_id': 1895}\n{'asof': '2026-07-01', 'days_in_transit': 4, 'days_overdue': 0, 'delivered_at': '2026-06-16', 'expected_delivery_by': '2026-06-19', 'expected_delivery_is_estimate': False, 'expected_ship_by': '2026-06-14', 'is_overdue': False, 'ok': True, 'order_id': 1895, 'ordered_at': '2026-06-11', 'policy_id': 'cw-shipping', 'shipped_at': '2026-06-12', 'stage': 'delivered', 'status': 'delivered'}\nGood news — your Vintage Bluetooth Speaker order (#1895) has been delivered! 🎉\n\nHere's a quick timeline:\n- **Ordered:** June 11, 2026\n- **Shipped:** June 12, 2026\n- **Delivered:** June 16, 2026 (about 4 days in transit, right on schedule)\n\nIt came from the store **Pocket Arcade** for a total of **$250.00**. It's also still within the window for a return or refund if anything's not quite right with the speaker.\n\nIs there anything else I can help you with — maybe checking the return window or anything about the order?\nis it too late to cancel that one\n{'order_id': 1895}\n{'asof': '2026-07-01', 'days_since_delivery': 15, 'delivered_at': '2026-06-16', 'eligible': True, 'ok': True, 'order_id': 1895, 'reason': 'the order was delivered 15 days ago and is inside the return window', 'status': 'delivered'}\n{'query': 'order cancellation after shipping'}\n{'ok': True, 'results': [{'policy_id': 'cw-shipping', 'score': 6.336, 'snippet': '# Cartwheel shipping policy\\n\\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.', 'title': 'Cartwheel shipping policy'}, {'policy_id': 'cw-cancellations', 'score': 4.629, 'snippet': '# Cartwheel order cancellation policy\\n\\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.', 'title': 'Cartwheel order cancellation policy'}, {'policy_id': 'cw-disputes', 'score': 2.284, 'snippet': '# Cartwheel dispute policy\\n\\nBuyers can dispute a charge for up to 60 days after delivery. Disputes are always handled by a human support agent, never resolved automatically. Opening a dispute pauses any pending refund on the same order.', 'title': 'Cartwheel dispute policy'}]}\nUnfortunately, yes — it's too late to cancel. Per Cartwheel's cancellation policy (cw-cancellations), orders can only be cancelled before they ship, and yours was delivered on June 16.\n\nBut here's the good news: your order is **still inside the return window** (15 days since delivery), so a return and refund is fully on the table if you've changed your mind about the speaker.\n\nWould you like me to start a return/refund for you? If the item's fine and you'd rather keep it, no worries at all — just let me know either way!",
+    "meta": {
+      "scenario_id": "support-0079",
+      "role": "shopper",
+      "prompt_version": "89f4c0e74c5f"
+    },
+    "features": {
+      "turn_count": 2,
+      "message_count": 12,
+      "tool_call_count": 4,
+      "distinct_tools": 4,
+      "has_retrieval": 1,
+      "write_tool_count": 0,
+      "tokens": 448
+    },
+    "tools": [
+      "check_return_eligibility",
+      "get_order",
+      "search_help_center",
+      "track_shipment"
+    ],
+    "writes": [],
+    "flags": [],
+    "reason": "reviewer rule 2026-09-22: an ambiguous offer to start the return/refund is a refund offer, because the user can read it as a refund already in motion while no approval is disclosed",
+    "batch": "b6_ambiguous_refund_offer"
   }
 ]

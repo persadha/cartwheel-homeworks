@@ -1016,5 +1016,38 @@
     "idx": null,
     "note": "no failure observed",
     "ts": "2026-09-22T11:05:00.000Z"
+  },
+  {
+    "id": "a1790075000011",
+    "conversation_id": "support-0229",
+    "trace_id": "de8b3192f1eb9be6b35c7154befcd996",
+    "quote": "If you'd like, I can go ahead and start the return/refund for you.",
+    "idx": 11,
+    "note": "[above_threshold_action_offered]",
+    "source": "accepted_suggestion",
+    "mode": "above_threshold_action_offered",
+    "ts": "2026-09-22T13:30:00Z"
+  },
+  {
+    "id": "a1790075000011",
+    "conversation_id": "support-0079",
+    "trace_id": "4efea9dac1f6dec09f481d9ca0694dae",
+    "quote": "Would you like me to start a return/refund for you?",
+    "idx": 11,
+    "note": "[above_threshold_action_offered]",
+    "source": "accepted_suggestion",
+    "mode": "above_threshold_action_offered",
+    "ts": "2026-09-22T13:30:00Z"
+  },
+  {
+    "id": "a1790075999",
+    "conversation_id": "support-0074",
+    "trace_id": "1d959b8b95bdd113378934ed14194145",
+    "quote": "Once you confirm, I'll check the details and get the refund moving.",
+    "idx": 7,
+    "note": "Promises to get a $174.50 refund moving with no mention of the approval step",
+    "source": "reviewer_rule",
+    "mode": "above_threshold_action_offered",
+    "ts": "2026-09-22T13:30:00Z"
   }
 ]

@@ -5,13 +5,13 @@ Branch `hw-4`. Review completed 2026-09-22.
 
 ## 1. The reviewed sample
 
-**103 conversations, 133 raw Langfuse traces, drawn from a population of 250.**
+**105 conversations, 136 raw Langfuse traces, drawn from a population of 250.**
 
 A counting convention matters here: the handout asks for at least 100 traces, and
 this review counts **conversations**, not raw traces. Cartwheel emits one trace per
 turn, so a four-turn conversation is four traces. Conversations are the unit
 because a failure that only exists across turns cannot be judged from one turn.
-Either way the minimum is met — 103 conversations, 133 traces.
+Either way the minimum is met — 105 conversations, 136 traces.
 
 Traces are grouped by `cartwheel.scenario_id` rather than `cartwheel.session_id`.
 The session id varies within a single conversation in this trace store, so
@@ -21,11 +21,11 @@ grouping on it would have split conversations apart.
 
 | Role | n |
 | --- | ---: |
-| shopper | 51 |
+| shopper | 53 |
 | merchant | 27 |
 | support | 25 |
 
-17 of the 103 call a write tool (`issue_refund`, `cancel_order`,
+17 of the 105 call a write tool (`issue_refund`, `cancel_order`,
 `escalate_to_human`).
 
 ### Batches, and how each was selected
@@ -44,23 +44,23 @@ grouping on it would have split conversations apart.
 | `b3_lookup_failure` | 3 | `not_found`, including one repeated identical call |
 | `b4_stability` | 15 | uniform random, seed 11 — drawn and reviewed **after** the taxonomy was drafted |
 | `b5_threshold_offer_v2` | 3 | second-pass depth search after a definition revision (see §6) |
+| `b6_ambiguous_refund_offer` | 2 | third-pass search after the ambiguity revision (see §6) |
 
 All four batch types the handout requires are present. No conversation counts
 toward more than one batch.
 
-**The sample grew from 100 to 103 during Part D.** A second-pass search after a
-definition revision retrieved three conversations that were not in the original
-review set. Leaving a mode's defining traces outside the set would make the Part E
-sample fractions incoherent, so they were added as `b5_threshold_offer_v2` with
-their retrieval filter recorded, following the precedent set by the `b3_*` depth
-searches.
+**The sample grew from 100 to 105.** Twice, a search run after a definition
+revision retrieved conversations that were not in the original review set — three
+for `b5_threshold_offer_v2` and two for `b6_ambiguous_refund_offer`. Leaving a
+mode's defining traces outside the set would make the Part E sample fractions
+incoherent, so both batches were added with their retrieval filters recorded,
+following the precedent set by the `b3_*` depth searches.
 
 ### Review volume
 
-104 annotations over all 103 conversations: **37 open codes and 67 "no failure
-observed"**. Every conversation in the set was reviewed. Suggestion queue: 16
-raised, **8 accepted, 7 rejected, 1 still pending** (`sg-rev-06` / `support-0229`,
-deliberately flagged borderline).
+107 annotations over all 105 conversations: **40 open codes and 67 "no failure
+observed"**. Every conversation in the set was reviewed. Suggestion queue: 17
+raised, **10 accepted and 7 rejected — all decided**.
 
 ## 2. The taxonomy
 
@@ -71,12 +71,15 @@ a likely evaluator type and a requirement source. All of it is in
 
 | Mode | Positives | Close negatives | Requirement | Evaluator |
 | --- | ---: | ---: | --- | --- |
-| `unrequested_information` | 8 | 6 | **RESP-6** (new) | LLM judge |
-| `unsupported_policy_claim` | 4 | 3 | RESP-1, RESP-3 | LLM judge |
-| `above_threshold_action_offered` | 4 | 10 | ESC-1, AUTH-1 | hybrid |
-| `unverifiable_completeness_claim` | 4 | 3 | RESP-3 | LLM judge |
+| `unrequested_information` | 11 | 6 | **RESP-6** (new) | LLM judge |
+| `above_threshold_action_offered` | 7 | 10 | ESC-1, AUTH-1 | hybrid |
+| `unverifiable_completeness_claim` | 6 | 3 | RESP-3 | LLM judge |
+| `unsupported_policy_claim` | 5 | 3 | RESP-1, RESP-3 | LLM judge |
 | `uncorrected_parameter_error` | 4 | 5 | RESP-3, partial | hybrid |
 | `misreads_tool_result` | 1 | 6 | RESP-3 | LLM judge |
+
+Positive counts include instances confirmed during Part E, not only the examples
+used to build the mode. Each mode's `found_in_part_e` field lists which.
 
 `misreads_tool_result` sits below the three-positive minimum, and that is reported
 rather than hidden. `support-0139` is an unambiguous instance — `get_order`
@@ -124,6 +127,21 @@ same conversation. Under that rule `0151` fails because the identifier resolves 
 nothing, and `0004` fails because there is no identifier. The merge is recorded in
 the mode's `merged_from` and `merge_reason`.
 
+### A second revision, made by the reviewer
+
+The first version of `above_threshold_action_offered` exempted offers to "help you
+start a return", treating them as the labelled next step RESP-6 permits. The
+reviewer overturned that: **an ambiguous offer to "start the return/refund" is a
+refund offer.** A user can reasonably read it as a refund already in motion, and
+the reply never discloses that an above-threshold refund needs human approval. The
+ambiguity is one-sided — it can only mislead toward the user expecting money back.
+
+That revision took the mode from 4 positives to 7, added
+`b6_ambiguous_refund_offer` to the sample, and reclassified `support-0074` from
+Pass. It also sharpened step 1 in the other direction: three traces the search
+returned are *refusals* ("this order isn't on your account, so I can't issue a
+refund"), and a refusal is not an offer.
+
 The same test was later applied in the other direction and **refused** a merge:
 `uncorrected_parameter_error` and `unverifiable_completeness_claim` co-occur on
 three traces but stay separate, because one is fixed by "correct a rejected
@@ -165,10 +183,14 @@ treated as one signal when it has two unrelated causes — window expired versus
 yet delivered. That second bug recurred in a later search and produced
 `support-0178`, which is now the close negative that marks exactly that boundary.
 
-**The 17-to-2 gap.** The widened search for `above_threshold_action_offered`
-returned 17 candidates; reading them left 2. Fifteen were offers to *help the user
-start* a return, which RESP-6 permits. That gap states the mode's boundary more
-precisely than its prose definition does.
+**The 17-to-2 gap, and its later reversal.** The widened search for
+`above_threshold_action_offered` returned 17 candidates; reading them left 2.
+Fifteen were offers to *help the user start* a return, which RESP-6 permits. That
+gap stated the mode's boundary more precisely than its prose definition did —
+until the reviewer overturned the exemption behind it (see §4), at which point a
+third search under the revised rule returned 10, of which 3 were already positives,
+2 were new, 1 was reclassified, 3 were refusals rather than offers, and 1 was the
+close negative that discloses the approval step.
 
 **One search returned zero, and the zero is the finding.** The handout's own
 worked example of a contradiction — a write tool returns `queued_for_approval`
@@ -272,17 +294,17 @@ failure modes visible only below the trace layer.
 
 ## 10. Part E — sample fractions
 
-All six modes applied to all 103 conversations: **618 judgments, written as 798
+All six modes applied to all 105 conversations: **630 judgments, written as 816
 rows**, one per turn trace id, under `analysis/state/labels/`.
 
 | Mode | Fail | of | Sample fraction |
 | --- | ---: | ---: | ---: |
-| `unrequested_information` | 10 | 103 | 0.097 |
-| `unverifiable_completeness_claim` | 6 | 103 | 0.058 |
-| `unsupported_policy_claim` | 5 | 103 | 0.049 |
-| `above_threshold_action_offered` | 4 | 103 | 0.039 |
-| `uncorrected_parameter_error` | 4 | 103 | 0.039 |
-| `misreads_tool_result` | 1 | 103 | 0.010 |
+| `unrequested_information` | 11 | 105 | 0.105 |
+| `above_threshold_action_offered` | 7 | 105 | 0.067 |
+| `unverifiable_completeness_claim` | 6 | 105 | 0.057 |
+| `unsupported_policy_claim` | 5 | 105 | 0.048 |
+| `uncorrected_parameter_error` | 4 | 105 | 0.038 |
+| `misreads_tool_result` | 1 | 105 | 0.010 |
 
 These are **sample fractions, not prevalence estimates**. The sample was
 deliberately reshaped by clustering, role balancing and ten targeted depth
@@ -296,15 +318,15 @@ carry different weight.
 
 | Source | Cells | What it means |
 | --- | ---: | --- |
-| `human` | 64 | The 58 positives and close negatives established by reading in Parts B and D, plus 6 the reviewer decided individually |
-| `code_gate` | 251 | Cells where the mode's **own decision rule step 1** cannot fire, so Pass is certain — no rejected tool call, no order over $100 with a refund discussion, no superlative. Each row names its gate |
-| `reviewer_accepted` | 303 | Proposed by the agent with a one-line rationale each, and accepted by the reviewer **as a block rather than read individually** |
+| `human` | 74 | The 58 positives and close negatives established by reading in Parts B and D, plus 6 the reviewer decided individually |
+| `code_gate` | 254 | Cells where the mode's **own decision rule step 1** cannot fire, so Pass is certain — no rejected tool call, no order over $100 with a refund discussion, no superlative. Each row names its gate |
+| `reviewer_accepted` | 302 | Proposed by the agent with a one-line rationale each, and accepted by the reviewer **as a block rather than read individually** |
 
-`reviewer_accepted` is kept distinct from `human` deliberately. All 303 are
+`reviewer_accepted` is kept distinct from `human` deliberately. All 302 are
 Passes, and all were accepted in bulk. HW5 draws its ground truth from these
 files, so how firmly each label was established is itself evidence.
 
-**798 Langfuse scores, one per row.** Every cell is synced. The proposals were
+**818 Langfuse scores against 816 rows.** Every cell is synced. One cell carries two scores: `support-0074`'s `above_threshold_action_offered` was reclassified after the ambiguity revision, and Langfuse scores are append-only, so the earlier 0 remains beside the later 1. The JSONL mirror holds exactly one row per cell and is authoritative. The proposals were
 held local until confirmed, because `write_label_score` calls `create_score`
 without a score id — Langfuse appends rather than upserts, so an overridden
 proposal would have left both values on the trace permanently.

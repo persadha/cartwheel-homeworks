@@ -520,8 +520,25 @@
           "reason": "second-pass threshold-offer search: an order over $100, a refund offer in the reply, no approval language; 0125 retrieved as the close negative that discloses"
         }
       ]
+    },
+    {
+      "batch": "b6_ambiguous_refund_offer",
+      "strategy": "ids",
+      "k": 2,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0229",
+          "reason": "reviewer rule 2026-09-22: an ambiguous offer to start the return/refund is a refund offer, because the user can read it as a refund already in motion while no approval is disclosed"
+        },
+        {
+          "conversation_id": "support-0079",
+          "reason": "reviewer rule 2026-09-22: an ambiguous offer to start the return/refund is a refund offer, because the user can read it as a refund already in motion while no approval is disclosed"
+        }
+      ]
     }
   ],
-  "total_conversations": 103,
-  "total_raw_traces": 133
+  "total_conversations": 105,
+  "total_raw_traces": 136
 }

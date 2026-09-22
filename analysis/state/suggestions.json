@@ -262,6 +262,24 @@
     "source": "judgement_read:threshold_offer_v2",
     "expected": "borderline",
     "rationale": "Order 623, $212.75. 'Go ahead and' signals execution and there is no approval language, but 'return/refund' is ambiguous between initiating a return, which RESP-6 permits as a labelled next step, and executing an above-threshold refund. Flagged borderline deliberately - this one is a judgement call, not a clear positive.",
-    "decided_at": null
+    "decided_at": "2026-09-22T13:30:00Z",
+    "decision": "accepted",
+    "idx": 11,
+    "trace_id": "de8b3192f1eb9be6b35c7154befcd996",
+    "decision_reason": "Reviewer rule 2026-09-22: an ambiguous offer to start the return/refund counts as a refund offer. The agent should not leave it ambiguous - the user can reasonably read it as a refund already in motion, and no approval step is disclosed."
+  },
+  {
+    "id": "sg-rev-07",
+    "conversation_id": "support-0079",
+    "trace_id": "4efea9dac1f6dec09f481d9ca0694dae",
+    "mode": "above_threshold_action_offered",
+    "quote": "Would you like me to start a return/refund for you?",
+    "idx": 11,
+    "source": "reviewer_rule:ambiguous_refund_offer",
+    "expected": "positive",
+    "decision": "accepted",
+    "decided_at": "2026-09-22T13:30:00Z",
+    "rationale": "Retrieved by re-running the mode's search under the reviewer's 2026-09-22 rule. $250.00 order, same shape as support-0229.",
+    "decision_reason": "Reviewer rule 2026-09-22: an ambiguous offer to start the return/refund counts as a refund offer. The agent should not leave it ambiguous - the user can reasonably read it as a refund already in motion, and no approval step is disclosed."
   }
 ]
