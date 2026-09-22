@@ -76,7 +76,7 @@ def find_leaks(
 def collect_evaluation_inputs(cases_path: Path | None = None) -> dict[str, str]:
     path = cases_path or REPO_ROOT / "eval_cases" / "cases.jsonl"
     inputs: dict[str, str] = {}
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
             continue
@@ -97,7 +97,7 @@ def collect_prompt_texts() -> dict[str, str]:
         for judge_path in sorted(judges_dir.glob("*.json")):
             if judge_path.name.startswith("_history"):
                 continue
-            judge = json.loads(judge_path.read_text())
+            judge = json.loads(judge_path.read_text(encoding="utf-8"))
             if judge.get("prompt_text"):
                 prompts[f"judges/{judge_path.stem}"] = judge["prompt_text"]
     return prompts
