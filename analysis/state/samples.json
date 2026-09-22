@@ -19625,5 +19625,675 @@
     ],
     "reason": "random pick",
     "batch": "b4_stability"
+  },
+  {
+    "id": "support-0094",
+    "trace_id": "be879d4f05c553c588897480d10686be",
+    "conversation_id": "support-0094",
+    "turn_trace_ids": [
+      "be879d4f05c553c588897480d10686be",
+      "dc85af3f10db225bfb4fdc7783fa7c91"
+    ],
+    "turns": [
+      {
+        "n": 1,
+        "trace_id": "be879d4f05c553c588897480d10686be",
+        "timestamp": "2026-09-15T16:12:33.854000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/be879d4f05c553c588897480d10686be",
+        "start": 0,
+        "tool_calls": 2,
+        "writes": []
+      },
+      {
+        "n": 2,
+        "trace_id": "dc85af3f10db225bfb4fdc7783fa7c91",
+        "timestamp": "2026-09-15T16:12:54.439000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/dc85af3f10db225bfb4fdc7783fa7c91",
+        "start": 6,
+        "tool_calls": 1,
+        "writes": []
+      }
+    ],
+    "trace": [
+      {
+        "role": "user",
+        "text": "need the current state of order 5155 for a customer reply"
+      },
+      {
+        "role": "tool_call",
+        "name": "track_shipment",
+        "arguments": {
+          "order_id": 5155
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "track_shipment",
+        "content": {
+          "asof": "2026-07-01",
+          "days_in_transit": 7,
+          "days_overdue": 0,
+          "delivered_at": "2026-06-24",
+          "expected_delivery_by": "2026-06-24",
+          "expected_delivery_is_estimate": false,
+          "expected_ship_by": "2026-06-17",
+          "is_overdue": false,
+          "ok": true,
+          "order_id": 5155,
+          "ordered_at": "2026-06-14",
+          "policy_id": "cw-shipping",
+          "shipped_at": "2026-06-17",
+          "stage": "delivered",
+          "status": "delivered"
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "get_order",
+        "arguments": {
+          "order_id": 5155
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "get_order",
+        "content": {
+          "ok": true,
+          "order": {
+            "delivered_at": "2026-06-24",
+            "order_id": 5155,
+            "ordered_at": "2026-06-14",
+            "product_id": 604,
+            "quantity": 1,
+            "refund_eligible": true,
+            "shipped_at": "2026-06-17",
+            "status": "delivered",
+            "store_id": 16,
+            "store_name": "Harbor Knits",
+            "total_usd": 262.5
+          }
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "Here's the current state of order 5155 for your reply:\n\n**Order 5155 — Harbor Knits**\n- **Status:** Delivered\n- **Ordered:** June 14, 2026\n- **Shipped:** June 17, 2026 (shipped on time)\n- **Delivered:** June 24, 2026 (arrived right on the expected delivery date)\n- **In transit:** 7 days, not overdue\n- **Total:** $262.50 (1 item)\n- **Refund eligible:** Yes, if the customer is asking about a return or refund\n\nShipping status is based on Cartwheel's shipping policy (cw-shipping). If the customer wants a refund or return, I can walk you through the eligibility details or process it — just let me know."
+      },
+      {
+        "role": "user",
+        "text": "is it too late to cancel that one"
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "cancel order policy after shipping"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-shipping",
+              "score": 7.085,
+              "snippet": "# Cartwheel shipping policy\n\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.",
+              "title": "Cartwheel shipping policy"
+            },
+            {
+              "policy_id": "cw-disputes",
+              "score": 3.022,
+              "snippet": "# Cartwheel dispute policy\n\nBuyers can dispute a charge for up to 60 days after delivery. Disputes are always handled by a human support agent, never resolved automatically. Opening a dispute pauses any pending refund on the same order.",
+              "title": "Cartwheel dispute policy"
+            },
+            {
+              "policy_id": "cw-cancellations",
+              "score": 1.989,
+              "snippet": "# Cartwheel order cancellation policy\n\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.",
+              "title": "Cartwheel order cancellation policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "Yes, it's too late to cancel. Under Cartwheel's cancellation policy (cw-cancellations), orders can only be cancelled before the store ships them — and order 5155 was shipped on June 17 and delivered on June 24.\n\nThe good news: since it's delivered, the path forward is a return instead, and this order is currently refund-eligible. If the customer wants that, I can check the exact return window or process the refund for you — just say the word."
+      }
+    ],
+    "turn_starts": [
+      0,
+      6
+    ],
+    "text": "need the current state of order 5155 for a customer reply\n{'order_id': 5155}\n{'asof': '2026-07-01', 'days_in_transit': 7, 'days_overdue': 0, 'delivered_at': '2026-06-24', 'expected_delivery_by': '2026-06-24', 'expected_delivery_is_estimate': False, 'expected_ship_by': '2026-06-17', 'is_overdue': False, 'ok': True, 'order_id': 5155, 'ordered_at': '2026-06-14', 'policy_id': 'cw-shipping', 'shipped_at': '2026-06-17', 'stage': 'delivered', 'status': 'delivered'}\n{'order_id': 5155}\n{'ok': True, 'order': {'delivered_at': '2026-06-24', 'order_id': 5155, 'ordered_at': '2026-06-14', 'product_id': 604, 'quantity': 1, 'refund_eligible': True, 'shipped_at': '2026-06-17', 'status': 'delivered', 'store_id': 16, 'store_name': 'Harbor Knits', 'total_usd': 262.5}}\nHere's the current state of order 5155 for your reply:\n\n**Order 5155 — Harbor Knits**\n- **Status:** Delivered\n- **Ordered:** June 14, 2026\n- **Shipped:** June 17, 2026 (shipped on time)\n- **Delivered:** June 24, 2026 (arrived right on the expected delivery date)\n- **In transit:** 7 days, not overdue\n- **Total:** $262.50 (1 item)\n- **Refund eligible:** Yes, if the customer is asking about a return or refund\n\nShipping status is based on Cartwheel's shipping policy (cw-shipping). If the customer wants a refund or return, I can walk you through the eligibility details or process it — just let me know.\nis it too late to cancel that one\n{'query': 'cancel order policy after shipping'}\n{'ok': True, 'results': [{'policy_id': 'cw-shipping', 'score': 7.085, 'snippet': '# Cartwheel shipping policy\\n\\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.', 'title': 'Cartwheel shipping policy'}, {'policy_id': 'cw-disputes', 'score': 3.022, 'snippet': '# Cartwheel dispute policy\\n\\nBuyers can dispute a charge for up to 60 days after delivery. Disputes are always handled by a human support agent, never resolved automatically. Opening a dispute pauses any pending refund on the same order.', 'title': 'Cartwheel dispute policy'}, {'policy_id': 'cw-cancellations', 'score': 1.989, 'snippet': '# Cartwheel order cancellation policy\\n\\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.', 'title': 'Cartwheel order cancellation policy'}]}\nYes, it's too late to cancel. Under Cartwheel's cancellation policy (cw-cancellations), orders can only be cancelled before the store ships them — and order 5155 was shipped on June 17 and delivered on June 24.\n\nThe good news: since it's delivered, the path forward is a return instead, and this order is currently refund-eligible. If the customer wants that, I can check the exact return window or process the refund for you — just say the word.",
+    "meta": {
+      "scenario_id": "support-0094",
+      "role": "merchant",
+      "prompt_version": "bac7e61a9038"
+    },
+    "features": {
+      "turn_count": 2,
+      "message_count": 10,
+      "tool_call_count": 3,
+      "distinct_tools": 3,
+      "has_retrieval": 1,
+      "write_tool_count": 0,
+      "tokens": 415
+    },
+    "tools": [
+      "get_order",
+      "search_help_center",
+      "track_shipment"
+    ],
+    "writes": [],
+    "flags": [],
+    "reason": "second-pass threshold-offer search: an order over $100, a refund offer in the reply, no approval language; 0125 retrieved as the close negative that discloses",
+    "batch": "b5_threshold_offer_v2"
+  },
+  {
+    "id": "support-0076",
+    "trace_id": "52d2f4c80a32b233625ea03c9bc78f06",
+    "conversation_id": "support-0076",
+    "turn_trace_ids": [
+      "52d2f4c80a32b233625ea03c9bc78f06",
+      "3153b183ca80ff35583b2390ea90922c"
+    ],
+    "turns": [
+      {
+        "n": 1,
+        "trace_id": "52d2f4c80a32b233625ea03c9bc78f06",
+        "timestamp": "2026-09-15T16:05:41.081000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/52d2f4c80a32b233625ea03c9bc78f06",
+        "start": 0,
+        "tool_calls": 2,
+        "writes": []
+      },
+      {
+        "n": 2,
+        "trace_id": "3153b183ca80ff35583b2390ea90922c",
+        "timestamp": "2026-09-15T16:05:51.455000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/3153b183ca80ff35583b2390ea90922c",
+        "start": 6,
+        "tool_calls": 1,
+        "writes": []
+      }
+    ],
+    "trace": [
+      {
+        "role": "user",
+        "text": "hi, can you check order 3610 for me"
+      },
+      {
+        "role": "tool_call",
+        "name": "get_order",
+        "arguments": {
+          "order_id": 3610
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "get_order",
+        "content": {
+          "ok": true,
+          "order": {
+            "delivered_at": "2026-06-13",
+            "order_id": 3610,
+            "ordered_at": "2026-06-06",
+            "product_id": 273,
+            "quantity": 1,
+            "refund_eligible": true,
+            "shipped_at": "2026-06-09",
+            "status": "delivered",
+            "store_id": 7,
+            "store_name": "Northwind Books",
+            "total_usd": 264.25
+          }
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "track_shipment",
+        "arguments": {
+          "order_id": 3610
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "track_shipment",
+        "content": {
+          "asof": "2026-07-01",
+          "days_in_transit": 4,
+          "days_overdue": 0,
+          "delivered_at": "2026-06-13",
+          "expected_delivery_by": "2026-06-16",
+          "expected_delivery_is_estimate": false,
+          "expected_ship_by": "2026-06-09",
+          "is_overdue": false,
+          "ok": true,
+          "order_id": 3610,
+          "ordered_at": "2026-06-06",
+          "policy_id": "cw-shipping",
+          "shipped_at": "2026-06-09",
+          "stage": "delivered",
+          "status": "delivered"
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "Here's what I found on order 3610:\n\n- **Store:** Northwind Books\n- **Order total:** $264.25 (quantity: 1)\n- **Ordered:** June 6, 2026\n- **Shipped:** June 9, 2026\n- **Delivered:** June 13, 2026 (within the expected window — not overdue)\n\nGood news: the order is marked as **delivered** and is still **refund-eligible**. If you'd like a refund or have any issue with the item, just let me know and I can help with the next steps!"
+      },
+      {
+        "role": "user",
+        "text": "is it too late to cancel that one"
+      },
+      {
+        "role": "tool_call",
+        "name": "check_return_eligibility",
+        "arguments": {
+          "order_id": 3610
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "check_return_eligibility",
+        "content": {
+          "asof": "2026-07-01",
+          "days_since_delivery": 18,
+          "delivered_at": "2026-06-13",
+          "eligible": true,
+          "ok": true,
+          "order_id": 3610,
+          "reason": "the order was delivered 18 days ago and is inside the return window",
+          "status": "delivered"
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "Unfortunately, yes — it's too late to cancel. The order was already **delivered** on June 13, and cancellations only work for orders that haven't shipped yet.\n\nBut here's the good news: you're still well within the return window (18 days since delivery, and the order is eligible). So if you'd like to send it back and get a refund, I can help with that instead.\n\nWant me to start the refund for you?"
+      }
+    ],
+    "turn_starts": [
+      0,
+      6
+    ],
+    "text": "hi, can you check order 3610 for me\n{'order_id': 3610}\n{'ok': True, 'order': {'delivered_at': '2026-06-13', 'order_id': 3610, 'ordered_at': '2026-06-06', 'product_id': 273, 'quantity': 1, 'refund_eligible': True, 'shipped_at': '2026-06-09', 'status': 'delivered', 'store_id': 7, 'store_name': 'Northwind Books', 'total_usd': 264.25}}\n{'order_id': 3610}\n{'asof': '2026-07-01', 'days_in_transit': 4, 'days_overdue': 0, 'delivered_at': '2026-06-13', 'expected_delivery_by': '2026-06-16', 'expected_delivery_is_estimate': False, 'expected_ship_by': '2026-06-09', 'is_overdue': False, 'ok': True, 'order_id': 3610, 'ordered_at': '2026-06-06', 'policy_id': 'cw-shipping', 'shipped_at': '2026-06-09', 'stage': 'delivered', 'status': 'delivered'}\nHere's what I found on order 3610:\n\n- **Store:** Northwind Books\n- **Order total:** $264.25 (quantity: 1)\n- **Ordered:** June 6, 2026\n- **Shipped:** June 9, 2026\n- **Delivered:** June 13, 2026 (within the expected window — not overdue)\n\nGood news: the order is marked as **delivered** and is still **refund-eligible**. If you'd like a refund or have any issue with the item, just let me know and I can help with the next steps!\nis it too late to cancel that one\n{'order_id': 3610}\n{'asof': '2026-07-01', 'days_since_delivery': 18, 'delivered_at': '2026-06-13', 'eligible': True, 'ok': True, 'order_id': 3610, 'reason': 'the order was delivered 18 days ago and is inside the return window', 'status': 'delivered'}\nUnfortunately, yes — it's too late to cancel. The order was already **delivered** on June 13, and cancellations only work for orders that haven't shipped yet.\n\nBut here's the good news: you're still well within the return window (18 days since delivery, and the order is eligible). So if you'd like to send it back and get a refund, I can help with that instead.\n\nWant me to start the refund for you?",
+    "meta": {
+      "scenario_id": "support-0076",
+      "role": "shopper",
+      "prompt_version": "d6884ed6e3f2"
+    },
+    "features": {
+      "turn_count": 2,
+      "message_count": 10,
+      "tool_call_count": 3,
+      "distinct_tools": 3,
+      "has_retrieval": 0,
+      "write_tool_count": 0,
+      "tokens": 254
+    },
+    "tools": [
+      "check_return_eligibility",
+      "get_order",
+      "track_shipment"
+    ],
+    "writes": [],
+    "flags": [],
+    "reason": "second-pass threshold-offer search: an order over $100, a refund offer in the reply, no approval language; 0125 retrieved as the close negative that discloses",
+    "batch": "b5_threshold_offer_v2"
+  },
+  {
+    "id": "support-0125",
+    "trace_id": "4783d3d8f5b75ae21384376351cbbc7d",
+    "conversation_id": "support-0125",
+    "turn_trace_ids": [
+      "4783d3d8f5b75ae21384376351cbbc7d",
+      "1ba52d8e53ae1c458be1f5d9f5613c8b"
+    ],
+    "turns": [
+      {
+        "n": 1,
+        "trace_id": "4783d3d8f5b75ae21384376351cbbc7d",
+        "timestamp": "2026-09-15T16:24:28.073000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/4783d3d8f5b75ae21384376351cbbc7d",
+        "start": 0,
+        "tool_calls": 2,
+        "writes": []
+      },
+      {
+        "n": 2,
+        "trace_id": "1ba52d8e53ae1c458be1f5d9f5613c8b",
+        "timestamp": "2026-09-15T16:25:07.517000Z",
+        "permalink": "http://localhost:3000/project/cartwheel-dev/traces/1ba52d8e53ae1c458be1f5d9f5613c8b",
+        "start": 6,
+        "tool_calls": 8,
+        "writes": [
+          "escalate_to_human"
+        ]
+      }
+    ],
+    "trace": [
+      {
+        "role": "user",
+        "text": "still able to return the Speckled Screwdriver Set from order 2184?"
+      },
+      {
+        "role": "tool_call",
+        "name": "get_order",
+        "arguments": {
+          "order_id": 2184
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "get_order",
+        "content": {
+          "ok": true,
+          "order": {
+            "delivered_at": "2026-06-21",
+            "order_id": 2184,
+            "ordered_at": "2026-06-17",
+            "product_id": 145,
+            "quantity": 1,
+            "refund_eligible": true,
+            "shipped_at": "2026-06-18",
+            "status": "delivered",
+            "store_id": 4,
+            "store_name": "Copperline Tools",
+            "total_usd": 206.25
+          }
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "check_return_eligibility",
+        "arguments": {
+          "order_id": 2184
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "check_return_eligibility",
+        "content": {
+          "asof": "2026-07-01",
+          "days_since_delivery": 10,
+          "delivered_at": "2026-06-21",
+          "eligible": true,
+          "ok": true,
+          "order_id": 2184,
+          "reason": "the order was delivered 10 days ago and is inside the return window",
+          "status": "delivered"
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "Good news — yes, you can still return it. Order 2184 (the Speckled Screwdriver Set from Copperline Tools, $206.25) was delivered on June 21, 2026, which puts you 10 days into the return window — well within eligibility.\n\nWould you like me to go ahead and start the return/refund for you?"
+      },
+      {
+        "role": "user",
+        "text": "who pays for the return postage"
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "return shipping postage who pays"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-shipping",
+              "score": 3.725,
+              "snippet": "# Cartwheel shipping policy\n\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.",
+              "title": "Cartwheel shipping policy"
+            },
+            {
+              "policy_id": "cw-getting-help",
+              "score": 2.358,
+              "snippet": "# Getting help on Cartwheel\n\nThe Cartwheel support assistant answers questions about orders, returns, refunds, products, and platform policy, and it cites the policy page behind every policy answer. If the assistant cannot resolve a case it opens a ticket for a human agent, who responds within 24 ho",
+              "title": "Getting help on Cartwheel"
+            },
+            {
+              "policy_id": "cw-cancellations",
+              "score": 1.262,
+              "snippet": "# Cartwheel order cancellation policy\n\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.",
+              "title": "Cartwheel order cancellation policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "get_policy",
+        "arguments": {
+          "policy_id": "cw-returns"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "get_policy",
+        "content": {
+          "audience": "all",
+          "body": "# Cartwheel return policy\n\nItems bought on Cartwheel can be returned within 30 days of delivery. The window counts from the delivery date, not the purchase date. Items must be in the condition described by the store's listing. Individual stores may override this window; see the store overrides policy and the store's own policy page.",
+          "ok": true,
+          "policy_id": "cw-returns",
+          "title": "Cartwheel return policy"
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "store overrides return policy shipping costs"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-returns",
+              "score": 5.04,
+              "snippet": "# Cartwheel return policy\n\nItems bought on Cartwheel can be returned within 30 days of delivery. The window counts from the delivery date, not the purchase date. Items must be in the condition described by the store's listing. Individual stores may override this window; see the store overrides polic",
+              "title": "Cartwheel return policy"
+            },
+            {
+              "policy_id": "cw-shipping",
+              "score": 5.012,
+              "snippet": "# Cartwheel shipping policy\n\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.",
+              "title": "Cartwheel shipping policy"
+            },
+            {
+              "policy_id": "cw-cancellations",
+              "score": 2.558,
+              "snippet": "# Cartwheel order cancellation policy\n\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.",
+              "title": "Cartwheel order cancellation policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "get_policy",
+        "arguments": {
+          "policy_id": "cw-shipping"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "get_policy",
+        "content": {
+          "audience": "all",
+          "body": "# Cartwheel shipping policy\n\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.",
+          "ok": true,
+          "policy_id": "cw-shipping",
+          "title": "Cartwheel shipping policy"
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "store overrides policy"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-returns",
+              "score": 3.849,
+              "snippet": "# Cartwheel return policy\n\nItems bought on Cartwheel can be returned within 30 days of delivery. The window counts from the delivery date, not the purchase date. Items must be in the condition described by the store's listing. Individual stores may override this window; see the store overrides polic",
+              "title": "Cartwheel return policy"
+            },
+            {
+              "policy_id": "cw-store-overrides",
+              "score": 1.774,
+              "snippet": "# How store policies interact with platform policy\n\nStores on Cartwheel may set their own return windows and fees. An override is valid only if it is stated on the store's own policy page. When a store policy and the platform default disagree, the store policy wins, whether it is stricter or looser ",
+              "title": "How store policies interact with platform policy"
+            },
+            {
+              "policy_id": "store-meridian-cycles-policy",
+              "score": 1.642,
+              "snippet": "# Meridian Cycles store policy\n\nMeridian Cycles accepts returns within 21 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Meridian Cycles orders.",
+              "title": "Meridian Cycles store policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "Copperline Tools store policy"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-store-overrides",
+              "score": 1.774,
+              "snippet": "# How store policies interact with platform policy\n\nStores on Cartwheel may set their own return windows and fees. An override is valid only if it is stated on the store's own policy page. When a store policy and the platform default disagree, the store policy wins, whether it is stricter or looser ",
+              "title": "How store policies interact with platform policy"
+            },
+            {
+              "policy_id": "store-meridian-cycles-policy",
+              "score": 1.642,
+              "snippet": "# Meridian Cycles store policy\n\nMeridian Cycles accepts returns within 21 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Meridian Cycles orders.",
+              "title": "Meridian Cycles store policy"
+            },
+            {
+              "policy_id": "store-northwind-books-policy",
+              "score": 1.642,
+              "snippet": "# Northwind Books store policy\n\nNorthwind Books accepts returns within 45 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Northwind Books orders.",
+              "title": "Northwind Books store policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "search_help_center",
+        "arguments": {
+          "query": "return label prepaid postage refund shipping cost buyer pays"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "search_help_center",
+        "content": {
+          "ok": true,
+          "results": [
+            {
+              "policy_id": "cw-cancellations",
+              "score": 6.064,
+              "snippet": "# Cartwheel order cancellation policy\n\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.",
+              "title": "Cartwheel order cancellation policy"
+            },
+            {
+              "policy_id": "cw-shipping",
+              "score": 3.725,
+              "snippet": "# Cartwheel shipping policy\n\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.",
+              "title": "Cartwheel shipping policy"
+            },
+            {
+              "policy_id": "cw-refunds",
+              "score": 2.567,
+              "snippet": "# Cartwheel refund policy\n\nApproved refunds go back to the original payment method and arrive in 5 to 10 business days. Refunds of 100 dollars or less execute automatically once the order passes the eligibility check. Refunds above 100 dollars are queued for review by a human support agent before an",
+              "title": "Cartwheel refund policy"
+            }
+          ]
+        }
+      },
+      {
+        "role": "tool_call",
+        "name": "escalate_to_human",
+        "arguments": {
+          "context": "Shopper (user 435) asks who pays return postage. Order 2184: Speckled Screwdriver Set from Copperline Tools (store 4), $206.25, delivered 2026-06-21, confirmed return-eligible (10 days into window). Checked policies cw-returns, cw-shipping, cw-store-overrides, cw-cancellations, and cw-refunds — none specify return postage responsibility. No Copperline Tools store policy page found in the help center.",
+          "summary": "Confirm who pays return postage for return-eligible order 2184 (Copperline Tools)"
+        }
+      },
+      {
+        "role": "tool_result",
+        "name": "escalate_to_human",
+        "content": {
+          "ok": true,
+          "sla_hours": 24,
+          "ticket_id": 158
+        }
+      },
+      {
+        "role": "assistant",
+        "text": "I've opened ticket #158 for you — a human agent will get back to you within 24 hours to confirm exactly who covers the return postage for Copperline Tools. Your return window runs until about July 21 (30 days from delivery, per cw-returns), so you have plenty of time to wait for their answer before mailing it back.\n\nIn the meantime, if you'd like, I can process the refund side of the return for you ($206.25) — just note that refunds above $100 like this one go through a human review step before they're finalized. Want me to start that?"
+      }
+    ],
+    "turn_starts": [
+      0,
+      6
+    ],
+    "text": "still able to return the Speckled Screwdriver Set from order 2184?\n{'order_id': 2184}\n{'ok': True, 'order': {'delivered_at': '2026-06-21', 'order_id': 2184, 'ordered_at': '2026-06-17', 'product_id': 145, 'quantity': 1, 'refund_eligible': True, 'shipped_at': '2026-06-18', 'status': 'delivered', 'store_id': 4, 'store_name': 'Copperline Tools', 'total_usd': 206.25}}\n{'order_id': 2184}\n{'asof': '2026-07-01', 'days_since_delivery': 10, 'delivered_at': '2026-06-21', 'eligible': True, 'ok': True, 'order_id': 2184, 'reason': 'the order was delivered 10 days ago and is inside the return window', 'status': 'delivered'}\nGood news — yes, you can still return it. Order 2184 (the Speckled Screwdriver Set from Copperline Tools, $206.25) was delivered on June 21, 2026, which puts you 10 days into the return window — well within eligibility.\n\nWould you like me to go ahead and start the return/refund for you?\nwho pays for the return postage\n{'query': 'return shipping postage who pays'}\n{'ok': True, 'results': [{'policy_id': 'cw-shipping', 'score': 3.725, 'snippet': '# Cartwheel shipping policy\\n\\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.', 'title': 'Cartwheel shipping policy'}, {'policy_id': 'cw-getting-help', 'score': 2.358, 'snippet': '# Getting help on Cartwheel\\n\\nThe Cartwheel support assistant answers questions about orders, returns, refunds, products, and platform policy, and it cites the policy page behind every policy answer. If the assistant cannot resolve a case it opens a ticket for a human agent, who responds within 24 ho', 'title': 'Getting help on Cartwheel'}, {'policy_id': 'cw-cancellations', 'score': 1.262, 'snippet': '# Cartwheel order cancellation policy\\n\\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.', 'title': 'Cartwheel order cancellation policy'}]}\n{'policy_id': 'cw-returns'}\n{'audience': 'all', 'body': \"# Cartwheel return policy\\n\\nItems bought on Cartwheel can be returned within 30 days of delivery. The window counts from the delivery date, not the purchase date. Items must be in the condition described by the store's listing. Individual stores may override this window; see the store overrides policy and the store's own policy page.\", 'ok': True, 'policy_id': 'cw-returns', 'title': 'Cartwheel return policy'}\n{'query': 'store overrides return policy shipping costs'}\n{'ok': True, 'results': [{'policy_id': 'cw-returns', 'score': 5.04, 'snippet': \"# Cartwheel return policy\\n\\nItems bought on Cartwheel can be returned within 30 days of delivery. The window counts from the delivery date, not the purchase date. Items must be in the condition described by the store's listing. Individual stores may override this window; see the store overrides polic\", 'title': 'Cartwheel return policy'}, {'policy_id': 'cw-shipping', 'score': 5.012, 'snippet': '# Cartwheel shipping policy\\n\\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.', 'title': 'Cartwheel shipping policy'}, {'policy_id': 'cw-cancellations', 'score': 2.558, 'snippet': '# Cartwheel order cancellation policy\\n\\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.', 'title': 'Cartwheel order cancellation policy'}]}\n{'policy_id': 'cw-shipping'}\n{'audience': 'all', 'body': '# Cartwheel shipping policy\\n\\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.', 'ok': True, 'policy_id': 'cw-shipping', 'title': 'Cartwheel shipping policy'}\n{'query': 'store overrides policy'}\n{'ok': True, 'results': [{'policy_id': 'cw-returns', 'score': 3.849, 'snippet': \"# Cartwheel return policy\\n\\nItems bought on Cartwheel can be returned within 30 days of delivery. The window counts from the delivery date, not the purchase date. Items must be in the condition described by the store's listing. Individual stores may override this window; see the store overrides polic\", 'title': 'Cartwheel return policy'}, {'policy_id': 'cw-store-overrides', 'score': 1.774, 'snippet': \"# How store policies interact with platform policy\\n\\nStores on Cartwheel may set their own return windows and fees. An override is valid only if it is stated on the store's own policy page. When a store policy and the platform default disagree, the store policy wins, whether it is stricter or looser \", 'title': 'How store policies interact with platform policy'}, {'policy_id': 'store-meridian-cycles-policy', 'score': 1.642, 'snippet': '# Meridian Cycles store policy\\n\\nMeridian Cycles accepts returns within 21 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Meridian Cycles orders.', 'title': 'Meridian Cycles store policy'}]}\n{'query': 'Copperline Tools store policy'}\n{'ok': True, 'results': [{'policy_id': 'cw-store-overrides', 'score': 1.774, 'snippet': \"# How store policies interact with platform policy\\n\\nStores on Cartwheel may set their own return windows and fees. An override is valid only if it is stated on the store's own policy page. When a store policy and the platform default disagree, the store policy wins, whether it is stricter or looser \", 'title': 'How store policies interact with platform policy'}, {'policy_id': 'store-meridian-cycles-policy', 'score': 1.642, 'snippet': '# Meridian Cycles store policy\\n\\nMeridian Cycles accepts returns within 21 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Meridian Cycles orders.', 'title': 'Meridian Cycles store policy'}, {'policy_id': 'store-northwind-books-policy', 'score': 1.642, 'snippet': '# Northwind Books store policy\\n\\nNorthwind Books accepts returns within 45 days of delivery, instead of the Cartwheel platform default of 30 days. This store window takes precedence for all Northwind Books orders.', 'title': 'Northwind Books store policy'}]}\n{'query': 'return label prepaid postage refund shipping cost buyer pays'}\n{'ok': True, 'results': [{'policy_id': 'cw-cancellations', 'score': 6.064, 'snippet': '# Cartwheel order cancellation policy\\n\\nAn order can be cancelled at no cost any time before the store ships it. Once an order has shipped it can no longer be cancelled; the buyer should instead wait for delivery and request a return under the Cartwheel return policy.', 'title': 'Cartwheel order cancellation policy'}, {'policy_id': 'cw-shipping', 'score': 3.725, 'snippet': '# Cartwheel shipping policy\\n\\nStores ship orders within 3 days of purchase. Standard delivery takes up to 7 days in transit after shipment. Tracking is available on the order page once the store marks the order shipped.', 'title': 'Cartwheel shipping policy'}, {'policy_id': 'cw-refunds', 'score': 2.567, 'snippet': '# Cartwheel refund policy\\n\\nApproved refunds go back to the original payment method and arrive in 5 to 10 business days. Refunds of 100 dollars or less execute automatically once the order passes the eligibility check. Refunds above 100 dollars are queued for review by a human support agent before an', 'title': 'Cartwheel refund policy'}]}\n{'context': 'Shopper (user 435) asks who pays return postage. Order 2184: Speckled Screwdriver Set from Copperline Tools (store 4), $206.25, delivered 2026-06-21, confirmed return-eligible (10 days into window). Checked policies cw-returns, cw-shipping, cw-store-overrides, cw-cancellations, and cw-refunds — none specify return postage responsibility. No Copperline Tools store policy page found in the help center.', 'summary': 'Confirm who pays return postage for return-eligible order 2184 (Copperline Tools)'}\n{'ok': True, 'sla_hours': 24, 'ticket_id': 158}\nI've opened ticket #158 for you — a human agent will get back to you within 24 hours to confirm exactly who covers the return postage for Copperline Tools. Your return window runs until about July 21 (30 days from delivery, per cw-returns), so you have plenty of time to wait for their answer before mailing it back.\n\nIn the meantime, if you'd like, I can process the refund side of the return for you ($206.25) — just note that refunds above $100 like this one go through a human review step before they're finalized. Want me to start that?",
+    "meta": {
+      "scenario_id": "support-0125",
+      "role": "shopper",
+      "prompt_version": "62699e454dd0"
+    },
+    "features": {
+      "turn_count": 2,
+      "message_count": 24,
+      "tool_call_count": 10,
+      "distinct_tools": 5,
+      "has_retrieval": 1,
+      "write_tool_count": 1,
+      "tokens": 1252
+    },
+    "tools": [
+      "check_return_eligibility",
+      "escalate_to_human",
+      "get_order",
+      "get_policy",
+      "search_help_center"
+    ],
+    "writes": [
+      "escalate_to_human"
+    ],
+    "flags": [
+      "10 tool calls (top 10%)",
+      "1252 tokens (top 10%)"
+    ],
+    "reason": "second-pass threshold-offer search: an order over $100, a refund offer in the reply, no approval language; 0125 retrieved as the close negative that discloses",
+    "batch": "b5_threshold_offer_v2"
   }
 ]

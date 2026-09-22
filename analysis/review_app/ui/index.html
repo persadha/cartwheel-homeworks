@@ -327,6 +327,7 @@
   .status.candidate { background: #fef3c7; color: #92400e; }
   .status.confirmed { background: #d1fae5; color: #065f46; }
   .status.frozen    { background: #e0e7ff; color: #3730a3; }
+  .status.dropped   { background: #f1f5f9; color: #64748b; text-decoration: line-through; }
 
   #sugg-queue { background: var(--panel); border: 1px solid var(--line);
                 border-radius: 8px; padding: 12px; }
@@ -880,7 +881,14 @@ function renderProgress() {
  * exists across turns cannot be judged from one turn. The server expands it
  * into one row and one Langfuse score per turn trace id, so every trace ends
  * up scored. */
-function modeNames() { return normalizePatterns(state.patterns).map(m => m.name); }
+/* Final modes only. A mode marked `dropped` stays in patterns.json so the path
+   from observation to category remains inspectable, but it is not part of the
+   final taxonomy and must not appear as a Part E labeling target. */
+function modeNames() {
+  return normalizePatterns(state.patterns)
+    .filter(m => m.status !== 'dropped')
+    .map(m => m.name);
+}
 
 function labelOf(mode, cid) {
   const m = state.labels[mode];
@@ -1001,7 +1009,10 @@ function bar(name, done, total, extra) {
 function normalizePatterns(p) {
   if (!p || typeof p !== 'object') return [];
   if (Array.isArray(p.modes)) return p.modes.filter(m => m && m.name);
-  return Object.entries(p).map(([name, m]) => ({name, ...(m || {})}));
+  // An underscore-prefixed key is taxonomy metadata (e.g. _axial_pass), not a mode.
+  return Object.entries(p)
+    .filter(([name]) => !name.startsWith('_'))
+    .map(([name, m]) => ({name, ...(m || {})}));
 }
 function modeCount(m) {
   // a live mode carries `count`; a final mode carries the any-instance count.

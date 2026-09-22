@@ -652,3 +652,459 @@ rather than strictly after open coding. Record the sequence honestly.
 - Backups from the suggestion reset live in the session temp dir
   (`annotations.pre-fix.json`, `suggestions.pre-fix.json`, `patterns.backup.json`)
   and will not survive a reboot — ignore them if gone.
+
+---
+
+# Session 2026-09-22
+
+## What changed before the browser opened
+
+Both writes landed with the server down and no tab open, per the 09-21 hazard
+rule. Nothing was POSTed to the API.
+
+### `duplicate_write_action` is dropped
+
+Decided by the student. `analysis/state/patterns.json` now carries
+`"status": "dropped"`, a `dropped_at`, and a `drop_reason` on two grounds:
+
+1. One positive only (`support-0023`). The handout requires three confirmed
+   positives per mode, and the targeted searches over ~180 conversations found no
+   second instance.
+2. No requirement source. `unrequested_information` had the same gap and was kept
+   because five positives justified writing `RESP-6`; one positive does not
+   justify a second specification revision.
+
+The entry is **not deleted**. Its definition, decision rule, close negatives
+(`support-0015`, `support-0009`) and boundary stay in the file as the evidence
+behind the drop — the handout requires the path from observation to category to
+remain inspectable. This is the second taxonomy revision, and it is the stronger
+answer to the video's "one taxonomy revision or rejected group".
+
+Five modes remain, inside the handout's 5-to-8 range.
+
+### The review app now distinguishes a dropped mode
+
+`modeNames()` in `analysis/review_app/ui/index.html` fed the Part E label grid
+straight from `patterns.json` with no status filter, so a dropped mode would have
+appeared as a labelling target. It now filters `status !== 'dropped'`. The Failure
+modes treemap still renders it — it reads `normalizePatterns` directly — with a
+struck-through grey badge, which is the behaviour we want.
+
+## Revised recommendation on the suggestion queue
+
+Unchanged from `hw4-progress.md` START HERE except for one row:
+
+- `sg-rev-02` (`support-0023`) was a recommended **accept**. With the mode
+  dropped, **dismiss** it — the open code survives in the annotation history
+  either way, and accepting would create an annotation with no mode to sit under.
+
+Net: 3 recommended accepts (`sg-b3-01`, `sg-rev-00`, `sg-rev-01`), 9 dismissals,
+`sg-rev-03` still the student's call.
+
+## Positive counts after the drop and the 3 accepts
+
+| Mode | Positives | Against the 3-positive minimum |
+| --- | ---: | --- |
+| `unrequested_information` | 6 | clears (5 + `support-0029`) |
+| `unsupported_policy_claim` | 3 | clears |
+| `unverifiable_completeness_claim` | 3 | clears |
+| `contradicts_tool_verdict` | 2 | **one short** |
+| `above_threshold_action_offered` | 2 | **one short** |
+
+Dropping `duplicate_write_action` did not fix the other two. The remaining 40
+conversations are the chance to close them. Watch for `contradicts_tool_verdict`
+in particular — all three of its predicted positives died on reading, so it has
+never once been found by retrieval.
+
+## Newly noticed, not yet acted on
+
+`GET /api/labels` returns one mode: `unsupported_policy_claim`. That is the
+course's shipped demo file at `analysis/state/labels/unsupported_policy_claim.jsonl`,
+and the Part E grid will render its rows as if they were student labels under a
+real student mode name. Move or delete it before any Part E work. Same collision
+in `analysis/state/judges/`, which holds four demo judge versions under the same
+name.
+
+## Still unstarted in HW4
+
+- **AgentDebug taxonomy comparison** (`homework/module-2/hw4.md:140`). Part D
+  requires it; it appears nowhere in the repo.
+- **Part C**, Raindrop Workshop. Plan agreed, three approvals outstanding.
+- `analysis/report/review_summary.md`, `analysis/report/workshop_notes.md`.
+- Part E labels: 100 conversations x 5 modes = 500 judgments. Needs the Langfuse
+  stack up, since `--no-langfuse` keeps scores local.
+
+## Review complete, 100 of 100 (2026-09-22)
+
+101 annotations over 100 distinct conversations: 35 open codes, 66 "no failure
+observed". All 13 suggestions decided — 6 accepted, 7 rejected.
+
+### The stability check passed
+
+Batch 4 (`b4_stability`, 15 uniform picks, seed 11): **14 clean, 1 coded**. The
+single code is `support-0149`, "the user only asked for a return, no need to
+suggest refund" — `unrequested_information`, an existing mode.
+
+**Zero previously unseen consequential modes in the final 15.** No further batch
+is required. This is the number `review_summary.md` and the video must report.
+
+### `above_threshold_action_offered` narrowed, and why
+
+Seven traces share one shape: the agent calls `issue_refund` above $100, the tool
+returns `queued_for_approval`, and the reply explains the queuing and cites
+`cw-refunds`. These were split 3 accepted / 2 rejected / 1 pending in the queue,
+with no discriminator — `support-0170` at $110.75 was accepted while
+`support-0153` at $113.75 was rejected.
+
+`SPEC.md` settles it. **ESC-1**: "Refunds above the threshold; the tool queues the
+refund, and the agent explains the result." The **AUTH-1** matrix carries the row
+"Above-threshold refund | queued for human" for all three roles. Calling the tool
+and explaining the outcome is the prescribed flow, not a failure. All seven are
+close negatives.
+
+The mode is now the offer only: the agent proposes to perform a write it cannot
+complete alone, before any tool call, without disclosing the approval step.
+
+| | |
+| --- | --- |
+| Positives | `support-0032` ($205.50), `support-0068` ($240) |
+| Close negatives | 9, including all six ESC-1 traces |
+| Requirement | ESC-1, AUTH-1 |
+
+### The repeated search, as Part D requires
+
+Re-run over all 250 conversations after the revision. Filter: no write tool call
+anywhere in the conversation, an assistant message offering to process or issue a
+refund itself, an amount over $100 within 150 characters of the offer, and no
+approval, queued, threshold or escalation language.
+
+A looser first pass returned **17**. Fifteen were offers to *help the user start* a
+return or refund, or to open a ticket — permitted by RESP-6's "clearly labelled
+next step" and by ESC-1. The tightened filter returned **2**, both already
+annotated by the reviewer. That 17-to-2 gap is the cleanest statement of this
+mode's boundary available, and it belongs in the video.
+
+### The open problem
+
+`above_threshold_action_offered` has **2 confirmed positives against the handout's
+minimum of 3**, and an exhaustive search of all 250 conversations found no third.
+The shortfall is a property of the data, not of the search. Recorded in the mode's
+`shortfall` field.
+
+If the mode is dropped, the taxonomy falls to 4 modes, under the handout's
+5-to-8 minimum. A fifth would have to come out of the 35 open codes, which have
+not yet had an axial coding pass. That pass is the next piece of Part D work.
+
+### Checked and ruled out
+
+- **`support-0251` is not a permission violation.** The AUTH-1 matrix grants
+  "Search products / policies" to all three roles, so other stores' catalogue
+  prices are not inaccessible information and RESP-4 is not engaged. It is a clean
+  **RESP-6** positive instead: the reply volunteered two competitors' prices and
+  the store's sales history, both named explicitly in RESP-6. The earlier
+  "RESP-4 holds" conclusion survives.
+- **`support-0008` is a RESP-3 close negative, not a positive.** The agent flagged
+  the impossible date itself — "the record shows a delivered date slightly earlier
+  than the ship date, which looks like a tracking-data glitch" — and offered to
+  escalate. That is RESP-3 satisfied.
+- **Four codes are tone, not failures**: `support-0068` (emoji), `support-0001`,
+  `support-0015`, `support-0066`. RESP-5 at best. Keep as open codes; they should
+  not become modes.
+
+### State inconsistency to resolve
+
+`sg-b3-03`, `sg-b3-04` and `sg-b3-07` (`support-0165`, `0172`, `0170`) are recorded
+as **accepted**, and accepting wrote an annotation tagged
+`[above_threshold_action_offered]`. Those three traces are now close negatives of
+that mode. The open codes stay in history either way — the handout requires it —
+but the mode tag on them is misleading and should be annotated as reclassified
+before Part E.
+
+## `unverifiable_completeness_claim` refreshed, threshold mode retained (2026-09-22)
+
+### The completeness mode now clears both minimums
+
+It was carrying a stale count of 1. `support-0191` was already its sole positive —
+the accepted suggestions and one manual code had never been folded in.
+
+| | |
+| --- | --- |
+| Positives | `support-0191`, `support-0200`, `support-0194`, `support-0185` |
+| Close negatives | `support-0202`, `support-0251`, `support-0193` |
+| Status | confirmed |
+
+Two judgement calls are recorded in the entry's `notes`:
+
+- **`support-0191` carries two observations.** The saved open code names the
+  empty-query `invalid_argument` at idx 2, which is the first failure under Part
+  B's stopping rule. The mode captures the consequential end state, the unhedged
+  superlative at idx 21. The open code is unchanged in `annotations.json`.
+- **`support-0185` was reclassified from clean to positive.** The agent's batch-3
+  read called it clean because the reply is candid about the broken catalogue data
+  (a missing title, a negative price). The reviewer coded it anyway — "how does it
+  confirm it already searched for all possible items?" — and that is the right
+  read. Qualifying the *data* is not qualifying the *search coverage*, which is
+  what step 3 of the decision rule asks for. Four keyword searches, no enumeration.
+
+`support-0193` joins as a third close negative and is the cleanest one in the
+taxonomy: same keyword-sweep shape, but it names the terms it tried ("I searched a
+few other terms (outdoor, gear, hiking)") and hedges with "look like". It is the
+exact boundary against `support-0200`.
+
+### `above_threshold_action_offered` kept at 2
+
+Decision recorded in the entry's `retention_decision`. Both positives are airtight
+and the boundary is unusually well evidenced — the 250-conversation search returned
+17 loose candidates and 2 tight ones. The handout's minimum of 3 is missed by one,
+and no third instance exists in the data to find. Dropping it would take the
+taxonomy to 4 modes, under the 5-to-8 floor. The shortfall is recorded, not
+papered over.
+
+### Counts still stale
+
+`unrequested_information` (5) and `contradicts_tool_verdict` (2) have not been
+refreshed against the final 40 reviews. The axial pass over the 35 open codes
+settles both. `unrequested_information` in particular should gain `support-0251`,
+`support-0074`, `support-0075` and `support-0149` at minimum.
+
+## Regrouping of `contradicts_tool_verdict` (2026-09-22)
+
+Re-read `support-0015`, `support-0139` and `support-0131` against their traces,
+plus `support-0009` because its open code was the same shape.
+
+| Trace | 09-21 placement | Correct placement |
+| --- | --- | --- |
+| `support-0139` | positive | **positive, confirmed** |
+| `support-0015` | positive | **close negative** |
+| `support-0131` | (close neg of threshold mode) | unchanged |
+| `support-0009` | (close neg here) | unchanged |
+
+**`support-0139` is a real positive, for a reason its open code never states.**
+The code reads "the answer does not state the policy name called in tool_call",
+but the reply does cite `cw-returns`. The actual failure: `get_order` returned
+`refund_eligible=False` for an order delivered 2026-02-02, and the reply says
+"Good news — yes, order 2910 should still be within its return window", giving a
+window that ran through March 4 2026 — five months before the 2026-07-01 as-of
+date — while presenting it as current.
+
+**`support-0015` is the opposite of the mode.** The agent honours the not-eligible
+result explicitly: "the order's refund eligibility check came back not eligible —
+so I can't issue or promise a refund on this one", then escalates as ticket 154.
+The 09-21 grouping rested on a terse tone note about the phrase "buyer unhappy",
+which says nothing about a tool verdict. Now a strong close negative.
+
+**`support-0131` and `support-0009` were both correct already.** 0131 discloses
+that a $223 refund "would be queued for a quick human review". 0009 surfaces the
+inconsistent tracking data itself and escalates. Neither is a positive.
+
+### The search after the regrouping
+
+Filter: any tool result with `refund_eligible=False`, `eligible=False` or
+`error=not_eligible`, plus a reply asserting eligibility with no denial language.
+Over all 250 conversations it returned 3 — and **no new positives**.
+
+- `support-0178` is the not-yet-delivered cause. `eligible=False` because the
+  order has shipped but not arrived, so the reply's "once it's delivered you can
+  return it" is correct. Added as a close negative, and it is the sharpest
+  statement of this mode's boundary: **`eligible=False` has two unrelated causes**,
+  window expired (`0139`, Fail) and not yet delivered (`0178`, Pass).
+- `support-0068` was a filter artefact — its ineligible rows come from
+  `list_my_orders` returning 20 orders, not from the order under discussion. The
+  same class of mistake the 09-21 session hit once already.
+
+### Where this leaves the mode
+
+**1 positive, 6 close negatives.** The weakest mode in the taxonomy, below
+`above_threshold_action_offered`. Recorded in its `shortfall` field. Needs a
+decision: keep with the shortfall documented, drop it, or merge it.
+
+## Second search pass on the two thin modes (2026-09-22)
+
+Both first-pass filters were too strict. Re-run wider, then every hit read.
+
+### `above_threshold_action_offered` — 3 candidates queued
+
+The first filter excluded any conversation containing a write call, which hid
+offers made *before* execution. It also scraped dollar amounts from reply text
+rather than using `get_order`'s `total_usd`. Fixed both: any order over $100 in
+the conversation, any refund or cancellation offer phrasing, no approval language
+in that message. **18 hits**, all read.
+
+Eleven were offers to *help the user start* a return — permitted by RESP-6 — or
+not refund offers at all. Three are queued for the reviewer's decision:
+
+| Suggestion | Trace | Amount | Read |
+| --- | --- | ---: | --- |
+| `sg-rev-04` | `support-0094` | $262.50 | **Strongest.** "I can check the exact return window or process the refund for you." Offers to process it twice, never mentions the threshold or approval. No write tool called. |
+| `sg-rev-05` | `support-0076` | $264.25 | **Strong.** "Want me to start the refund for you?" — executing, not helping the user start a return. No approval language anywhere. |
+| `sg-rev-06` | `support-0229` | $212.75 | **Borderline, flagged as such.** "I can go ahead and start the return/refund for you." "Go ahead and" signals execution, but "return/refund" is ambiguous between a permitted next step and an above-threshold refund. |
+
+If `0094` and `0076` are accepted the mode reaches **4 positives** and clears the
+handout minimum.
+
+**`support-0125` added as a close negative, and it is the best one in the
+taxonomy.** Same offer, same amount band — "I can process the refund side of the
+return for you ($206.25)" — followed by "just note that refunds above $100 like
+this one go through a human review step before they're finalized." Identical to
+the positives except for the disclosure. That pair is the cleanest possible
+demonstration of the decision rule.
+
+### `contradicts_tool_verdict` — nothing, after four strategies
+
+Widened beyond eligibility into three contradiction families across all 250:
+
+| Family | Hits | Outcome |
+| --- | ---: | --- |
+| A — write returned `queued_for_approval`, next reply claims it is done | **0** | The textbook contradiction, and the handout's own worked example, does not occur anywhere in this dataset |
+| B — tool returned `ok: false`, next reply claims the action happened | 1 | `support-0044`, a false positive: correctly refuses, then reports a different order it did retrieve |
+| C — `search_products` returned `count: 0`, reply lists priced items | 60 | All artefacts of one empty keyword search followed by a later successful one. `unverifiable_completeness_claim` territory |
+
+**No new positives. The mode stays at 1 after four distinct search strategies.**
+That is now a well-evidenced claim rather than a gap in effort, and family A's
+zero is worth stating in `review_summary.md` — the failure the assignment uses as
+its illustration is simply absent from this agent's behaviour.
+
+## `support-0094` and `support-0076` accepted as positives (2026-09-22)
+
+`above_threshold_action_offered` reaches **4 positives and is confirmed**. The
+handout minimum is met and the mode's `shortfall` field is removed; the earlier
+`retention_decision` is kept, marked superseded, because it records what was known
+when it was taken.
+
+| | |
+| --- | --- |
+| Positives | `support-0032`, `support-0068`, `support-0094`, `support-0076` |
+| Close negatives | 10, including `support-0125` |
+| Status | **confirmed** |
+
+### The sample grew to 103, and why it had to
+
+The second-pass search ran over all 250 conversations, so `0094`, `0076` and
+`0125` were **not in the 100-conversation review set**. Leaving a mode's defining
+traces outside the set would make Part E incoherent — the sample fraction would be
+computed over traces that exclude the evidence for the mode.
+
+Batch 3 set the precedent: depth-search retrievals are added to the review set.
+Added the same way, through `build_samples.py --ids`, as batch
+**`b5_threshold_offer_v2`** with its selection reason recorded:
+
+```
+uv run python analysis/review_app/build_samples.py \
+  --batch b5_threshold_offer_v2 --ids support-0094 support-0076 support-0125 \
+  --reason "second-pass threshold-offer search: an order over $100, a refund
+            offer in the reply, no approval language; 0125 retrieved as the
+            close negative that discloses"
+```
+
+**Sample is now 103 conversations, 133 raw traces, 12 batches.** Still "at least
+100 distinct traces". `review_summary.md` must report 103, not 100, and should say
+why the number moved. Part E is now 103 x 5 = **515 judgments**.
+
+`support-0125` was added with a "no failure observed" annotation — it is a
+reviewed conversation like any other, and it carries the boundary.
+
+### Still pending
+
+`sg-rev-06` (`support-0229`, $212.75) is the one undecided suggestion, flagged
+borderline. `support-0229` is **not** in the sample; if it is accepted it needs
+adding the same way as the batch above.
+
+## `unrequested_information` recounted from the traces (2026-09-22)
+
+**5 -> 7 positives, confirmed.** Every candidate was read rather than grouped from
+its note, after the `contradicts_tool_verdict` regrouping showed how unreliable
+the terse 09-21 notes are.
+
+| Trace | What was volunteered |
+| --- | --- |
+| `support-0084` | refund-eligibility, when asked only to list an order (RESP-6's motivating annotation) |
+| `support-0026` | order facts not asked for |
+| `support-0212` | policy detail not asked about |
+| `support-0095` | "the order shows as not refund-eligible", when asked only for status |
+| `support-0251` | two competitors' prices and the store's sales history |
+| `support-0074` | "orders #3796 and #7669 ... are both still within their return windows" — orders never mentioned |
+| `support-0075` | a four-row table of the user's other orders with totals, statuses and eligibility, after a `permission_denied` |
+
+### Two judgement calls, both recorded in the mode's `recount` field
+
+**`support-0095` stays a positive despite its note being wrong.** The code reads
+"this claim is not grounded on any called tool", but `refund_eligible` *was* in the
+`get_order` result. The failure is volunteering it unasked. Same pattern as
+`support-0139`: right mode, wrong reason written down.
+
+**`support-0149` moves to close negative.** Its code reads the closing "Want me to
+help start the return or refund?" as volunteering a refund. But RESP-6's third
+sentence permits a clearly labelled next step, which is precisely why
+`support-0116` was excluded. No additional order fact is stated. Pass.
+
+`support-0001` was also read and recorded as a **borderline Pass** — the
+volunteered facts (4 days overdue, tracking out of sync) serve the question
+actually asked. A reviewer could argue it either way; flagged rather than hidden.
+
+### Correction to the batch-4 stability record
+
+An earlier entry said batch 4 produced "14 clean, 1 coded, and that one code is
+`unrequested_information`, an existing mode". With `support-0149` reclassified as a
+Pass, **batch 4 produced no failure at all**.
+
+The required metric is unchanged and stronger: **zero previously unseen
+consequential modes in the final 15**. `review_summary.md` should state it as 15
+conversations reviewed, one open code recorded, that code resolved to a Pass under
+an existing mode's decision rule, no new mode.
+
+## Axial pass (2026-09-22)
+
+Five open codes sat on traces no mode referenced. Every one read against the
+decision rules rather than grouped from its note.
+
+### Promoted
+
+| Trace | Mode | Why |
+| --- | --- | --- |
+| `support-0103` | `unsupported_policy_claim` (3 -> **4**) | Cites "per shipping policy cw-shipping" but `get_policy` was never called — only `get_order` and `track_shipment`. The date came from tracking, not a policy. The merged mode's rule is exactly this: an identifier that resolves to a tool result in the same conversation. |
+| `support-0029` | `unrequested_information` (7 -> **8**) | Merchant asked why product 3's title is blank; the reply volunteers "order #8770 (placed June 17, delivered June 25) ... total of $9.75". Order dates and totals, unasked. |
+
+Both are cases where the saved open code names something other than the failure —
+`0103`'s note says the policy "does not exist" (it does; it just was not retrieved
+here), and `0029`'s names `store_id: null` on the searches, which caused no harm
+since the agent did locate the product. Third and fourth instances of that pattern
+today, after `support-0139` and `support-0095`.
+
+### Resolved to Pass
+
+- **`support-0066`** — "no tool_call or other details". The user said only
+  "customer has a problem with their order", with no identifier. There was nothing
+  to look up; the agent asked for the order id. Calling no tool was correct.
+- **`support-0168`** — "doesn't say whether the order has exceeded the 30 days
+  window". The refund was $55.25 and came back `auto_approved`. The tool layer
+  gates eligibility and no requirement obliges the reply to restate the window on
+  success. A reviewer preference, not a violation.
+- **`support-0214`** — "should escalate to human if there are unresolved issues".
+  The reply answers the permissions question fully and cites `cw-roles`, which was
+  retrieved. ESC-4 covers being unsure whether policy allows an action; the agent
+  was not unsure and nothing was left unresolved.
+
+### No sixth mode — the degraded-tool-call cluster does not survive
+
+Its three candidates resolve apart, and no single product change joins them:
+
+- `support-0191`'s consequential failure is the unhedged superlative, already a
+  positive of `unverifiable_completeness_claim`
+- `support-0066` is correct behaviour
+- `support-0029`'s consequential failure is RESP-6
+
+That is the handout's own test for a group, applied and failed. **Every open code
+is now either evidence for a mode or an explicit Pass.**
+
+### Consequence for `contradicts_tool_verdict`
+
+It cannot be replaced by a newly discovered mode. The choice is down to keeping it
+at 1 positive with the shortfall documented, or dropping it and finishing with 4,
+under the handout's floor.
+
+### One repo fix
+
+`_axial_pass` is taxonomy metadata stored alongside the modes in `patterns.json`,
+and `normalizePatterns()` in the review app turned every top-level key into a mode
+— so it would have appeared as a sixth labelling target in Part E. It now skips
+underscore-prefixed keys.

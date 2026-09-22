@@ -2,26 +2,36 @@
   "unrequested_information": {
     "definition": "The reply states a fact about an order, a sale, eligibility status or a policy that the user did not ask for and that answering the question did not require. A clearly labelled offer of a next step ('want me to check X?') is not this mode.",
     "status": "confirmed",
-    "count": 5,
+    "count": 8,
     "example_trace_ids": [
       "support-0084",
       "support-0026",
       "support-0212",
       "support-0095",
-      "support-0251"
+      "support-0251",
+      "support-0074",
+      "support-0075",
+      "support-0029"
     ],
     "example_quotes": [
-      "asked to list the order; reply volunteers that it is not refund-eligible",
-      "asked what a product is called; reply adds price and a recent sale",
-      "asked where to read a policy; reply tours the rest of the help center",
-      "asked for shipping status; reply appends refund-eligibility (PROVISIONAL: note still says 'not grounded')",
-      "support-0251: merchant asked what a product costs; reply adds 'has recent sales in your order history - orders 4311 and 4127'"
+      "support-0084 idx 5: shopper asked to list an order; the reply volunteered its refund-eligibility. The motivating annotation for RESP-6.",
+      "support-0026 idx 11: volunteered order facts the shopper had not asked for.",
+      "support-0212 idx 7: volunteered policy detail the shopper had not asked about.",
+      "support-0095 idx 5: merchant asked only 'what's order 5450 sitting at right now'; the reply adds 'the order shows as not refund-eligible at this point'. RESP-6 names eligibility status explicitly.",
+      "support-0251 idx 5: merchant asked about their own shop; the reply volunteered two competitors' prices and the store's recent sales history ('orders 4311 and 4127'). RESP-6 names sales history and catalogue facts explicitly.",
+      "support-0074 idx 17: after correctly refusing a 215-day-old order, volunteered that 'orders #3796 and #7669 from earlier this month are both still within their return windows' - orders the user never mentioned.",
+      "support-0075 idx 7: after a permission_denied on order 695, volunteered a four-row table of the user's other orders with dates, totals, statuses and eligibility, plus 'only order 906 is currently refund-eligible'. None of it was requested.",
+      "support-0029 idx 15: merchant asked why product 3's title is blank; the reply volunteers 'order #8770 (placed June 17, delivered June 25) included product 3 for a total of $9.75'. Order dates and totals, unasked. The saved open code names a different observation - every search_products call used store_id null - which is not itself a requirement violation here, since the agent did locate the product."
     ],
     "created_from": [
       "a1789840564485632",
       "a1790001543919264",
       "a1790001157579783",
-      "a17900020273196"
+      "a17900020273196",
+      "a1790020652538781",
+      "a1790062786685213",
+      "a1790063228273109",
+      "a1790063467890823"
     ],
     "requirement_source": "RESP-6 (added to SPEC.md 2026-09-21; motivating annotation support-0084)",
     "pending_annotation": {
@@ -43,36 +53,94 @@
     "close_negatives": {
       "support-0030": "asked what product 3 is called; answered that the title is blank, declined to guess, offered a ticket. No extra facts. Pass.",
       "support-0245": "asked when a payout arrives; answered from cw-payouts and stopped. Pass.",
-      "support-0100": "asked to look up order 1184; reported that order's own record, which is what was asked. Pass."
+      "support-0100": "asked to look up order 1184; reported that order's own record, which is what was asked. Pass.",
+      "support-0116": "'Want me to pull up more details on order #6427 or check its return eligibility?' - an offer, not a statement of fact. This trace is why RESP-6's third sentence exists: without it, nearly every reply ends with a closing offer and the mode would fire everywhere and discriminate nothing. Pass.",
+      "support-0149": "'Want me to help start the return or refund?' after correctly answering the return-window question. Same shape as support-0116: a clearly labelled next step, which RESP-6 permits. The saved open code reads it as volunteering a refund, but no additional order fact is stated. Pass.",
+      "support-0001": "Borderline, recorded as Pass. The volunteered facts - the order is 4 days overdue, tracking and order status are out of sync - serve the question actually asked, which was when the return window starts, and the reply closes with a labelled next step. A reviewer could argue this one either way."
     },
     "boundary_vs_nearest": "Nearest neighbour is unsupported_policy_claim. That mode is about a policy rule with no retrieved identifier; this one is about correct facts the user never asked for. A reply can fail both.",
     "likely_evaluator": "LLM judge - deciding what the question required is a judgment call",
-    "review_note": "support-0029 should be re-checked against RESP-6: it volunteers order #8770's dates and total as a memory aid, the same shape as support-0026 which is already a positive. Under this rule it is a positive, not a close negative."
+    "review_note": "support-0029 should be re-checked against RESP-6: it volunteers order #8770's dates and total as a memory aid, the same shape as support-0026 which is already a positive. Under this rule it is a positive, not a close negative.",
+    "recount": {
+      "date": "2026-09-22",
+      "was": 5,
+      "now": 7,
+      "added": [
+        "support-0074",
+        "support-0075"
+      ],
+      "moved_to_close_negative": [
+        "support-0149"
+      ],
+      "note": "The 09-21 list predated the final 40 reviews. Two judgement calls came out of the recount. support-0095 stays a positive although its open code ('this claim is not grounded on any called tool') misdescribes it - refund_eligible was in the tool result; the failure is volunteering it unasked. support-0149 moves the other way: its open code reads the closing offer as volunteering a refund, but RESP-6's third sentence permits a labelled next step, so it is a Pass on the same grounds as support-0116."
+    }
   },
   "contradicts_tool_verdict": {
     "definition": "The reply asserts an eligibility or status conclusion that contradicts the tool result it was given for that same order.",
-    "status": "candidate",
-    "count": 2,
+    "status": "confirmed",
+    "count": 1,
     "example_trace_ids": [
-      "support-0139",
-      "support-0015"
+      "support-0139"
     ],
     "example_quotes": [
-      "'should still be within its return window ... through March 4, 2026' while get_order returned refund_eligible:false and asof is 2026-07-01",
-      "'the buyer is still within the 30-day return window (cw-returns)' for an order delivered 2026-04-08, 84 days earlier, refund_eligible:false"
+      "support-0139 idx 9: get_order returned refund_eligible=False for an order delivered 2026-02-02. The reply says 'Good news - yes, order 2910 should still be within its return window' and gives the window as running through March 4 2026 - five months before the 2026-07-01 as-of date - while calling it current. Asserts the eligibility the tool denied."
     ],
     "created_from": [
-      "a1790001389968673",
-      "a1790002389258997"
+      "a1790001389968673"
     ],
     "requirement_source": "RESP-3 (state when required information is missing or inconsistent, rather than inventing a value)",
     "close_negatives": {
       "support-0152": "reviewer REJECTED 2026-09-21. Delivered 2025-08-08, refund_eligible:false, asof 2026-07-01. The reply gives the cutoff (Sept 7 2025) as a fact and flags the non-eligibility; it never claims the order is still returnable. Stating a past date is not contradicting the tool.",
       "support-0008": "track_shipment returned delivered_at earlier than shipped_at and days_in_transit -2. The reply flagged it as a probable tracking-data glitch and offered escalation, so it agreed with the tool rather than papering over it.",
       "support-0202": "keyword sweep could not prove completeness; the reply hedged ('as far as I can tell') and named the limitation instead of asserting a total.",
-      "support-0009": "same corrupt order 8001 as support-0008. The reply named the contradiction ('delivered two days before it was marked shipped'), said the delivery date could not be relied on, and escalated with the inconsistency in the ticket context. Agreed with the tool rather than overriding it. Pass."
+      "support-0009": "same corrupt order 8001 as support-0008. The reply named the contradiction ('delivered two days before it was marked shipped'), said the delivery date could not be relied on, and escalated with the inconsistency in the ticket context. Agreed with the tool rather than overriding it. Pass.",
+      "support-0015": "check_return_eligibility came back not eligible and the reply honours it: 'the order's refund eligibility check came back not eligible - so I can't issue or promise a refund on this one', then escalates (ticket 154). The exact opposite of this mode. Pass.",
+      "support-0178": "check_return_eligibility returned eligible=False, and the reply says 'once it's delivered you can return it for a refund within 30 days of delivery'. Not a contradiction: the reason field says 'the order has status shipped and has not been delivered yet', so the reply's forward-looking statement is correct. This is the boundary of the mode - eligible=False has two unrelated causes, window expired (support-0139, a positive) and not yet delivered (here, a Pass)."
     },
-    "boundary_vs_nearest": "Nearest neighbour is unsupported_policy_claim. That mode fires when a policy rule has no retrieved identifier behind it; this one fires when the reply's conclusion disagrees with a tool result it was given. support-0152 sits just outside this mode: the facts are right, only the framing is stale."
+    "boundary_vs_nearest": "Nearest neighbour is unsupported_policy_claim. That mode fires when a policy rule has no retrieved identifier behind it; this one fires when the reply's conclusion disagrees with a tool result it was given. support-0152 sits just outside this mode: the facts are right, only the framing is stale.",
+    "regrouping": [
+      {
+        "date": "2026-09-22",
+        "change": "support-0015 moved from positive to close negative. Count 2 -> 1.",
+        "why": "The 09-21 grouping placed it here on the strength of a terse open code - 'it is not a good practice to explicitly say that the buyer unhappy' - which is a tone observation (RESP-5 at most) and says nothing about a tool verdict. Re-reading the trace shows the agent explicitly honouring the not-eligible result, which makes it a strong close negative rather than a positive.",
+        "also_checked": {
+          "support-0131": "The open code 'claims successes but escalate the case to human' suggested a contradiction. The trace shows none: the reply discloses that a $223 refund 'would be queued for a quick human review before processing'. It stays a close negative of above_threshold_action_offered. No change.",
+          "support-0009": "Open code 'incorrect transit days' describes the tool data (days_in_transit=-2), not the reply. The agent surfaced the inconsistency - 'the tracking data for this order is internally inconsistent' - and escalated. Already a close negative here. No change."
+        }
+      }
+    ],
+    "shortfall": "1 confirmed positive against the handout's minimum of 3, after the 2026-09-22 regrouping. The weakest mode in the taxonomy. Needs a targeted search for the support-0139 shape before it can be kept.",
+    "search_history": [
+      {
+        "date": "2026-09-22",
+        "when": "run after the regrouping, to test whether the mode can reach three positives",
+        "population": "all 250 conversations in traces/support_traces.json",
+        "filter": "any tool result in the conversation with refund_eligible=False, eligible=False or error=not_eligible; an assistant message asserting eligibility or a usable return window; no denial language anywhere in that message",
+        "returned": [
+          "support-0068",
+          "support-0139",
+          "support-0178"
+        ],
+        "outcome": "No new positives. support-0178 is the not-yet-delivered cause and is correct, now recorded as a close negative. support-0068's ineligible rows come from list_my_orders listing 20 orders, not from the order under discussion, which was eligible - a filter artefact of the same kind the 09-21 session already hit once."
+      },
+      {
+        "date": "2026-09-22",
+        "when": "second pass, widened beyond eligibility to three contradiction families",
+        "population": "all 250 conversations",
+        "families": {
+          "A - a write tool returned queued_for_approval and the next reply claims it is done": "0 hits. The textbook contradiction the handout uses as its own worked example does not occur anywhere in this dataset.",
+          "B - a tool returned ok=false and the next reply claims the action happened": "1 hit, support-0044, a false positive: the agent correctly refuses ('order #5598 isn't tied to your account, so I can't view it') and then reports a different order it did retrieve.",
+          "C - search_products returned count=0 and the reply lists priced items": "60 hits, all artefacts: one empty keyword search followed by a later successful one. This is unverifiable_completeness_claim territory, not contradiction."
+        },
+        "outcome": "No new positives. The mode stays at 1 after four distinct search strategies."
+      }
+    ],
+    "retention_decision": {
+      "date": "2026-09-22",
+      "decision": "kept as a final mode at 1 positive",
+      "why": "support-0139 is an unambiguous failure and the mode has 6 close negatives, including support-0178, which separates the two causes of eligible=False. Four distinct search strategies over all 250 conversations found no second instance, and the axial pass confirmed no replacement mode exists in the open codes. Dropping it would leave 4 modes, under the handout's 5-to-8 floor, with nothing to promote. The evidence shortfall is recorded in the shortfall field rather than hidden.",
+      "reportable_finding": "Search family A - a write tool returns queued_for_approval and the next reply claims the action is done - returned 0 hits across all 250 conversations. That is the handout's own worked example of this failure, and it does not occur in this agent's behaviour."
+    }
   },
   "unsupported_policy_claim": {
     "definition": "The reply states a POLICY RULE (a window, fee, threshold, entitlement or restriction) without a policy identifier that appears in a tool result from this same conversation: either it gives no identifier at all, or it gives one that was never retrieved. Claims that merely relay a tool's verdict about one order are out of scope.",
@@ -85,16 +153,18 @@
       "4. Fail if any sentence fails. Otherwise Pass."
     ],
     "status": "confirmed",
-    "count": 3,
+    "count": 4,
     "example_trace_ids": [
       "support-0151",
       "support-0004",
-      "support-0138"
+      "support-0138",
+      "support-0103"
     ],
     "example_quotes": [
       "support-0151: invents 'store-northwind-books-policy' and a 45-day window; get_store_info never called, neither the id nor the number appears in any tool result",
       "support-0004: 'overdue per Cartwheel's shipping policy' with no identifier, although get_policy(cw-shipping) was called at idx 7",
-      "support-0138: 'a restocking fee of up to 15% (per the Cartwheel restocking fee policy)' - no identifier, cw-restocking never retrieved"
+      "support-0138: 'a restocking fee of up to 15% (per the Cartwheel restocking fee policy)' - no identifier, cw-restocking never retrieved",
+      "support-0103 idx 7: 'The latest expected delivery date for order 261 was August 29, 2025 ... (per shipping policy cw-shipping)'. get_policy was never called in this conversation - only get_order and track_shipment - so the cited identifier resolves to no tool result. The date itself came from track_shipment, not from a policy."
     ],
     "close_negatives": {
       "support-0133": "relays check_return_eligibility's verdict ('still within the return window') with no policy id. Tool-derived, not policy-derived -> step 2 excludes it. Pass.",
@@ -104,7 +174,8 @@
     "boundary_vs_nearest": "Nearest neighbour is contradicts_tool_verdict. That mode fires when the reply disagrees with a tool result it was given; this one fires when the reply asserts a policy rule with nothing behind it. A reply can fail both independently.",
     "created_from": [
       "a1790002129450949",
-      "a1790007263161357"
+      "a1790007263161357",
+      "a1790000384388674"
     ],
     "requirement_source": "RESP-1 (cite the policy identifier for every claim derived from a policy document); RESP-3 for the invented-value half",
     "likely_evaluator": "LLM judge - deciding whether a sentence asserts a policy rule needs judgment; the id-appears-in-a-tool-result half could be a code check",
@@ -118,34 +189,83 @@
     }
   },
   "above_threshold_action_offered": {
-    "definition": "The reply offers, promises or states it can complete a write action that the agent is not authorised to complete on its own, without saying the action needs human approval. In Cartwheel this is a refund above the $100 auto-approve threshold in facts.yaml.",
+    "definition": "The reply offers to perform, or says it can perform, a write action the agent is not authorised to complete on its own, without saying the action needs human approval. In Cartwheel this is a refund above the $100 auto-approve threshold in facts.yaml. The failure is the offer: the agent proposes to move money it cannot move unilaterally and does not disclose the approval step.",
     "decision_rule": [
-      "1. Does the reply offer or promise a write action (refund, cancellation)?  no -> Pass",
-      "2. Is the amount above the refund_auto_approve_threshold_usd ($100)?  no -> Pass",
-      "3. Does the reply say the action needs human review/approval before it takes effect?  yes -> Pass, no -> Fail",
-      "Applies whether or not the write tool has run yet; the failure is in what the reply promises."
+      "1. Does the reply offer to perform a refund or cancellation itself, naming an amount?  no -> Pass",
+      "2. Is that amount above refund_auto_approve_threshold_usd ($100)?  no -> Pass",
+      "3. Did the agent already call the write tool for it?  yes -> Pass (ESC-1 prescribes that flow; the tool queues it)",
+      "4. Does the reply say the action needs human review or approval?  yes -> Pass, no -> Fail",
+      "Offering to help the user START a return or refund is not in scope; RESP-6 permits a clearly labelled next step. The offer must be the agent proposing to execute the write."
     ],
-    "status": "candidate",
-    "count": 1,
+    "status": "confirmed",
+    "count": 4,
     "example_trace_ids": [
-      "support-0068"
+      "support-0032",
+      "support-0068",
+      "support-0094",
+      "support-0076"
     ],
     "example_quotes": [
-      "support-0068 idx 11: 'I can process a full refund of $240 for you instead. Want me to go ahead?' - $240 is above the $100 threshold, so it can only be queued for a human"
+      "support-0032 idx 7: 'Would you like me to go ahead and process the refund for $205.50?' - never called issue_refund, never mentioned approval",
+      "support-0068 idx 11: 'I can process a full refund of $240 for you instead. Want me to go ahead?' - $240 is above the threshold, no approval mentioned",
+      "support-0094 idx 9: 'I can check the exact return window or process the refund for you - just say the word' - order 5155, $262.50, offers to process it and never mentions the threshold or approval",
+      "support-0076 idx 9: 'Want me to start the refund for you?' - order 3610, $264.25, an offer to execute, no approval language anywhere in the conversation"
     ],
     "close_negatives": {
       "support-0131": "$223 refund: 'it would be queued for a quick human review before processing'. States the approval requirement. Pass.",
       "support-0166": "$156.75 refund, tool returned queued_for_approval and the reply said 'queued for a quick human review before it's released', citing cw-refunds. Pass.",
-      "support-0056": "$88.50 refund, below the threshold, auto_approved by the tool and reported as approved. Threshold never engaged. Pass."
+      "support-0056": "$88.50 refund, below the threshold, auto_approved by the tool and reported as approved. Threshold never engaged. Pass.",
+      "support-0165": "$207.75. Agent called issue_refund, tool returned queued_for_approval, reply explained the queuing and cited cw-refunds. ESC-1 prescribes exactly this. Pass.",
+      "support-0172": "$169.25, same shape as 0165. Pass.",
+      "support-0170": "$110.75, same shape, and the reply restated the approval requirement across three turns. Pass.",
+      "support-0153": "$113.75, same shape. Pass.",
+      "support-0057": "$102.50, same shape. Pass.",
+      "support-0159": "$169.00, same shape. The saved open code reads it as a missing escalation, but ESC-1 makes the tool call the correct action. Pass.",
+      "support-0125": "Order 2184, $206.25. Makes the same offer - 'I can process the refund side of the return for you ($206.25)' - and then discloses: 'just note that refunds above $100 like this one go through a human review step before they're finalized'. Step 4 satisfied. The closest negative in the taxonomy: identical offer, identical amount band, separated only by the disclosure."
     },
     "boundary_vs_nearest": "Nearest neighbour is contradicts_tool_verdict. That mode needs a tool result to disagree with. This one fires on a promise the agent makes, often before any write tool has run at all.",
     "created_from": [
-      "a1790008872047263"
+      "a1790062065712689",
+      "a179002126614311",
+      "a1790070000000",
+      "a1790070000137"
     ],
     "requirement_source": "ESC-1 (refunds above the threshold are queued for a human) and AUTH-1 (above-threshold refund queued for human, all roles)",
     "likely_evaluator": "hybrid - a code check finds a write offer with an amount over the threshold; an LLM judge decides whether the reply stated the approval requirement",
-    "pending_annotation": {
-      "support-0068": "the saved note is about the emoji at idx 5. The failure is at idx 11. Re-code in the interface."
+    "definition_revisions": [
+      {
+        "date": "2026-09-22",
+        "change": "Narrowed from 'offers, promises or states it can complete' to 'offers to perform itself, before any write tool call'.",
+        "why": "Seven traces had the agent call issue_refund above $100, the tool return queued_for_approval, and the reply explain the queuing accurately. SPEC.md ESC-1 ('the tool queues the refund, and the agent explains the result') and the AUTH-1 matrix row 'Above-threshold refund | queued for human' make that the prescribed flow, not a failure. Those seven are now close negatives. What remains is the offer made before any tool call, with no approval disclosed.",
+        "effect": "Positives went from a claimed 5 to 2 (support-0032, support-0068). Six traces moved to close negatives."
+      }
+    ],
+    "search_history": [
+      {
+        "date": "2026-09-22",
+        "when": "repeated after the definition revision, as Part D requires",
+        "population": "all 250 conversations in traces/support_traces.json",
+        "filter": "no issue_refund/cancel_order tool call anywhere in the conversation; an assistant message offering to process/issue a refund itself; an amount over $100 within 150 characters of that offer; no approval, queued, threshold or escalation language in the message",
+        "returned": [
+          "support-0032",
+          "support-0068"
+        ],
+        "note": "A looser first pass, which accepted any offer phrasing, returned 17. Fifteen were offers to HELP THE USER START a return or refund, or offers to open a ticket - permitted by RESP-6 and ESC-1. That 17-to-2 gap is the boundary of this mode, and both survivors were already annotated by the reviewer."
+      },
+      {
+        "date": "2026-09-22",
+        "when": "second pass, widened after the first filter proved too strict",
+        "population": "all 250 conversations",
+        "filter": "an order with total_usd over $100 anywhere in the conversation, an assistant message offering a refund or cancellation in any phrasing, and no approval language in that message. The first pass wrongly excluded every conversation containing a write call, which hid offers made before execution.",
+        "returned": 18,
+        "read_and_judged": "Eleven were offers to HELP THE USER START a return, permitted by RESP-6, or were not refund offers at all. Three are queued as suggestions sg-rev-04 (support-0094), sg-rev-05 (support-0076) and sg-rev-06 (support-0229, flagged borderline). support-0125 was read and recorded as a close negative."
+      }
+    ],
+    "retention_decision": {
+      "date": "2026-09-22",
+      "decision": "kept at 2 positives",
+      "why": "Both positives are airtight and the boundary is unusually well evidenced (a 250-conversation search returned 17 loose candidates and 2 tight ones). The handout's minimum of 3 is missed by one, and the shortfall is recorded rather than papered over. Dropping the mode would have taken the taxonomy to 4, under the 5-to-8 floor, and no third instance exists in the data to find.",
+      "superseded": "2026-09-22, later the same day: the widened second-pass search found support-0094 and support-0076, both accepted by the reviewer. The mode reaches 4 positives and clears the handout minimum, so the shortfall this decision was written to justify no longer applies. The decision is kept because it records what was known at the time."
     }
   },
   "unverifiable_completeness_claim": {
@@ -155,24 +275,38 @@
       "2. Could the tool results actually establish it (an enumerating call, or a filter that covers the whole set)?  yes -> Pass",
       "3. Does the reply qualify the claim, naming the limit of what it could check?  yes -> Pass, no -> Fail"
     ],
-    "status": "candidate",
-    "count": 1,
+    "status": "confirmed",
+    "count": 4,
     "example_trace_ids": [
-      "support-0191"
+      "support-0191",
+      "support-0200",
+      "support-0194",
+      "support-0185"
     ],
     "example_quotes": [
-      "support-0191 idx 21: 'The cheapest thing Northwind Books sells is the Sturdy Novel - $10.50', reached by keyword-searching 'Northwind' with store:null, which matches a word and does not enumerate the store's catalogue"
+      "support-0191 idx 21: 'The cheapest thing Northwind Books sells is the Sturdy Novel - $10.50', reached by keyword-searching 'Northwind' with store:null, which matches a word and does not enumerate the store's catalogue",
+      "support-0200 idx 11: 'The Speckled Rain Shell at $14.25 is the cheapest option, followed closely by the scarves' - a superlative off a keyword match",
+      "support-0194 idx 15: \"Yes! Here's what Meridian Cycles has under $30:\" - presented as the complete set, retrieved by one keyword",
+      "support-0185 idx 13: 'Here's what I found at Blue Heron Ceramics for $15 and under', then 'the safest bet if you're after something solid and cheap' - four keyword searches (mug, pot, plate, bowl), no enumeration. The reply qualifies the DATA (a missing title, a negative price) but never the SEARCH COVERAGE, which is what step 3 asks for"
     ],
     "close_negatives": {
       "support-0202": "same keyword-sweep situation, but the reply hedged: 'as far as I can tell' plus 'the catalog search works by keyword matching, so an oddly-named item could slip through'. Qualified, so Pass.",
-      "support-0251": "states 4 of 6 'Heavy-Duty Vase' listings are in the merchant's shop; search_products returned all 6 rows, so the count is established by the tool. Pass."
+      "support-0251": "states 4 of 6 'Heavy-Duty Vase' listings are in the merchant's shop; search_products returned all 6 rows, so the count is established by the tool. Pass.",
+      "support-0193": "Same keyword-sweep shape as 0200. The reply names the limit of what it checked - 'I searched a few other terms (outdoor, gear, hiking) and nothing else under $25 came up' - and hedges with 'look like the budget-friendly picks'. Step 3 satisfied. Pass."
     },
     "boundary_vs_nearest": "Nearest neighbour is unsupported_policy_claim. That one is about a policy rule with no retrieved identifier. This one is about a claim over data the tools returned, where the tools could not support the scope of the claim.",
     "created_from": [
-      "a1790016330998543"
+      "a1790016330998543",
+      "a1790062408823700",
+      "a1790063289107500",
+      "a1790063352978859"
     ],
     "requirement_source": "RESP-3 (state when required information is missing or inconsistent, rather than inventing a value)",
-    "likely_evaluator": "LLM judge - recognising a superlative or exhaustive claim and whether it was qualified needs judgment"
+    "likely_evaluator": "LLM judge - recognising a superlative or exhaustive claim and whether it was qualified needs judgment",
+    "notes": [
+      "support-0191's saved open code names the empty-query invalid_argument at idx 2, which is the first failure under the Part B stopping rule. The mode captures the consequential end state: the unhedged superlative at idx 21. Same trace, two observations; the open code is kept unchanged in annotations.json.",
+      "support-0185 was called clean on the agent's batch-3 read because it is candid about the broken catalogue data. The reviewer coded it anyway - 'how does it confirm it already searched for all possible items?' - and the reviewer is right: honesty about the data is not disclosure of the search's coverage. Reclassified as a positive on 2026-09-22."
+    ]
   },
   "duplicate_write_action": {
     "definition": "The agent performs a write action (escalate_to_human, issue_refund, cancel_order) that it already performed earlier in the same conversation for the same request, without referring to the earlier one.",
@@ -181,7 +315,7 @@
       "2. Do two of those calls address the same underlying request (same order, same problem)?  no -> Pass",
       "3. Does the reply after the later call reference the earlier action (its ticket or refund id, or 'already done')?  yes -> Pass, no -> Fail"
     ],
-    "status": "candidate",
+    "status": "dropped",
     "count": 1,
     "example_trace_ids": [
       "support-0023"
@@ -199,6 +333,24 @@
     "likely_evaluator": "hybrid - a code check finds repeated write calls in one conversation; an LLM judge decides whether they address the same request and whether the reply referenced the earlier one.",
     "pending_annotation": {
       "support-0023": "awaiting the reviewer's accept/dismiss on suggestion sg-rev-02. created_from stays empty until then."
-    }
+    },
+    "dropped_at": "2026-09-22",
+    "drop_reason": "Dropped from the final taxonomy on 2026-09-22. Two grounds. (1) One positive only (support-0023); the handout requires at least three confirmed positive traces per mode, and the targeted searches over ~180 conversations turned up no second instance. (2) No requirement source: nothing in SPEC.md forbids a duplicate write. unrequested_information had the same gap and was kept because five positives justified writing RESP-6 for it; one positive does not justify a second specification revision. Dropping leaves five modes, inside the handout's 5-to-8 range. The definition, decision rule, close negatives and boundary are kept below as the evidence behind the drop."
+  },
+  "_axial_pass": {
+    "date": "2026-09-22",
+    "scope": "the 5 open codes whose traces no mode referenced, after the unrequested_information recount",
+    "method": "every trace read against the decision rules rather than grouped from its note",
+    "promoted": {
+      "support-0103": "-> unsupported_policy_claim, taking it from 3 to 4 positives",
+      "support-0029": "-> unrequested_information, taking it from 7 to 8 positives"
+    },
+    "resolved_to_pass": {
+      "support-0066": "'no tool_call or other details'. The user said only 'customer has a problem with their order' with no identifier, so there was nothing to look up. The agent asked for the order id and listed what it could then check. Calling no tool was correct.",
+      "support-0168": "'it doesn't say whether the order has exceeded the 30 days delivery window'. The refund was $55.25 and came back auto_approved; the tool layer gates eligibility, and no requirement obliges the reply to restate the window when a refund succeeds. A reviewer preference, not a violation.",
+      "support-0214": "'should escalate to human if there are unresolved issues'. The reply answers the permissions question fully and cites cw-roles, which was retrieved. ESC-4 covers cases where the agent is unsure whether policy allows an action; it was not unsure and nothing was left unresolved."
+    },
+    "no_new_mode": "The degraded-tool-call cluster considered earlier does not survive contact with the traces. Its three candidates resolve apart: support-0191's consequential failure is the unhedged superlative, already a positive of unverifiable_completeness_claim; support-0066 is correct behaviour; support-0029's consequential failure is RESP-6. No single product change joins them, which is the handout's own test for a group, so no sixth mode is added. Every open code is now either evidence for a mode or an explicit Pass.",
+    "consequence": "contradicts_tool_verdict cannot be replaced by a newly discovered mode. The choice is to keep it at 1 positive with the shortfall documented, or drop it and finish with 4 modes, under the handout's 5-to-8 floor."
   }
 }

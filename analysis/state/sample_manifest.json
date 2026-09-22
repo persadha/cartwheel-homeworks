@@ -499,8 +499,29 @@
           "reason": "random pick"
         }
       ]
+    },
+    {
+      "batch": "b5_threshold_offer_v2",
+      "strategy": "ids",
+      "k": 3,
+      "requested_k": 15,
+      "seed": 7,
+      "picks": [
+        {
+          "conversation_id": "support-0094",
+          "reason": "second-pass threshold-offer search: an order over $100, a refund offer in the reply, no approval language; 0125 retrieved as the close negative that discloses"
+        },
+        {
+          "conversation_id": "support-0076",
+          "reason": "second-pass threshold-offer search: an order over $100, a refund offer in the reply, no approval language; 0125 retrieved as the close negative that discloses"
+        },
+        {
+          "conversation_id": "support-0125",
+          "reason": "second-pass threshold-offer search: an order over $100, a refund offer in the reply, no approval language; 0125 retrieved as the close negative that discloses"
+        }
+      ]
     }
   ],
-  "total_conversations": 100,
-  "total_raw_traces": 127
+  "total_conversations": 103,
+  "total_raw_traces": 133
 }

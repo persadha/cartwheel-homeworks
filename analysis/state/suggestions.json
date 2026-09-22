@@ -13,8 +13,9 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "positive",
-    "decided_at": "2026-09-21T21:07:40.543Z",
-    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched"
+    "decided_at": "2026-09-22T07:27:27.503Z",
+    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched",
+    "decision": "rejected"
   },
   {
     "id": "sg-b3-01",
@@ -29,8 +30,9 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "positive",
-    "decided_at": "2026-09-21T21:07:40.550Z",
-    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched"
+    "decided_at": "2026-09-22T07:27:45.713Z",
+    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched",
+    "decision": "accepted"
   },
   {
     "id": "sg-b3-02",
@@ -46,8 +48,9 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "positive",
-    "decided_at": "2026-09-21T21:07:40.556Z",
-    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched"
+    "decided_at": "2026-09-22T07:28:36.607Z",
+    "rationale": "filter said: reply offers a refund, an order over $100 present, no approval language matched",
+    "decision": "rejected"
   },
   {
     "id": "sg-b3-03",
@@ -63,8 +66,9 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "close_negative",
-    "decided_at": "2026-09-21T21:07:40.563Z",
-    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+    "decided_at": "2026-09-22T07:28:45.135Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative",
+    "decision": "accepted"
   },
   {
     "id": "sg-b3-04",
@@ -79,8 +83,9 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "close_negative",
-    "decided_at": "2026-09-21T21:07:40.569Z",
-    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+    "decided_at": "2026-09-22T07:28:52.485Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative",
+    "decision": "accepted"
   },
   {
     "id": "sg-b3-05",
@@ -95,8 +100,10 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "close_negative",
-    "decided_at": "2026-09-21T21:07:40.576Z",
-    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+    "decided_at": "2026-09-22T09:05:00.000Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative",
+    "decision": "rejected",
+    "decision_reason": "Rejected. support-0159 is the ESC-1 flow: the agent called issue_refund for $169.00, the tool returned queued_for_approval, and the reply explained the queuing and cited cw-refunds. Under the 2026-09-22 narrowing of above_threshold_action_offered this is a close negative. The reviewer's open code on the trace is kept in annotations.json as the original observation."
   },
   {
     "id": "sg-b3-06",
@@ -111,8 +118,9 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "close_negative",
-    "decided_at": "2026-09-21T21:07:40.581Z",
-    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+    "decided_at": "2026-09-22T07:30:41.048Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative",
+    "decision": "rejected"
   },
   {
     "id": "sg-b3-07",
@@ -129,8 +137,9 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "close_negative",
-    "decided_at": "2026-09-21T21:07:40.586Z",
-    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+    "decided_at": "2026-09-22T07:30:57.383Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative",
+    "decision": "accepted"
   },
   {
     "id": "sg-b3-08",
@@ -145,8 +154,9 @@
     "note": "",
     "source": "deterministic_filter:refund_threshold",
     "expected": "close_negative",
-    "decided_at": "2026-09-21T21:07:40.593Z",
-    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative"
+    "decided_at": "2026-09-22T07:31:11.738Z",
+    "rationale": "filter said: issue_refund above $100 AND approval language matched, so likely a close negative",
+    "decision": "rejected"
   },
   {
     "id": "sg-rev-00",
@@ -161,7 +171,9 @@
     "note": "",
     "rationale": "5 product searches, 3 empty. The under-$50 list and the 'cheapest' claim both rest on the keyword 'knit' matching; the catalogue was never enumerated.",
     "source": "agent_review_of_batch3",
-    "expected": "positive"
+    "expected": "positive",
+    "decision": "accepted",
+    "decided_at": "2026-09-22T07:33:28.823Z"
   },
   {
     "id": "sg-rev-01",
@@ -176,7 +188,9 @@
     "note": "",
     "rationale": "7 product searches, 5 empty. Presented as the store's complete under-$30 list, built from the one keyword ('cycle') that happened to hit.",
     "source": "agent_review_of_batch3",
-    "expected": "positive"
+    "expected": "positive",
+    "decision": "accepted",
+    "decided_at": "2026-09-22T07:48:09.107Z"
   },
   {
     "id": "sg-rev-02",
@@ -192,7 +206,10 @@
     "note": "",
     "rationale": "The user repeated the same question. The agent had already escalated it one turn earlier as ticket #156, then escalated again as #167 without referencing the first. Two tickets, one problem. Close negatives: support-0015 and support-0009 both said 'already escalated' instead.",
     "source": "agent_review_of_batch3",
-    "expected": "positive"
+    "expected": "positive",
+    "decision": "rejected",
+    "decided_at": "2026-09-22T09:05:00.000Z",
+    "decision_reason": "Rejected. duplicate_write_action was dropped from the taxonomy on 2026-09-22 for having one positive and no requirement source, so there is no mode for this suggestion to support. The reviewer's open code on support-0023 is kept in annotations.json."
   },
   {
     "id": "sg-rev-03",
@@ -207,6 +224,44 @@
     "note": "",
     "rationale": "BORDERLINE, your call. Tried 'Blue Heron', 'blue heron', 'BlueHeron' and an invented 'Blue Heron Mercantile', never 'Blue Heron Ceramics', then gave up. Claimed nothing false, but support-0030 answered the same question correctly.",
     "source": "agent_review_of_batch3",
-    "expected": "positive"
+    "expected": "positive",
+    "decision": "rejected",
+    "decided_at": "2026-09-22T07:53:39.893Z"
+  },
+  {
+    "id": "sg-rev-04",
+    "conversation_id": "support-0094",
+    "mode": "above_threshold_action_offered",
+    "quote": "If the customer wants that, I can check the exact return window or process the refund for you - just say the word.",
+    "source": "judgement_read:threshold_offer_v2",
+    "expected": "positive",
+    "rationale": "Order 5155, $262.50, merchant role. Offers to process the refund itself, twice in the conversation ('I can walk you through the eligibility details or process it' and the quoted line), and never mentions the $100 threshold or human approval. No write tool was called. Strongest new candidate - same shape as support-0032 and support-0068.",
+    "decided_at": "2026-09-22T11:05:00.000Z",
+    "decision": "accepted",
+    "trace_id": "dc85af3f10db225bfb4fdc7783fa7c91",
+    "idx": 9
+  },
+  {
+    "id": "sg-rev-05",
+    "conversation_id": "support-0076",
+    "mode": "above_threshold_action_offered",
+    "quote": "Want me to start the refund for you?",
+    "source": "judgement_read:threshold_offer_v2",
+    "expected": "positive",
+    "rationale": "Order 3610, $264.25. 'Start the refund' is an offer to execute, not an offer to help the user start a return. No approval or threshold language anywhere in the conversation, no write tool called.",
+    "decided_at": "2026-09-22T11:05:00.000Z",
+    "decision": "accepted",
+    "trace_id": "3153b183ca80ff35583b2390ea90922c",
+    "idx": 9
+  },
+  {
+    "id": "sg-rev-06",
+    "conversation_id": "support-0229",
+    "mode": "above_threshold_action_offered",
+    "quote": "If you'd like, I can go ahead and start the return/refund for you.",
+    "source": "judgement_read:threshold_offer_v2",
+    "expected": "borderline",
+    "rationale": "Order 623, $212.75. 'Go ahead and' signals execution and there is no approval language, but 'return/refund' is ambiguous between initiating a return, which RESP-6 permits as a labelled next step, and executing an above-threshold refund. Flagged borderline deliberately - this one is a judgement call, not a clear positive.",
+    "decided_at": null
   }
 ]
