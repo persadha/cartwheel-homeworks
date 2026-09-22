@@ -277,7 +277,7 @@ rows**, one per turn trace id, under `analysis/state/labels/`.
 
 | Mode | Fail | of | Sample fraction |
 | --- | ---: | ---: | ---: |
-| `unrequested_information` | 11 | 103 | 0.107 |
+| `unrequested_information` | 10 | 103 | 0.097 |
 | `unverifiable_completeness_claim` | 6 | 103 | 0.058 |
 | `unsupported_policy_claim` | 5 | 103 | 0.049 |
 | `above_threshold_action_offered` | 4 | 103 | 0.039 |
@@ -296,21 +296,37 @@ carry different weight.
 
 | Source | Cells | What it means |
 | --- | ---: | --- |
-| `human` | 58 | Positives and close negatives established by reading during Parts B and D |
+| `human` | 64 | The 58 positives and close negatives established by reading in Parts B and D, plus 6 the reviewer decided individually |
 | `code_gate` | 251 | Cells where the mode's **own decision rule step 1** cannot fire, so Pass is certain — no rejected tool call, no order over $100 with a refund discussion, no superlative. Each row names its gate |
-| `agent_proposed` | 309 | **Not yet confirmed by the reviewer.** Each carries a one-line rationale |
+| `reviewer_accepted` | 303 | Proposed by the agent with a one-line rationale each, and accepted by the reviewer **as a block rather than read individually** |
 
-**397 Langfuse scores were written, for the `human` and `code_gate` cells only.**
-The proposals are deliberately held local: `write_label_score` calls
-`create_score` without a score id, so Langfuse appends rather than upserts, and an
-overridden proposal would leave both values on the trace permanently. The
-proposals sync once confirmed.
+`reviewer_accepted` is kept distinct from `human` deliberately. All 303 are
+Passes, and all were accepted in bulk. HW5 draws its ground truth from these
+files, so how firmly each label was established is itself evidence.
 
-**Six proposals assert a Fail** and should be reviewed before anything is
-finalised — `support-0090`, `support-0077` and `support-0234` for
-`unrequested_information`; `support-0231` for `unsupported_policy_claim`;
-`support-0201` and `support-0196` for `unverifiable_completeness_claim`. Every
-other proposal is a Pass. Three are flagged in their comments as borderline.
+**798 Langfuse scores, one per row.** Every cell is synced. The proposals were
+held local until confirmed, because `write_label_score` calls `create_score`
+without a score id — Langfuse appends rather than upserts, so an overridden
+proposal would have left both values on the trace permanently.
+
+### The six cells the reviewer decided individually
+
+Every proposal that asserted a Fail was reviewed against its trace.
+
+**Confirmed Fail (5).** `support-0090` and `support-0077` for
+`unrequested_information` — both answer a pure status question and then add
+eligibility as an aside ("One other thing worth knowing"), the same shape as the
+confirmed positive `support-0095`. `support-0231` for `unsupported_policy_claim`,
+on the letter of the rule: the claim is grounded in `check_return_eligibility`,
+but it is attributed to `(cw-returns)`, an identifier never retrieved in that
+conversation. `support-0201` and `support-0196` for
+`unverifiable_completeness_claim` — `0196` is the sharpest instance in the set,
+claiming "nothing in the store's 40-item catalog is priced lower" when the
+broadest successful search returned 25 of those 40.
+
+**Overturned to Pass (1).** `support-0234`. The customer asked about restocking on
+order 1643, and restocking only applies to a return, so stating refund-eligibility
+is responsive rather than volunteered.
 
 **Two proposals were withdrawn during the pass, and how is worth recording.**
 `support-0057` and `support-0076` were first proposed as

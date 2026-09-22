@@ -434,55 +434,57 @@
     "date": "2026-09-22",
     "grid": "103 conversations x 6 modes = 618 judgments, expanded to 798 rows, one per turn trace id",
     "label_provenance": {
-      "human": "58 cells. The positives and close negatives established by reading during Parts B and D, transcribed from this file.",
-      "code_gate": "251 cells, all Pass. Cells where the mode's OWN decision rule step 1 cannot fire, so Pass is certain. Applied to the three modes with a mechanically checkable gate: no tool rejected a call (uncorrected_parameter_error), no order over $100 combined with a refund or cancellation discussion (above_threshold_action_offered), no superlative or complete-set language (unverifiable_completeness_claim). Each row records its gate in the comment.",
-      "agent_proposed": "309 cells. NOT CONFIRMED BY THE REVIEWER. Each carries a one-line rationale in its comment. These are proposals for the reviewer to accept or override in the label grid."
+      "human": "64 cells. The 58 positives and close negatives established by reading in Parts B and D, plus 6 the reviewer decided individually on 2026-09-22.",
+      "code_gate": "251 cells, all Pass. Cells where the mode's OWN decision rule step 1 cannot fire, so Pass is certain. Each row names its gate in the comment.",
+      "reviewer_accepted": "303 cells, all Pass. Proposed by the agent with a one-line rationale each and accepted by the reviewer as a block rather than read individually. Kept distinct from 'human' on purpose: HW5 draws ground truth from these files and the distinction is evidence about label strength."
     },
-    "langfuse": "397 scores written, for the human and code_gate cells only. The agent_proposed cells are deliberately held local: langfuse_io.write_label_score calls create_score without a score id, so Langfuse appends rather than upserts, and an overridden proposal would leave both values on the trace permanently. Sync the proposals after the reviewer confirms them.",
-    "needs_review_first": {
-      "note": "the six cells where a proposal asserts a Fail; every other proposal is a Pass",
-      "cells": {
-        "unrequested_information": [
-          "support-0090",
-          "support-0077",
-          "support-0234 (flagged borderline)"
-        ],
-        "unsupported_policy_claim": [
-          "support-0231 (flagged as a judgement call)"
-        ],
-        "unverifiable_completeness_claim": [
-          "support-0201",
-          "support-0196"
-        ]
-      }
-    },
+    "langfuse": "798 scores, one per row. All cells are synced; nothing is held back.",
     "corrections_during_the_pass": "Two proposals were withdrawn before they were finalised. support-0057 and support-0076 were initially proposed as unsupported_policy_claim Fails for stating a return window or threshold with no identifier. Both relay check_return_eligibility's own reason string, which is exactly the basis on which the reviewer had already passed support-0133 as a close negative. The existing human label caught the inconsistency; both are now Pass.",
     "sample_fractions": {
       "unrequested_information": {
-        "fail": 11,
-        "of": 103
+        "fail": 10,
+        "of": 103,
+        "fraction": 0.097
       },
       "misreads_tool_result": {
         "fail": 1,
-        "of": 103
+        "of": 103,
+        "fraction": 0.01
       },
       "unsupported_policy_claim": {
         "fail": 5,
-        "of": 103
+        "of": 103,
+        "fraction": 0.049
       },
       "above_threshold_action_offered": {
         "fail": 4,
-        "of": 103
+        "of": 103,
+        "fraction": 0.039
       },
       "unverifiable_completeness_claim": {
         "fail": 6,
-        "of": 103
+        "of": 103,
+        "fraction": 0.058
       },
       "uncorrected_parameter_error": {
         "fail": 4,
-        "of": 103
+        "of": 103,
+        "fraction": 0.039
       }
     },
-    "caveat": "These are sample fractions, not prevalence estimates. The sample was reshaped by clustering, role balancing and ten targeted depth searches."
+    "caveat": "These are sample fractions, not prevalence estimates. The sample was reshaped by clustering, role balancing and ten targeted depth searches.",
+    "reviewer_decisions_2026_09_22": {
+      "reviewed": "the six cells where a proposal asserted a Fail; all other proposals were Passes",
+      "confirmed_fail": [
+        "support-0090 / unrequested_information",
+        "support-0077 / unrequested_information",
+        "support-0231 / unsupported_policy_claim",
+        "support-0201 / unverifiable_completeness_claim",
+        "support-0196 / unverifiable_completeness_claim"
+      ],
+      "overturned_to_pass": {
+        "support-0234 / unrequested_information": "The customer's question was about restocking on order 1643, and restocking only applies to a return, so stating refund-eligibility is responsive rather than volunteered."
+      }
+    }
   }
 }
