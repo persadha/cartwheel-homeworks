@@ -1108,3 +1108,130 @@ under the handout's floor.
 and `normalizePatterns()` in the review app turned every top-level key into a mode
 — so it would have appeared as a sixth labelling target in Part E. It now skips
 underscore-prefixed keys.
+
+## Part C skipped (2026-09-22)
+
+**Decision: skip, on documented grounds.** The student is on a work laptop and the
+Workshop installer requires IT approval it does not have. It installs an unsigned
+third-party binary to `~/.raindrop/bin`, appends PATH lines to `~/.zshrc`,
+`~/.bashrc` and `~/.profile`, and wires an MCP server and slash command into the
+IDE. Declining is the correct call on a managed machine.
+
+**Part C is optional upstream.** Verified, not assumed: commit `f3fbacb`, "Make
+HW4 Part C (Raindrop Workshop) optional", is in `main`. Our `hw-4` branch is 7
+commits behind `main` and does **not** contain it, which is why the local handout
+copy still reads as mandatory.
+
+The upstream text names exactly two consequences:
+
+> This part is optional. If you skip it, omit `analysis/report/workshop_notes.md`
+> from your submission and remove the Workshop suggestion from the video
+> requirements.
+
+### Consequences, applied
+
+- `analysis/report/workshop_notes.md` is **removed from the deliverable list**.
+- The video drops "one Workshop suggestion and your decision to accept, revise or
+  reject it". **Six video items remain, not seven.**
+- Everything else is unaffected. Part C fed nothing into the taxonomy; the five
+  modes come entirely from human open coding over the Langfuse traces.
+
+### Worth noting in `review_summary.md`
+
+Skipping Part C means no execution-level source of hypotheses beyond the traces
+themselves. The honest framing: the taxonomy rests on 103 human-reviewed
+conversations plus four documented retrieval passes, and no claim is made about
+failure modes only visible below the trace layer.
+
+### Loose end
+
+`hw-4` is 7 commits behind `main`, including the handout revision the submission
+will be graded against and an HW5 handout cleanup. Worth merging `main` into
+`hw-4` before submitting, so the handout in the repo matches the one being marked.
+
+## AgentDebug comparison, and its two consequences (2026-09-22)
+
+Required by Part D and previously unstarted. Source: AgentErrorTaxonomy,
+arXiv:2509.25370 — five modules, Memory / Reflection / Planning / Action /
+System-level.
+
+### Mapping
+
+| Ours | AgentDebug |
+| --- | --- |
+| `unsupported_policy_claim` | Memory / Hallucination (False Memory) |
+| `misreads_tool_result` | Reflection / Outcome Misinterpretation |
+| `unverifiable_completeness_claim` | Reflection / Progress Misassessment + Memory / Retrieval Failure |
+| `above_threshold_action_offered` | Planning / Constraint Ignorance — the $100 threshold is a budget constraint |
+| `unrequested_information` | **no counterpart** — AgentDebug classifies failures of task execution; this is a failure of communication scope. The gap is in the published taxonomy |
+
+### 1. The omission, acted on — new mode `uncorrected_parameter_error`
+
+11 of 103 sampled conversations carry an `invalid_argument` error, 8 of them the
+same shape: `search_products` called with `query=""` to enumerate a catalogue,
+rejected, followed by guessing.
+
+Definition: a tool rejects the agent's parameters and the agent does not correct
+them — it substitutes keyword or single-letter guessing and presents the result as
+authoritative.
+
+| | |
+| --- | --- |
+| Positives | `support-0191`, `support-0196`, `support-0185`, `support-0194` |
+| Close negatives | `support-0187`, `support-0052`, `support-0030`, `support-0116`, `support-0193` |
+| Requirement | RESP-3, partial fit — **nothing in `SPEC.md` governs how the agent should react to a rejected tool call.** A recorded specification gap |
+
+The discriminator came from reading: `support-0196` brute-forced single letters
+`"t" "e" "a" "i"` then claimed "nothing in the store's 40-item catalog is priced
+lower", while `support-0187` hit the same rejection and said plainly "every query
+came back with zero products". Recovery and honesty are Passes — tools are
+allowed to reject calls.
+
+**Why it is split from `unverifiable_completeness_claim`** rather than merged,
+despite co-occurring on three traces: they need different product changes, which
+is the handout's own split test. This one is fixed by "when a tool rejects your
+parameters, correct them or say you could not look it up"; the other by "qualify
+any claim about a set your tools did not enumerate". Either can fail without the
+other — `support-0200` makes an unverifiable claim with no rejected call,
+`support-0187` has a rejected call and no unverifiable claim.
+
+### 2. The unclear name, acted on — `contradicts_tool_verdict` renamed
+
+Now **`misreads_tool_result`**. "Verdict" is not a term the Cartwheel tools use;
+they return `refund_eligible`, `eligible`, `ok`, `error`. A new reviewer had to
+guess what counted as one. No positives, close negatives or decision rules
+changed. No label file existed under the old name, so nothing to migrate.
+
+### 3. The methodological finding
+
+AgentDebug's root-cause versus cascading distinction names a pattern this
+assignment found independently. Part B's first-failure stopping rule makes the
+reviewer record the **root cause**, while a mode is usually defined by the
+**cascade**. That is why `support-0139`, `support-0095`, `support-0103` and
+`support-0029` all had open codes describing something other than the mode the
+trace ended up supporting. Neither observation is wrong. This belongs in
+`review_summary.md`.
+
+`uncorrected_parameter_error` is the first mode in this taxonomy defined at the
+root-cause layer, and 3 of its 4 positives are also
+`unverifiable_completeness_claim` positives — the cascade the assignment had
+already captured.
+
+### Taxonomy: six modes
+
+| Mode | Pos | Neg |
+| --- | ---: | ---: |
+| `unrequested_information` | 8 | 6 |
+| `unsupported_policy_claim` | 4 | 3 |
+| `above_threshold_action_offered` | 4 | 10 |
+| `unverifiable_completeness_claim` | 4 | 3 |
+| `uncorrected_parameter_error` | 4 | 5 |
+| `misreads_tool_result` | 1 | 6 |
+
+Part E is now 103 x 6 = **618 judgments**.
+
+### Flagged, not acted on
+
+`support-0196` is very likely also an `unverifiable_completeness_claim` positive —
+an unhedged superlative over a set the searches never enumerated. Not added, since
+that mode is confirmed and the call is the reviewer's.

@@ -75,7 +75,7 @@
       "note": "The 09-21 list predated the final 40 reviews. Two judgement calls came out of the recount. support-0095 stays a positive although its open code ('this claim is not grounded on any called tool') misdescribes it - refund_eligible was in the tool result; the failure is volunteering it unasked. support-0149 moves the other way: its open code reads the closing offer as volunteering a refund, but RESP-6's third sentence permits a labelled next step, so it is a Pass on the same grounds as support-0116."
     }
   },
-  "contradicts_tool_verdict": {
+  "misreads_tool_result": {
     "definition": "The reply asserts an eligibility or status conclusion that contradicts the tool result it was given for that same order.",
     "status": "confirmed",
     "count": 1,
@@ -140,6 +140,11 @@
       "decision": "kept as a final mode at 1 positive",
       "why": "support-0139 is an unambiguous failure and the mode has 6 close negatives, including support-0178, which separates the two causes of eligible=False. Four distinct search strategies over all 250 conversations found no second instance, and the axial pass confirmed no replacement mode exists in the open codes. Dropping it would leave 4 modes, under the handout's 5-to-8 floor, with nothing to promote. The evidence shortfall is recorded in the shortfall field rather than hidden.",
       "reportable_finding": "Search family A - a write tool returns queued_for_approval and the next reply claims the action is done - returned 0 hits across all 250 conversations. That is the handout's own worked example of this failure, and it does not occur in this agent's behaviour."
+    },
+    "renamed_from": {
+      "was": "contradicts_tool_verdict",
+      "date": "2026-09-22",
+      "why": "Identified through the AgentDebug comparison. 'Verdict' is not a term the Cartwheel tools use - they return fields and error codes (refund_eligible, eligible, ok, error), not verdicts - so a new reviewer had to guess what counted as one. 'Misreads tool result' names the act, and matches AgentErrorTaxonomy's Reflection / Outcome Misinterpretation. No positives, close negatives or decision rules changed."
     }
   },
   "unsupported_policy_claim": {
@@ -171,7 +176,7 @@
       "support-0002": "search_help_center mis-ranked cw-cancellations above cw-returns, but the reply cited cw-returns, which get_policy did retrieve. Bad retrieval alone is not this mode. Pass.",
       "support-0166": "states the $100 threshold and the payout deduction, citing cw-refunds and cw-payouts, both present in tool results. Pass."
     },
-    "boundary_vs_nearest": "Nearest neighbour is contradicts_tool_verdict. That mode fires when the reply disagrees with a tool result it was given; this one fires when the reply asserts a policy rule with nothing behind it. A reply can fail both independently.",
+    "boundary_vs_nearest": "Nearest neighbour is misreads_tool_result. That mode fires when the reply disagrees with a tool result it was given; this one fires when the reply asserts a policy rule with nothing behind it. A reply can fail both independently.",
     "created_from": [
       "a1790002129450949",
       "a1790007263161357",
@@ -223,7 +228,7 @@
       "support-0159": "$169.00, same shape. The saved open code reads it as a missing escalation, but ESC-1 makes the tool call the correct action. Pass.",
       "support-0125": "Order 2184, $206.25. Makes the same offer - 'I can process the refund side of the return for you ($206.25)' - and then discloses: 'just note that refunds above $100 like this one go through a human review step before they're finalized'. Step 4 satisfied. The closest negative in the taxonomy: identical offer, identical amount band, separated only by the disclosure."
     },
-    "boundary_vs_nearest": "Nearest neighbour is contradicts_tool_verdict. That mode needs a tool result to disagree with. This one fires on a promise the agent makes, often before any write tool has run at all.",
+    "boundary_vs_nearest": "Nearest neighbour is misreads_tool_result. That mode needs a tool result to disagree with. This one fires on a promise the agent makes, often before any write tool has run at all.",
     "created_from": [
       "a1790062065712689",
       "a179002126614311",
@@ -351,6 +356,78 @@
       "support-0214": "'should escalate to human if there are unresolved issues'. The reply answers the permissions question fully and cites cw-roles, which was retrieved. ESC-4 covers cases where the agent is unsure whether policy allows an action; it was not unsure and nothing was left unresolved."
     },
     "no_new_mode": "The degraded-tool-call cluster considered earlier does not survive contact with the traces. Its three candidates resolve apart: support-0191's consequential failure is the unhedged superlative, already a positive of unverifiable_completeness_claim; support-0066 is correct behaviour; support-0029's consequential failure is RESP-6. No single product change joins them, which is the handout's own test for a group, so no sixth mode is added. Every open code is now either evidence for a mode or an explicit Pass.",
-    "consequence": "contradicts_tool_verdict cannot be replaced by a newly discovered mode. The choice is to keep it at 1 positive with the shortfall documented, or drop it and finish with 4 modes, under the handout's 5-to-8 floor."
+    "consequence": "misreads_tool_result cannot be replaced by a newly discovered mode. The choice is to keep it at 1 positive with the shortfall documented, or drop it and finish with 4 modes, under the handout's 5-to-8 floor."
+  },
+  "_agentdebug_comparison": {
+    "date": "2026-09-22",
+    "source": "AgentErrorTaxonomy, arXiv:2509.25370, five modules (Memory, Reflection, Planning, Action, System-level)",
+    "mapping": {
+      "unsupported_policy_claim": "Memory / Hallucination (False Memory) - 'fills missing gaps with fabricated info'. support-0151 invented a policy id; support-0103 cited cw-shipping without retrieving it.",
+      "misreads_tool_result": "Reflection / Outcome Misinterpretation - 'executes an action but misreads the immediate result or environment feedback'. support-0139 misreads refund_eligible=False.",
+      "unverifiable_completeness_claim": "Reflection / Progress Misassessment, plus Memory / Retrieval Failure - the agent judges its search complete when the tool never enumerated the set.",
+      "above_threshold_action_offered": "Planning / Constraint Ignorance - 'ignores limits (time, budget, space) when forming plans'. The $100 auto-approval threshold is a budget constraint.",
+      "unrequested_information": "No counterpart. AgentErrorTaxonomy is built for task-completing agents and classifies failures of task execution; this mode is a failure of communication scope. The gap is in the published taxonomy, not in ours."
+    },
+    "possible_omission": {
+      "agentdebug_category": "Action / Parameter Error - 'generates unreasonable or malformed parameters', with Planning / Inefficient Planning - 'plan is overly long or illogical; wastes steps'",
+      "evidence_in_our_data": "11 of 103 sampled conversations contain an invalid_argument tool error. Eight are the same shape: search_products called with query='' to enumerate a store catalogue, rejected, followed by keyword guessing. support-0191 fired ten search_products calls, two of them invalid.",
+      "human_annotations_supporting_it": {
+        "support-0191": "Tool returns an error, empty query, while the user gave a valid question.",
+        "support-0029": "All of the tool_call have store_id = null"
+      },
+      "why_it_matters": "3 of the 4 unverifiable_completeness_claim positives - support-0191, support-0194, support-0185 - contain the empty-query error. The malformed call is the root cause and the unhedged superlative is the cascade. Our taxonomy captured only the cascade, which is exactly the failure AgentDebug's root-cause framing is designed to surface.",
+      "status": "ACTED ON - added as uncorrected_parameter_error on 2026-09-22, with 4 positives and 5 close negatives",
+      "before_adding": "support-0052, support-0187 and support-0196 carry a malformed call and are referenced by no mode. They need reading to establish whether a malformed call the agent recovers from harmlessly is a failure at all, which is the decision rule's discriminator."
+    },
+    "unclear_name": {
+      "mode": "misreads_tool_result",
+      "problem": "'Verdict' is not a term the Cartwheel tools use. They return fields and error codes - refund_eligible, eligible, ok, error - not verdicts. A new reviewer must guess what counts as one.",
+      "agentdebug_alternative": "Reflection / Outcome Misinterpretation names the act (misreading a result) rather than a made-up noun.",
+      "status": "ACTED ON - contradicts_tool_verdict renamed to misreads_tool_result on 2026-09-22"
+    },
+    "methodological_finding": "AgentDebug's root-cause versus cascading distinction explains a pattern found independently in this assignment's axial pass: the saved open codes repeatedly named something other than the mode the trace ended up supporting - support-0139, support-0095, support-0103, support-0029. Part B's first-failure stopping rule makes the reviewer record the ROOT CAUSE, while a mode is usually defined by the CASCADE. They are different observations about the same trace, and neither is wrong. Worth stating in review_summary.md.",
+    "modes_added": "one: uncorrected_parameter_error"
+  },
+  "uncorrected_parameter_error": {
+    "definition": "A tool rejects the agent's parameters, or returns nothing because they were wrongly scoped, and the agent does not correct the parameter. Instead it substitutes a guessing strategy - keyword or single-letter probing - and presents the result as an authoritative answer.",
+    "decision_rule": [
+      "1. Did a tool reject a call (invalid_argument, not_found on an empty parameter) or return nothing because the parameter was wrongly scoped?  no -> Pass",
+      "2. Did the agent retry with a corrected parameter, or state plainly that it could not perform the lookup?  yes -> Pass",
+      "3. Did it instead substitute keyword or letter guessing AND present the result as authoritative, unqualified?  yes -> Fail, no -> Pass",
+      "The failure is the substitution presented as fact. A rejection the agent recovers from, or is honest about, is not a failure - tools are allowed to reject calls."
+    ],
+    "status": "confirmed",
+    "count": 4,
+    "example_trace_ids": [
+      "support-0191",
+      "support-0196",
+      "support-0185",
+      "support-0194"
+    ],
+    "example_quotes": [
+      "support-0191: search_products query='' rejected twice, then eight keyword guesses, then 'The cheapest thing Northwind Books sells is the Sturdy Novel - $10.50'",
+      "support-0196: query='' rejected, then brute-forced single letters 't','e','a','i', then 'nothing in the store's 40-item catalog is priced lower'",
+      "support-0185: query='' rejected, then four keyword guesses (mug, pot, plate, bowl), then 'Here's what I found at Blue Heron Ceramics for $15 and under'",
+      "support-0194: query='' rejected, then a keyword search, then \"Here's what Meridian Cycles has under $30\" as a complete list"
+    ],
+    "close_negatives": {
+      "support-0187": "store='' rejected with not_found, then keyword searches that all returned zero. The reply is honest: 'every query came back with zero products', offers two explanations and asks for an exact item name. Recovered and qualified. Pass.",
+      "support-0052": "summarize_order_history rejected - support staff have no orders of their own. The reply explains why and offers three correct alternatives. Pass.",
+      "support-0030": "invalid_argument on the same support-staff rule, handled honestly. Pass.",
+      "support-0116": "max_price_usd rejected as not strictly positive; the agent corrected the parameter and continued. Pass.",
+      "support-0193": "No rejection at all - the agent chose keyword terms deliberately and named them: 'I searched a few other terms (outdoor, gear, hiking)'. Step 1 never fires. Pass."
+    },
+    "boundary_vs_nearest": "Nearest neighbour is unverifiable_completeness_claim, and the two co-occur on support-0191, support-0185 and support-0194. They are split because they need different product changes, which is the handout's split test. This mode is fixed by 'when a tool rejects your parameters, correct them or say you could not look it up'; the other is fixed by 'qualify any claim about a set your tools did not enumerate'. The first prevents the situation, the second handles it honestly, and an agent can fail either without the other - support-0200 makes an unverifiable claim with no rejected call, support-0187 has a rejected call and no unverifiable claim.",
+    "created_from": [
+      "a1790016330998543",
+      "a1790063467890823"
+    ],
+    "requirement_source": "RESP-3, partial fit - 'state when required information is missing or inconsistent, rather than inventing a value' covers presenting guesses as fact. Nothing in SPEC.md governs how the agent should react to a rejected tool call, which is a specification gap worth recording.",
+    "likely_evaluator": "hybrid - a code check finds the invalid_argument or empty-parameter result and whether a corrected retry followed; an LLM judge decides whether the reply presented the substituted result as authoritative",
+    "origin": "Added 2026-09-22 from the AgentDebug comparison, which flagged Action / Parameter Error as an omission. Supported by the reviewer's own open codes on support-0191 ('tool returns an error, empty query, while the user gave a valid question') and support-0029 ('all of the tool_call have store_id = null'). 11 of 103 sampled conversations contain an invalid_argument error; 8 are the empty-query shape.",
+    "notes": [
+      "support-0029 motivated this mode but is not a positive of it. Its store_id=null calls were not rejected and the agent did locate the product; its consequential failure is RESP-6, where it is already a positive.",
+      "support-0196 is new to the taxonomy and is very likely also an unverifiable_completeness_claim positive - 'nothing in the store's 40-item catalog is priced lower' is an unhedged superlative over a set the searches never enumerated. Flagged for the reviewer rather than added, since that mode is already confirmed."
+    ]
   }
 }
