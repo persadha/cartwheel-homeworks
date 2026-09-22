@@ -215,7 +215,7 @@ Memory, Reflection, Planning, Action and System-level.
 | `unrequested_information` | **no counterpart** |
 
 **The omission it identified, and the mode that followed.** AgentDebug's Action /
-Parameter Error had no counterpart here. Checking the data: 11 of 103 conversations
+Parameter Error had no counterpart here. Checking the data: 11 of 105 conversations
 carry an `invalid_argument` error, and 8 are the same shape — `search_products`
 called with an empty `query` to enumerate a catalogue, rejected, then keyword
 guessing. Added as `uncorrected_parameter_error`, supported by the reviewer's own
