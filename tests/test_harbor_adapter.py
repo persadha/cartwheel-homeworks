@@ -434,3 +434,84 @@ def test_hw5_judge_uses_named_input_and_the_strict_hw5_parser(
     ):
         with pytest.raises(ValueError):
             decode(bad)
+
+
+def _write_trial_dirs(job: Path, trials: list[dict]) -> None:
+    """Lay out a job the way Harbor 0.23 does: stats only, one result per trial."""
+    job.mkdir()
+    (job / "result.json").write_text(
+        json.dumps({"n_total_trials": len(trials), "stats": {}})
+    )
+    for trial in trials:
+        trial_dir = job / trial["trial_name"]
+        trial_dir.mkdir()
+        (trial_dir / "result.json").write_text(json.dumps(trial))
+
+
+def test_baseline_summary_reads_per_trial_results(tmp_path: Path) -> None:
+    cases_path = tmp_path / "cases.jsonl"
+    case = {
+        "id": "e-501",
+        "mode": "response_quality",
+        "input": {"role": "shopper", "user_id": 1, "message": "hello"},
+        "initial_state": {"world": "reseed", "fixture": None},
+        "expected": {"checks": [{"check": "reply_asks_question"}]},
+    }
+    _write_cases(cases_path, [case])
+    trials = [
+        {
+            "task_name": "cartwheel/evals__e-501",
+            "trial_name": f"e-501__{attempt}",
+            "started_at": f"2026-01-01T00:00:0{attempt}Z",
+            "verifier_result": {"rewards": {"reward": value}},
+            "exception_info": None,
+        }
+        for attempt, value in enumerate([1, 1, 0, 1, 1])
+    ]
+    job = tmp_path / "job"
+    _write_trial_dirs(job, trials)
+
+    markdown, passed = summarize_job(
+        job, cases_path=cases_path, expected_attempts=5, classify=True
+    )
+
+    assert passed is True
+    assert "| `e-501` | 4 | 5 |" in markdown
+    assert '`kind: "capability"`, `baseline_pass_rate: 0.8`' in markdown
+
+
+def test_capability_analysis_orders_per_trial_results_by_start_time(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "harbor_adapter.analysis.pass_at_k", lambda n, c, k: (n + c + k) / 100
+    )
+    trials = [
+        {
+            "task_name": "cartwheel/evals__e-502",
+            "trial_name": f"e-502__{name}",
+            "started_at": started,
+            "verifier_result": {"rewards": {"reward": reward}},
+            "agent_info": {
+                "model_info": {"provider": "student", "name": "provider-model"}
+            },
+            "exception_info": None,
+        }
+        for name, started, reward in [
+            ("b", "2026-01-01T00:00:02Z", 0),
+            ("a", "2026-01-01T00:00:01Z", 1),
+            ("c", "2026-01-01T00:00:03Z", 1),
+        ]
+    ]
+    job = tmp_path / "job"
+    _write_trial_dirs(job, trials)
+
+    result = analyze_capability_job(job, "e-502", expected_attempts=3)
+
+    assert [row["trial_name"] for row in result["trials"]] == [
+        "e-502__a",
+        "e-502__b",
+        "e-502__c",
+    ]
+    assert result["rewards"] == [1, 0, 1]
+    assert result["trial_order"] == "per-trial result.json, by started_at"
