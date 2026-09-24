@@ -23,3 +23,9 @@ scenarios/demo_pilot_gt.json
 
 # Snapshot of the post-pilot world, kept for inspection only.
 data/cartwheel-after-pilot.db
+
+# Vendored skill bodies installed with `npx skills add` (HW5 uses
+# write-judge-prompt and validate-evaluator). skills-lock.json pins the source
+# and hash, so the install is reproducible without committing third-party text.
+.agents/skills/
+.claude/skills/

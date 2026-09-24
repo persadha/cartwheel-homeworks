@@ -1,0 +1,152 @@
+{
+ "support-0217": {
+  "verdict": "Fail",
+  "critique": "The user raised the topic of the return window. The assistant starts by correctly stating that the default return window is 30 days from the delivery date, providing the required information about the policy clearly within scope. However, the reply further states, \"stores can override that window with their own policy — stricter or looser — and when they do, the store's policy wins,\" which includes the detail that overrides can be tighter or more lenient. This fact about store policies and their overrides belongs to category 4, providing policy details on a topic the user did not raise. The user did not inquire about the specific policies of various stores or overrides; they only asked about the return window itself. Therefore, the reply includes unrequested information that does not align with the user's inquiry.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0240": {
+  "verdict": "Fail",
+  "critique": "The user mentioned order 8885 and stated that a buyer is raising a dispute on it, which directly relates to the topic of disputes. In response, the assistant talks about the order's details, including its amount, store, delivery date, and eligibility status for a refund, all of which are relevant to the raised dispute and are facts about the record the user named (order 8885). However, the assistant states, \"disputes are always handled by a human support agent, never resolved automatically,\" which falls under category 4, as it provides policy detail on disputes which the user did not specifically raise. Therefore, the sentence can be completed with: \"The reply states 'disputes are always handled by a human support agent, never resolved automatically', which belongs to 'policy detail', a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0245": {
+  "verdict": "Fail",
+  "critique": "The user raised the topic of when they would get paid for last week's sales. The assistant provides a detailed explanation about the payout schedule, including aspects of the payment process. However, the assistant states, \"any refunds you issued during the week are deducted from the next payout before it goes out,\" which belongs to category 5, the refund eligibility status of an order, a topic the user never raised. The user did not inquire about refunds or returns specifically, so this fact is outside the scope of what they asked. Therefore, the incomplete sentence is: \"The reply states 'any refunds you issued during the week are deducted from the next payout before it goes out,' which belongs to category 5, the eligibility status of an order, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0204": {
+  "verdict": "Pass",
+  "critique": "The user raised the topic of finding products from Atlas Stationery that are under $30. The assistant lists five products, all within the price range requested, which directly answers the user's inquiry. The assistant does not introduce any unrequested facts from other topics; the reply solely conveys details about the products that match the user's request. Therefore, I cannot complete the sentence in \"The test\" as there are no substantive facts that fall into the identified categories that the user did not raise. Everything mentioned is relevant to the user's original question about items under $30.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0117": {
+  "verdict": "Fail",
+  "critique": "The user raised a specific inquiry about which of their orders included the \"Portable Pencil Set\" (Product ID 764). The reply correctly indicates that none of their orders include this product, which directly answers the user's question. Additionally, it lists orders with similarly named pencil sets as contextual information. However, the assistant states the fact: \"none of your orders include the Portable Pencil Set,\" which belongs to category 1, as it is a fact about another order (the Portable Pencil Set) that the user never raised. Thus, the sentence \"The reply states 'none of your orders include the Portable Pencil Set,' which belongs to 'another order,' a record or topic the user never raised.\" can be completed. This constitutes a failure to meet the criterion because the assistant introduced an unrequested fact about a product that the user did not ask about. The mention of alternative products (Travel Pencil Set, Vintage Pencil Set) also adds facts about different orders that the user did not raise and further supports the determination of a failure.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0087": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 8454, and the topic of checking its status. The assistant provides information about the status, timeline, and refund of the order, all of which are relevant to the user's inquiry. However, the assistant states, \"and it's already been refunded,\" which is a fact about the refund status of the order. This falls under category 5, which pertains to the refund eligibility status of an order. The user did not ask about refunds, so this information is outside the scope of their question. The final part of the response contains an offer, but this does not negate the earlier unrequested fact. Therefore, the sentence can be completed: \"The reply states 'it’s already been refunded,' which belongs to category 5, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0246": {
+  "verdict": "Pass",
+  "critique": "The user raised the topic of their next payout landing. The assistant's reply provides information about the payout schedule, stating, \"Payouts run weekly, every Friday\" and details about processing time, which explains how payouts work but does not introduce any unrequested facts about other topics. There are no statements about refunds, eligibility, or specifics of any other payout not raised by the user, so nothing can be quoted as belonging to an unrequested record or topic. The reply remains focused on the user's inquiry about their payout. Thus, I cannot complete the sentence \"The reply states ____, which belongs to ____, a record or topic the user never raised.\" Therefore, the final result is Pass.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0065": {
+  "verdict": "Fail",
+  "critique": "The user raised a general concern about one of their orders being wrong, but did not specify which order or issue they were experiencing. The assistant responds by summarizing the most recent orders, which includes identifying details about each order (order numbers, dates, and statuses). These details about the orders help the user identify which order might be incorrect. However, the assistant includes facts about previous orders grouped into a table format, which goes beyond what the user asked. \n\nThe reply states: \"Order #6213: Placed (not shipped yet)\" and presents lists for other recent orders without the user raising this specific history. Therefore, an unrequested fact is introduced. This fact belongs to category 1, as it refers to \"Another order\" that the user never mentioned. The specific quote \"Order #6213: Placed (not shipped yet)\" fits the failure structure, indicating that the assistant included information regarding an order that was not raised by the user. \n\nThus, I can complete the sentence: \"The reply states 'Order #6213: Placed (not shipped yet)', which belongs to 'Another order', a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0046": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 6894, and asked where it is. The assistant responded that order #6894 cannot be accessed due to permission issues, which is a direct answer to the user's inquiry. The assistant then provided a list of recent orders with their statuses, which is a valid response based on the user's general question about their order. However, the assistant also states, \"None of your orders are currently in transit — everything recent is marked as delivered\", which presents information about the delivery status of all recent orders without the user having raised that specific topic. This belongs to category 5, which relates to refund or return eligibility status — the assistant did not have the user's inquiry leaning towards that aspect. Therefore, one could complete the sentence as follows: \"The reply states ‘none of your orders are currently in transit’, which belongs to category 5, refund or return eligibility status of an order that the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0098": {
+  "verdict": "Fail",
+  "critique": "The user raised a single record, order 1767, and specifically asked for its status. The assistant provides detailed information about the order's status, product details, and delivery dates, all of which are relevant to the user’s request and pertain to the order the user named. However, the assistant states, \"No further refunds are eligible on this one since it's already been refunded,\" which belongs to category 5, the refund eligibility status of an order. This information is unrequested because the user did not inquire about refunds or return eligibility. Therefore, it violates the established guideline to only provide facts relevant to the topics raised by the user.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0251": {
+  "verdict": "Fail",
+  "critique": "The user raised the topic of the Heavy-Duty Vase and asked for details about relevant items. The assistant provides thorough information about available Heavy-Duty Vases in the user's shop, including product IDs and prices, which directly answers the user’s query without adding unrelated facts. However, the assistant states that 'Product #1 (the $298.00 listing) has recent sales in your order history — orders 4311 and 4127' which belongs to category 2, sales history, relating to orders the user did not mention or inquire about. This is an unrequested fact that the user never raised. Therefore, I can complete the sentence: 'The reply states that Product #1 has recent sales in your order history, which belongs to sales history, a record or topic the user never raised.'",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0077": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 56, and inquired about its status. The assistant provides updates about the product, order date, shipping date, delivery date, and whether it is stuck in transit—all of which are pertinent to the user's question regarding order 56. However, the assistant states that the order is \"currently shows as not refund-eligible,\" which belongs to category 5, the refund eligibility status of an order, and the user did not raise refunds, returns, or any related topics in their message. Therefore, the reply contains unrequested information about the order's refund eligibility status. \n\nThe sentence can be completed as follows: \"The reply states 'the order currently shows as not refund-eligible', which belongs to category 5, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0085": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 6593, and asked about its status. The assistant provides details regarding the store, total, dates of ordering, shipping, and delivery—all of which are facts pertinent to the order the user asked about. However, the assistant states that 'the order is also currently within its refund-eligible window', which belongs to category 5, the refund eligibility status of an order. The user did not inquire about refunds or returns, making this an unrequested fact. Additionally, the assistant mentions that 'if anything's not right with the item, you still have options', which could imply further discussion about options not raised by the user. Hence, it fails the criterion because it introduces a substantive fact that the user never raised. The sentence can be completed: \"The reply states 'the order is also currently within its refund-eligible window', which belongs to refund or return eligibility status of an order, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0116": {
+  "verdict": "Fail",
+  "critique": "The user raised the record of the Classic Hammer order, specifically asking to find it in their store. The assistant confirms finding Order #6427 with details such as product ID, quantity, total, status, and dates - all related to the order the user requested. However, the assistant also states that \"you also sell a separate product called 'Classic Hammer' (product ID 144, $137.25), but there are no orders for that one\", which introduces a fact about another product (product ID 144) that was not requested by the user. Therefore, it states \"you also sell a separate product called 'Classic Hammer' (product ID 144, $137.25)\", which belongs to category 1 (Another order), as the user did not ask about any other orders or products beyond the Classic Hammer related to order #6427.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0036": {
+  "verdict": "Fail",
+  "critique": "The user raised the record of order 8138 and the topic of return eligibility. The user wanted to know if they could still send back this specific order, indicating a question of return status. The assistant's reply offers details specific to this order, including its delivery date, total amount, and the fact that it is not return-eligible, all information relevant to order 8138 and therefore in scope. However, the assistant states, \"Saltbox Pantry's return window: 7 days from delivery (they override Cartwheel's default 30-day window per their store policy...\", which introduces policy detail about Saltbox Pantry's return policy beyond the information requested by the user. The user did not inquire about the store's policy on return windows specifically. Therefore, we can complete the sentence as follows: \"The reply states 'Saltbox Pantry's return window: 7 days from delivery', which belongs to policy detail, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0106": {
+  "verdict": "Fail",
+  "critique": "The user raised the topic of the Compact Tea Sampler, asking which order it was on. The assistant successfully identifies this as order #3411 and provides relevant details. However, the assistant also mentions that the order is \"currently refund-eligible if that's useful.\" This statement introduces an unrequested fact about the refund eligibility status of order #3411, which belongs to category 5. The user did not inquire about refunds or returns specifically; thus, this is not in scope. Therefore, I can complete the sentence: \"The reply states 'currently refund-eligible,' which belongs to category 5, the refund or return eligibility status of an order the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0226": {
+  "verdict": "Fail",
+  "critique": "The user raised the topic of refund authority, asking who is allowed to issue a refund. The reply provides detailed information directly addressing the user's query about the process of issuing refunds at Cartwheel. However, it includes the statement \"A human support agent: Any refund above $100 is queued for review by a human before any money moves.\" This fact pertains to the eligibility status of refunds that are above $100, which relates to category 5, refund or return eligibility status of an order, even though the user did not specifically ask about refund eligibility. Therefore, the reply fails because it presents a substantive fact about refund eligibility that the user did not raise.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0212": {
+  "verdict": "Fail",
+  "critique": "The user raised topics related to case escalations to human agents, specifically asking about the circumstances under which a case is escalated. The assistant accurately outlines the policy regarding escalations, citing specific conditions such as refunds over $100, account changes, disputes, and instances where the assistant cannot resolve a case. However, while the assistant provided insightful details directly relevant to the user's inquiry, it also mentioned that a ticket is opened for an escalation without the user asking about the details of what happens when such a ticket is opened. The assistant states, \"I open a ticket — when I hit something above my authority...\" which introduces a new fact regarding the escalation process that the user did not directly ask about. This fact about opening a ticket, which falls into policy detail on a topic the user did not raise, can be interpreted as falling under category 4. Therefore, the assistant's response includes unrequested information. As a result, I can complete the sentence: \"The reply states 'I open a ticket — when I hit something above my authority', which belongs to policy detail, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0055": {
+  "verdict": "Pass",
+  "critique": "The user raised the record of order 1289 and the topics of a refund and a damaged item. The assistant's response addresses the refund for order 1289, correctly acknowledging the user's concern about the damaged item and providing the refund amount and its processing time. The details about the refund (\"I've refunded your full $93.25 for order 1289 (refund ID 577)\") are pertinent to the user's request, which is about the refund itself and not about the refund eligibility, which was already confirmed in the previous tool call. The reply does not state any facts that belong to an unrequested record or topic. Therefore, I cannot complete the sentence in \"The test\"; there are no unrequested facts present in the response.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0242": {
+  "verdict": "Fail",
+  "critique": "The user raised a question regarding the payout schedule, specifically asking about the timing of payouts. The assistant's reply provides information related to this topic. It states, 'Payouts run weekly, on Fridays' and 'Each payout takes 2 business days to process after the Friday run', which directly relate to the payout schedule. \n\nHowever, the reply also states, 'refunds issued during the week are deducted from the next payout', which belongs to category 5, as it provides detail about the refund eligibility status of an order (i.e., refunds affecting the next payout). The user did not raise questions about refunds, returns, or cancellations.\n\nThus, I can complete the sentence: \"The reply states 'refunds issued during the week are deducted from the next payout', which belongs to category 5, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0082": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 3452, and asked about its status (\"wheres order 3452 got to\"). The assistant provides details about the delivery of order 3452, including the ordered date, shipped date, delivered date, store name, and total amount, all of which pertain directly to the user's inquiry and therefore fall within scope. However, the assistant states that the order is 'refund eligible', which belongs to category 5, the eligibility status of an order. This aspect was not raised by the user, who did not inquire about refunds or returns. Therefore, the sentence can be completed as: \"The reply states 'refund eligible: true', which belongs to category 5, the eligibility status of an order, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0089": {
+  "verdict": "Fail",
+  "critique": "The user raised the record of order 1807 and asked two topics: tracking the shipment status and whether it was too late to cancel. In response to the shipment tracking, the assistant provided details about the order being delivered, the store, order and shipping dates. These details are directly relevant to order 1807, thus they are in scope. However, upon responding to the second question about cancellation, the assistant states that cancellations only work on orders that haven't shipped, which is a policy detail regarding cancellations not explicitly asked by the user. This belongs to category 4, as the user never raised cancellation policies or details -- they only inquired if it was possible to cancel the specific order. Therefore, I can complete the failure sentence: 'The reply states cancellations only work on orders that haven't shipped yet, which belongs to policy detail, a record or topic the user never raised.'",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0099": {
+  "verdict": "Fail",
+  "critique": "The user raised order 529 asking for details about it. The assistant answered the query fully by providing details about the order such as product, store, total, status, dates, and refund eligibility. However, when the user later inquires about cancelling the order, the assistant states, \"Cancellations are only possible before an order ships,\" and provides a detailed explanation about the return policy, including that items can be returned within 30 days of delivery and that the user is still within this window. The reply states that they are refund eligible due to the order's status, which is fact about refunds being possible after delivery — a topic that the user did not initially raise. Therefore, the assistant's statement concludes with an offer to process a refund which is permissible, but the fact about refund eligibility is a substantive fact about a situation that was not specifically raised by the user. Thus, the assistant's reply fails the criterion for including an unrequested fact.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0109": {
+  "verdict": "Fail",
+  "critique": "The user raised one record regarding the Classic Screwdriver Set to access details about it. The assistant lists two orders in response. The reply states that 'Currently eligible for a refund' and 'Not eligible for a refund anymore' for each order, which belong to category 5 regarding the refund eligibility status of an order. However, the user did not ask about refunds or their eligibility. They simply requested to pull up the order associated with the Classic Screwdriver Set, making the statements about refund eligibility unrequested facts. Thus, I can complete the sentence with the fact: 'Currently eligible for a refund', which belongs to category 5.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0095": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 5450, and asked specifically about its current shipping status. The reply addresses the status of order 5450 accurately, covering aspects like its delivery, including dates and store information, all of which are directly related to the user's inquiry. However, the reply states \"the order shows as **not refund-eligible** at this point,\" which belongs to category 5, concerning refund eligibility status of an order—an aspect the user never raised in their question. Therefore, this creates a failure in adherence to the criterion. \n\nThe user did not inquire about refunds or returns; thus, this fact is an unrequested detail. The sentence can be completed as follows: \"The reply states 'the order shows as **not refund-eligible**', which belongs to category 5, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0071": {
+  "verdict": "Pass",
+  "critique": "The user raised the record of order 6884 and the topic of refunds. The assistant's reply provided the refund ineligibility status of order 6884 based on the Cartwheel return policy, which is a relevant detail about the order in question. It states that order #6884 is not eligible for a refund because it was delivered 113 days ago, which falls outside of the return window that states items can be returned within 30 days of delivery. However, while the assistant cites the details regarding the delivery date and refund eligibility about that specific order, there are no unrequested facts related to another order or another refund outside of the user-raised topic in the conclusion. Therefore, the response does not include a statement that can be completed in the format \"The reply states ____, which belongs to ____, a record or topic the user never raised.\" Since all information provided is relevant to order 6884 and related to the user's request, the response is deemed valid with no off-topic facts presented.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0169": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 1150, and the topic of refunds. The assistant provides specific details about the refund process from the policy, including the timeframe for when money is returned to the buyer after a refund is approved as per the policy (5 to 10 business days). However, this policy detail regarding the time for refunds belongs to category 4, policy detail, on a topic the user did not explicitly raise. The user’s inquiry about the refund was explicitly regarding their specific order's status, and the policy details provided were not requested. The assistant's statement about the refund process does not directly relate to the user's raised query about when they would receive back their money, as it introduces additional information about how refunds are handled in general. Therefore, the reply fails to meet the criterion since it introduces unrequested policy details about refunds that the user did not specifically ask for.",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0092": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 8387, and the topic of its status. The assistant provides a detailed summary of the order's details, which includes facts like the product ID, quantity, total amount, status, ordered date, shipped date, and delivered date, all of which pertain to the raised order and are in scope. However, the assistant also states that the order is \"not currently eligible for a refund,\" which falls under category 5 (refund or return eligibility status of an order) and is a fact the user did not raise. Therefore, it can be reported as an unrequested fact present in the reply. The sentence can be completed as follows: \"The reply states 'not currently eligible for a refund', which belongs to category 5, a record or topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0079": {
+  "verdict": "Fail",
+  "critique": "The user raised one record, order 1895, related to their Vintage Bluetooth Speaker, and inquired about its status and cancellation. The assistant effectively addressed the user's inquiry about the order's status with appropriate details such as the order date, shipping date, delivery date, and total cost, which all pertain to order 1895, thus answering the user's question correctly. However, the assistant also included information that the order is still within the return window for a refund. This could be interpreted as a fact about refund eligibility status, which belongs to category 5. The user did not ask about refunds or returns specifically in this context; they only inquired about cancellation. Therefore, while the fact about return eligibility is factually correct, it is not directly relevant to the user's stated question about cancellation. In completing the sentence: \"The reply states the order is still within the window for a return or refund, which belongs to category 5, the eligibility status of an order, a topic the user never raised.\"",
+  "judge_id": "unrequested_information-v2"
+ },
+ "support-0118": {
+  "verdict": "Fail",
+  "critique": "The user raised a single record, the Portable Marble Run, and the topic of finding it in their orders. The assistant identified that there were two types of Portable Marble Run available, which are facts about the catalogue that were not requested. Specifically, the statement \"Your store carries two different 'Portable Marble Run' listings ($50.25 and $224.25)\" states information about catalogue prices which belongs to category 3, as the user never asked about catalogue prices. Additionally, the assistant states \"Order 1981 — Portable Marble Run ($50.25), 1 unit, ordered June 29, shipped July 1, currently in transit.\" This identifies a specific order and its status, but since the user did not ask for any current orders beyond the specific finding of the Portable Marble Run, this information is also outside the raised topic. Thus, the statement also contains unrequested facts. Therefore, I can complete the sentence: 'The reply states \"Your store carries two different 'Portable Marble Run' listings ($50.25 and $224.25)\", which belongs to catalogue prices, a record or topic the user never raised.'",
+  "judge_id": "unrequested_information-v2"
+ }
+}
