@@ -25,6 +25,11 @@ MODEL_IDS = {
     "gpt-nano": "gpt-5.5-nano",
 }
 
+# Judges whose HW5 input folded the tool name into each call and result
+# (hw-5:analysis/run_judges.py::_judge_messages). Their verifier renders the
+# runtime transcript the same way.
+NAMED_TRACE_JUDGES = {"unrequested_information"}
+
 
 def _toml_string(value: str) -> str:
     return json.dumps(value, ensure_ascii=False)
@@ -230,7 +235,9 @@ def cartwheel_code_checks(workspace: Path) -> bool:
 
 def _judge_py(mode: str, expected: str, judge: dict[str, Any]) -> str:
     """Run one frozen judge through the DocETL contract used in HW5."""
-    del mode
+    render = (
+        "judge_trace_text_named" if mode in NAMED_TRACE_JUDGES else "judge_trace_text"
+    )
     template = '''from __future__ import annotations
 
 import json
@@ -240,7 +247,7 @@ from pathlib import Path
 from docetl.api import Dataset, MapOp, Pipeline, PipelineOutput, PipelineStep
 from rewardkit import criterion
 
-from replay.rollout import judge_trace_text
+from replay.rollout import __RENDER__ as render_trace
 
 PROMPT = __PROMPT__
 MODEL = __MODEL__
@@ -248,21 +255,21 @@ EXPECTED = __EXPECTED__
 
 
 def _decode(row: dict) -> str:
+    # Same contract as HW5 (analysis/helpers/scale.py::_decode_judge_rows):
+    # exactly Pass or Fail with a critique, otherwise an error, never a verdict.
+    verdict = row.get("result")
     critique = row.get("critique")
+    if verdict not in ("Pass", "Fail"):
+        raise ValueError("judge result must be Pass or Fail")
     if not isinstance(critique, str) or not critique.strip():
         raise ValueError("judge result needs a critique")
-    raw = str(row.get("result", "")).strip().lower().rstrip(".")
-    if raw in {"pass", "passed"}:
-        return "pass"
-    if raw in {"fail", "failed"}:
-        return "fail"
-    return "fail"
+    return verdict.lower()
 
 
 @criterion
 def cartwheel_judge(workspace: Path) -> bool:
     evidence = json.loads((workspace / "cartwheel-result.json").read_text())
-    content = judge_trace_text(evidence["transcript"])
+    content = render_trace(evidence["transcript"])
     with tempfile.TemporaryDirectory(prefix="cartwheel-judge-") as directory:
         root = Path(directory)
         input_path = root / "input.json"
@@ -311,6 +318,7 @@ def cartwheel_judge(workspace: Path) -> bool:
         template.replace("__PROMPT__", repr(judge["prompt_text"]))
         .replace("__MODEL__", repr(_judge_model(judge["model"])))
         .replace("__EXPECTED__", repr(expected))
+        .replace("__RENDER__", render)
     )
 
 
