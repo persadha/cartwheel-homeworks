@@ -1,0 +1,117 @@
+{
+  "case_id": "e-005",
+  "model": "deepinfra/zai-org/GLM-5.3",
+  "trial_order": "per-trial result.json, by started_at",
+  "trials": [
+    {
+      "trial_name": "e-005__FDLch24",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-005__5YsNSVJ",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__CCgBpRA",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__KLATH4d",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-005__HfyJz9J",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__8upHFxK",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__oE2bS5Z",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__gbTka9r",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-005__LsTWi9n",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__v8cK32Q",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__A52vtEp",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-005__SJ6UZ5q",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__Pi6cwPX",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-005__bzsXbVz",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-005__82gf4wP",
+      "passed": 0
+    }
+  ],
+  "rewards": [
+    0,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "n": 15,
+  "successes": 9,
+  "comparisons": [
+    {
+      "n": 5,
+      "successes": 3,
+      "pass_at_k": {
+        "1": 0.6,
+        "3": 1.0,
+        "5": 1.0
+      }
+    },
+    {
+      "n": 10,
+      "successes": 7,
+      "pass_at_k": {
+        "1": 0.7,
+        "3": 0.9916666666666667,
+        "5": 1.0
+      }
+    },
+    {
+      "n": 15,
+      "successes": 9,
+      "pass_at_k": {
+        "1": 0.6,
+        "3": 0.9560439560439561,
+        "5": 0.998001998001998,
+        "10": 1.0,
+        "15": 1.0
+      }
+    }
+  ]
+}
