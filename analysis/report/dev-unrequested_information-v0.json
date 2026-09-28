@@ -1,0 +1,35 @@
+{
+  "confusion": {
+    "tp": 0,
+    "fp": 0,
+    "fn": 9,
+    "tn": 21,
+    "n": 30
+  },
+  "human_pass": 9,
+  "human_fail": 21,
+  "tpr": 0.0,
+  "tpr_interval": [
+    0.0,
+    0.2992
+  ],
+  "tnr": 1.0,
+  "tnr_interval": [
+    0.8454,
+    1.0
+  ],
+  "agreement": 0.7,
+  "disagreements": [
+    "2a20777c94c3c938f5606cac6e55cecf",
+    "2faec369efe097eec6346fd68fa37106",
+    "62dcc30b6db0e9bcf82f4891732c3281",
+    "63acb195ae03be9b139325532cffb371",
+    "bdfb5fa3c1eafb6b59c1861241064f27",
+    "c0ec32875e969850ea8e65a130729c50",
+    "c16899c3670062aebf2a9ed689aba1ae",
+    "ebd56acda85ade71892be924b4f94d2f",
+    "feb366d6f59b413bf77dbc07a5735d2f"
+  ],
+  "judge_id": "unrequested_information-v0",
+  "split": "dev"
+}

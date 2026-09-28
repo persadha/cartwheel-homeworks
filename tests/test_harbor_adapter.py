@@ -326,3 +326,192 @@ def test_capability_analysis_uses_5_10_and_15_observed_runs(
         "10",
         "15",
     }
+
+
+def _hw5_record_to_transcript(trace: list[dict]) -> dict | None:
+    """Rebuild a runtime transcript from one HW5 judge input record, or None
+    when the record's message order has no single-reply-per-turn shape."""
+    turns: list[dict] = []
+    pending: dict | None = None
+    for message in trace:
+        role = message["role"]
+        if role == "user":
+            turns.append({"user": message["text"], "tool_calls": [], "reply": ""})
+        elif not turns or turns[-1]["reply"]:
+            return None
+        elif role == "tool_call":
+            args = dict(message["arguments"])
+            pending = {"name": args.pop("tool"), "args": args}
+        elif role == "tool_result":
+            name, _, body = message["text"].partition(" -> ")
+            if pending is None or pending["name"] != name:
+                return None
+            turns[-1]["tool_calls"].append({**pending, "result": json.loads(body)})
+            pending = None
+        elif role == "assistant":
+            turns[-1]["reply"] = message["text"]
+    return {"turns": turns}
+
+
+def test_named_judge_input_reproduces_the_hw5_judge_input() -> None:
+    from analysis.helpers.normalization import _flatten
+    from replay.rollout import judge_trace_text_named
+
+    path = Path(__file__).resolve().parents[1] / "analysis/state/hw5_trace_inputs.json"
+    records = json.loads(path.read_text(encoding="utf-8"))
+    compared = 0
+    for record in records:
+        transcript = _hw5_record_to_transcript(record["trace"])
+        if transcript is None:
+            continue
+        assert judge_trace_text_named(transcript) == _flatten(record["trace"]), (
+            record["trace_id"]
+        )
+        compared += 1
+    assert compared >= 60
+
+
+def _decode_from(rubric: str):
+    import ast
+
+    tree = ast.parse(rubric)
+    node = next(
+        n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_decode"
+    )
+    namespace: dict = {}
+    exec(compile(ast.Module([node], []), "decode", "exec"), namespace)
+    return namespace["_decode"]
+
+
+def test_hw5_judge_uses_named_input_and_the_strict_hw5_parser(
+    tmp_path: Path, monkeypatch
+) -> None:
+    judges = tmp_path / "state" / "judges"
+    judges.mkdir(parents=True)
+    (judges / "unrequested_information-v2.json").write_text(
+        json.dumps(
+            {
+                "mode": "unrequested_information",
+                "version": 2,
+                "prompt_text": "Frozen HW5 prompt.",
+                "model": "gpt-4o-mini",
+                "status": "frozen",
+            }
+        )
+    )
+    monkeypatch.setenv("CARTWHEEL_ANALYSIS_STATE", str(tmp_path / "state"))
+    cases_path = tmp_path / "cases.jsonl"
+    _write_cases(
+        cases_path,
+        [
+            {
+                "id": "e-201",
+                "mode": "unrequested_information",
+                "input": {"role": "shopper", "user_id": 1, "message": "Hi"},
+                "initial_state": {"world": "reseed", "fixture": None},
+                "expected": {
+                    "assertions": ["The reply answers only what was asked."],
+                    "judges": {"unrequested_information": "pass"},
+                },
+            }
+        ],
+    )
+    export_tasks(cases_path, tmp_path / "tasks", baseline=True)
+    rubric = (
+        tmp_path / "tasks" / "e-201" / "tests" / "judge_unrequested_information.py"
+    ).read_text()
+    assert "import judge_trace_text_named as render_trace" in rubric
+    assert "MODEL = 'gpt-4o-mini'" in rubric
+
+    decode = _decode_from(rubric)
+    assert decode({"result": "Pass", "critique": "ok"}) == "pass"
+    assert decode({"result": "Fail", "critique": "ok"}) == "fail"
+    for bad in (
+        {"result": "pass", "critique": "ok"},
+        {"result": "Passed", "critique": "ok"},
+        {"result": "Unsure", "critique": "ok"},
+        {"result": "Pass", "critique": "  "},
+    ):
+        with pytest.raises(ValueError):
+            decode(bad)
+
+
+def _write_trial_dirs(job: Path, trials: list[dict]) -> None:
+    """Lay out a job the way Harbor 0.23 does: stats only, one result per trial."""
+    job.mkdir()
+    (job / "result.json").write_text(
+        json.dumps({"n_total_trials": len(trials), "stats": {}})
+    )
+    for trial in trials:
+        trial_dir = job / trial["trial_name"]
+        trial_dir.mkdir()
+        (trial_dir / "result.json").write_text(json.dumps(trial))
+
+
+def test_baseline_summary_reads_per_trial_results(tmp_path: Path) -> None:
+    cases_path = tmp_path / "cases.jsonl"
+    case = {
+        "id": "e-501",
+        "mode": "response_quality",
+        "input": {"role": "shopper", "user_id": 1, "message": "hello"},
+        "initial_state": {"world": "reseed", "fixture": None},
+        "expected": {"checks": [{"check": "reply_asks_question"}]},
+    }
+    _write_cases(cases_path, [case])
+    trials = [
+        {
+            "task_name": "cartwheel/evals__e-501",
+            "trial_name": f"e-501__{attempt}",
+            "started_at": f"2026-01-01T00:00:0{attempt}Z",
+            "verifier_result": {"rewards": {"reward": value}},
+            "exception_info": None,
+        }
+        for attempt, value in enumerate([1, 1, 0, 1, 1])
+    ]
+    job = tmp_path / "job"
+    _write_trial_dirs(job, trials)
+
+    markdown, passed = summarize_job(
+        job, cases_path=cases_path, expected_attempts=5, classify=True
+    )
+
+    assert passed is True
+    assert "| `e-501` | 4 | 5 |" in markdown
+    assert '`kind: "capability"`, `baseline_pass_rate: 0.8`' in markdown
+
+
+def test_capability_analysis_orders_per_trial_results_by_start_time(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "harbor_adapter.analysis.pass_at_k", lambda n, c, k: (n + c + k) / 100
+    )
+    trials = [
+        {
+            "task_name": "cartwheel/evals__e-502",
+            "trial_name": f"e-502__{name}",
+            "started_at": started,
+            "verifier_result": {"rewards": {"reward": reward}},
+            "agent_info": {
+                "model_info": {"provider": "student", "name": "provider-model"}
+            },
+            "exception_info": None,
+        }
+        for name, started, reward in [
+            ("b", "2026-01-01T00:00:02Z", 0),
+            ("a", "2026-01-01T00:00:01Z", 1),
+            ("c", "2026-01-01T00:00:03Z", 1),
+        ]
+    ]
+    job = tmp_path / "job"
+    _write_trial_dirs(job, trials)
+
+    result = analyze_capability_job(job, "e-502", expected_attempts=3)
+
+    assert [row["trial_name"] for row in result["trials"]] == [
+        "e-502__a",
+        "e-502__b",
+        "e-502__c",
+    ]
+    assert result["rewards"] == [1, 0, 1]
+    assert result["trial_order"] == "per-trial result.json, by started_at"

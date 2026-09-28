@@ -1,0 +1,16 @@
+{
+  "versions": [
+    {
+      "judge_id": "unrequested_information-v0",
+      "prompt_hash": "effd7c561346"
+    },
+    {
+      "judge_id": "unrequested_information-v1",
+      "prompt_hash": "b2c95bccacad"
+    },
+    {
+      "judge_id": "unrequested_information-v2",
+      "prompt_hash": "41d3a59dc59d"
+    }
+  ]
+}

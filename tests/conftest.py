@@ -60,6 +60,10 @@ def analysis_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     src = Path(__file__).resolve().parent.parent / "analysis" / "state"
     dst = tmp_path / "state"
     shutil.copytree(src, dst)
+    # The course demo labels and judges live in _demo/ so they stay out of the
+    # student's own state; the Module 2 tests are written against them.
+    for sub in ("labels", "judges"):
+        shutil.copytree(src / "_demo" / sub, dst / sub, dirs_exist_ok=True)
     monkeypatch.setenv("CARTWHEEL_ANALYSIS_STATE", str(dst))
     for var in ("LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY", "LANGFUSE_HOST"):
         monkeypatch.delenv(var, raising=False)

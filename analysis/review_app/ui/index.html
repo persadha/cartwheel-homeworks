@@ -102,6 +102,39 @@
   .views button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
   .spacer { flex: 1; }
   .counts { color: var(--muted); font-size: 13px; }
+  /* HW5 judge calibration. One mode, one judgment per conversation, and the
+     handout's inverted convention: 1 = Pass. Kept visually distinct from the
+     Part E grid so the two label sets are never confused. */
+  #hw5-bar { display: none; padding: 8px 14px; border-bottom: 1px solid var(--line);
+             background: #14161a; gap: 12px; align-items: center; flex-wrap: wrap; }
+  #hw5-bar.on { display: flex; }
+  #hw5-bar .lab { font-size: 12px; color: var(--muted); text-transform: uppercase;
+                  letter-spacing: .06em; }
+  #hw5-bar .sig { font-size: 12px; color: #d8a657; font-family: ui-monospace, monospace; }
+  #hw5-bar .batch { font-size: 12px; padding: 1px 7px; border-radius: 9px;
+                    border: 1px solid var(--line); color: var(--muted); }
+  #hw5-bar button { padding: 5px 16px; border-radius: 5px; border: 1px solid var(--line);
+                    background: #1d2026; color: var(--fg); cursor: pointer; font-size: 14px; }
+  #hw5-bar button.pass.on { background: #1f4d2e; border-color: #2f7d47; }
+  #hw5-bar button.fail.on { background: #5a1f22; border-color: #8c3339; }
+  #hw5-bar input.ev { flex: 1; min-width: 220px; padding: 5px 8px; border-radius: 5px;
+                      border: 1px solid var(--line); background: #0f1115; color: var(--fg); }
+  #hw5-bar .prog { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  #hw5-judge { display: none; padding: 8px 14px; border-bottom: 1px solid var(--line);
+               background: #101319; font-size: 13px; }
+  #hw5-judge.on { display: block; }
+  #hw5-judge .v { font-weight: 600; }
+  #hw5-judge .agree { color: #7bbf8a; }
+  #hw5-judge .clash { color: #e0707a; }
+  #hw5-judge .crit { color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  #queue-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  #queue-table th, #queue-table td { padding: 4px 8px; border-bottom: 1px solid var(--line);
+                                     text-align: left; }
+  #queue-table td.cid { cursor: pointer; color: #79b8ff; }
+  #queue-table tr.lab-pass td.v { color: #7bbf8a; }
+  #queue-table tr.lab-fail td.v { color: #e0707a; }
+  #queue-filters { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  #queue-filters button.on { background: #2a2f38; }
   .nav { display: flex; gap: 4px; align-items: center; }
   .nav button {
     border: 1px solid var(--line); background: var(--bg);
@@ -355,6 +388,7 @@
     <button data-view="label">Label</button>
     <button data-view="map">Map</button>
     <button data-view="progress">Progress</button>
+    <button data-view="queue" id="tab-queue" style="display:none">Queue</button>
   </div>
   <div class="spacer"></div>
   <div class="nav" id="trace-nav">
@@ -366,6 +400,8 @@
 </header>
 
 <div id="trace-view" class="view active">
+  <div id="hw5-bar"></div>
+  <div id="hw5-judge"></div>
   <div class="trace-header" id="trace-header"></div>
   <div class="trace-body-wrap">
     <div class="trace-body" id="trace-body"></div>
@@ -377,6 +413,13 @@
   <div class="section-title">Structured labeling</div>
   <div class="grid-note" id="label-note"></div>
   <div class="grid-wrap"><table class="grid" id="label-grid"></table></div>
+</div>
+
+<div id="queue-view" class="view">
+  <div class="section-title">HW5 labelling queue</div>
+  <div class="grid-note" id="queue-note"></div>
+  <div id="queue-filters"></div>
+  <div class="grid-wrap"><table id="queue-table"></table></div>
 </div>
 
 <div id="map-view" class="view">
@@ -418,6 +461,12 @@ const state = {
   labels: {},        // {mode: {conversation_id: 0|1}}
   graph: {nodes: [], clusters: []},
   cur: 0,            // index into samples
+  // HW5. Separate from `labels` above: one mode, one row per conversation, and
+  // 1 = Pass rather than Part E's 1 = failure present.
+  hw5: {enabled: false, mode: '', convention: ''},
+  hw5Labels: {},     // {conversation_id: {label, comment}}
+  hw5Judge: {},      // {conversation_id: {verdict, critique, judge_id}}
+  queueFilter: 'unlabelled',
 };
 
 const api = {
@@ -1138,6 +1187,175 @@ document.getElementById('map').addEventListener('click', (e) => {
   if (best && bestD < 200) gotoTrace(best.trace_id);
 });
 
+
+/* ------------------------------------------------------------------ *
+ * HW5: judge calibration labelling                                   *
+ * ------------------------------------------------------------------ *
+ * Part E of HW4 judged six modes per conversation with 1 = failure present.
+ * HW5 judges ONE mode and stores 1 = Pass, because TPR/TNR take Pass as the
+ * positive class (hw5.md, "Pass is the positive class (1)"). The two label
+ * sets therefore live in different files and never share a code path; this
+ * view writes only to /api/hw5/labels. */
+
+function hw5On() { return state.hw5 && state.hw5.enabled; }
+
+function hw5LabelOf(cid) {
+  const r = state.hw5Labels[cid];
+  return r && (r.label === 0 || r.label === 1) ? r.label : null;
+}
+
+function hw5Counts() {
+  const vals = Object.values(state.hw5Labels);
+  const p = vals.filter(r => r.label === 1).length;
+  return {labelled: vals.length, pass: p, fail: vals.length - p};
+}
+
+function renderHw5Bar() {
+  const bar = document.getElementById('hw5-bar');
+  if (!hw5On()) { bar.classList.remove('on'); return; }
+  bar.classList.add('on');
+  const s = curTrace();
+  if (!s) { bar.innerHTML = '<span class="lab">no conversation</span>'; return; }
+  const cid = convId(s);
+  const v = hw5LabelOf(cid);
+  const c = hw5Counts();
+  const sigs = s.hw5_signals || [];
+  const ev = (state.hw5Labels[cid] || {}).comment || '';
+
+  bar.innerHTML =
+    `<span class="lab">${escape(state.hw5.mode)}</span>` +
+    `<span class="batch">${escape(s.hw5_batch || '-')}</span>` +
+    (sigs.length ? `<span class="sig">${escape(sigs.join(' '))}</span>` : '') +
+    `<button class="pass${v === 1 ? ' on' : ''}" data-v="1" title="key: p">Pass</button>` +
+    `<button class="fail${v === 0 ? ' on' : ''}" data-v="0" title="key: f">Fail</button>` +
+    `<button data-v="" title="key: x">clear</button>` +
+    `<input class="ev" id="hw5-ev" placeholder="evidence (quote the volunteered fact)" ` +
+    `value="${attr(ev)}">` +
+    `<span class="prog">${c.labelled}/${state.samples.length} labelled &middot; ` +
+    `${c.pass} Pass &middot; ${c.fail} Fail</span>`;
+
+  bar.querySelectorAll('button').forEach(b => {
+    b.onclick = () => {
+      const raw = b.dataset.v;
+      saveHw5Label(cid, raw === '' ? null : parseInt(raw, 10));
+    };
+  });
+  const box = document.getElementById('hw5-ev');
+  // Evidence is saved against the current label, so typing alone must not
+  // create one; an unlabelled conversation keeps the text until a verdict.
+  box.onblur = () => {
+    if (hw5LabelOf(cid) !== null) saveHw5Label(cid, hw5LabelOf(cid), box.value);
+  };
+  box.onkeydown = (e) => { if (e.key === 'Enter') box.blur(); };
+  renderHw5Judge();
+}
+
+function renderHw5Judge() {
+  const el = document.getElementById('hw5-judge');
+  const s = curTrace();
+  if (!hw5On() || !s) { el.classList.remove('on'); return; }
+  const j = state.hw5Judge[convId(s)];
+  if (!j) { el.classList.remove('on'); return; }
+  el.classList.add('on');
+  const human = hw5LabelOf(convId(s));
+  const judgePass = j.verdict === 'Pass' || j.verdict === 1;
+  const clash = human !== null && ((human === 1) !== judgePass);
+  el.innerHTML =
+    `<span class="v ${clash ? 'clash' : 'agree'}">judge ${escape(String(j.verdict))}` +
+    (human === null ? '' : ` &middot; you ${human === 1 ? 'Pass' : 'Fail'}` +
+      (clash ? ' &middot; DISAGREEMENT' : ' &middot; agree')) +
+    `</span> <span class="lab">${escape(j.judge_id || '')}</span>` +
+    `<div class="crit">${escape(j.critique || '')}</div>`;
+}
+
+async function saveHw5Label(cid, label, comment) {
+  const s = state.samples.find(x => convId(x) === cid);
+  if (!s) return;
+  const box = document.getElementById('hw5-ev');
+  const text = comment !== undefined ? comment : (box ? box.value : '');
+  const res = await api.post('/api/hw5/labels', {
+    mode: state.hw5.mode,
+    conversation_id: cid,
+    trace_id: s.trace_id,
+    turn_trace_ids: s.turn_trace_ids || [s.trace_id],
+    label,
+    comment: text,
+  });
+  if (res && res.error) { toast(res.error); return; }
+  if (label === null) delete state.hw5Labels[cid];
+  else state.hw5Labels[cid] = {label, comment: text};
+  toast(label === null ? 'cleared'
+        : `${label === 1 ? 'Pass' : 'Fail'} &middot; ${res.pass} Pass / ${res.fail} Fail`);
+  renderHw5Bar();
+  if (document.getElementById('queue-view').classList.contains('active')) renderQueue();
+}
+
+/* The queue is the reading order: screened candidates first, then the random
+   slice, then the HW4 carry-over. Default filter is `unlabelled`, so the
+   session resumes where it stopped. */
+function renderQueue() {
+  const note = document.getElementById('queue-note');
+  const filters = document.getElementById('queue-filters');
+  const table = document.getElementById('queue-table');
+  const c = hw5Counts();
+  note.textContent =
+    `${state.hw5.mode} | ${state.hw5.convention} | ` +
+    `${c.labelled}/${state.samples.length} labelled, ${c.pass} Pass, ${c.fail} Fail.`;
+
+  const opts = [['unlabelled', 'unlabelled'], ['all', 'all'],
+                ['screen', 'screened'], ['random', 'random slice'],
+                ['fail', 'Fail only'], ['disagree', 'judge disagreements']];
+  filters.innerHTML = opts.map(([k, lbl]) =>
+    `<button data-f="${k}" class="${state.queueFilter === k ? 'on' : ''}">${lbl}</button>`
+  ).join('');
+  filters.querySelectorAll('button').forEach(b =>
+    b.onclick = () => { state.queueFilter = b.dataset.f; renderQueue(); });
+
+  const rows = state.samples.filter(s => {
+    const cid = convId(s), v = hw5LabelOf(cid), j = state.hw5Judge[cid];
+    switch (state.queueFilter) {
+      case 'unlabelled': return v === null;
+      case 'screen': return s.hw5_batch === 'hw5_screen';
+      case 'random': return s.hw5_batch === 'hw5_random';
+      case 'fail': return v === 0;
+      case 'disagree':
+        if (!j || v === null) return false;
+        return (v === 1) !== (j.verdict === 'Pass' || j.verdict === 1);
+      default: return true;
+    }
+  });
+
+  table.innerHTML =
+    '<tr><th>conversation</th><th>batch</th><th>role</th><th>signals</th>' +
+    '<th>your label</th><th>judge</th><th>evidence</th></tr>' +
+    rows.map(s => {
+      const cid = convId(s), v = hw5LabelOf(cid), j = state.hw5Judge[cid] || {};
+      const cls = v === 1 ? 'lab-pass' : v === 0 ? 'lab-fail' : '';
+      return `<tr class="${cls}"><td class="cid" data-goto="${attr(cid)}">${escape(cid)}</td>` +
+        `<td>${escape(s.hw5_batch || '')}</td>` +
+        `<td>${escape((s.meta || {}).role || '')}</td>` +
+        `<td>${escape((s.hw5_signals || []).join(' '))}</td>` +
+        `<td class="v">${v === null ? '-' : (v === 1 ? 'Pass' : 'Fail')}</td>` +
+        `<td>${escape(String(j.verdict || ''))}</td>` +
+        `<td>${escape(((state.hw5Labels[cid] || {}).comment || '').slice(0, 80))}</td></tr>`;
+    }).join('');
+  table.querySelectorAll('td.cid').forEach(td =>
+    td.onclick = () => gotoTrace(td.dataset.goto));
+}
+
+async function loadHw5() {
+  state.hw5 = await api.get('/api/hw5/config');
+  if (!hw5On()) return;
+  state.hw5Labels = await api.get('/api/hw5/labels');
+  state.hw5Judge = await api.get('/api/hw5/judge');
+  document.getElementById('tab-queue').style.display = '';
+  // Part E's grid, map and progress describe the HW4 sample, not this one.
+  ['label', 'map', 'progress'].forEach(v => {
+    const b = document.querySelector(`.views button[data-view="${v}"]`);
+    if (b) b.style.display = 'none';
+  });
+}
+
 /* ------------------------------------------------------------------ *
  * Navigation + view switching                                        *
  * ------------------------------------------------------------------ */
@@ -1149,22 +1367,30 @@ function gotoTrace(tid) {
   if (i < 0) { toast('that conversation is not in the current sample'); return; }
   state.cur = i;
   switchView('trace');
-  renderHeader(); renderTrace(); updatePos();
+  renderHeader(); renderTrace(); updatePos(); renderHw5Bar();
 }
 function updatePos() {
   document.getElementById('pos').textContent =
     state.samples.length ? `${state.cur + 1} / ${state.samples.length}` : '0 / 0';
 }
 document.getElementById('prev').onclick = () => {
-  if (state.cur > 0) { state.cur--; renderHeader(); renderTrace(); updatePos(); }
+  if (state.cur > 0) { state.cur--; renderHeader(); renderTrace(); updatePos(); renderHw5Bar(); }
 };
 document.getElementById('next').onclick = () => {
-  if (state.cur < state.samples.length - 1) { state.cur++; renderHeader(); renderTrace(); updatePos(); }
+  if (state.cur < state.samples.length - 1) { state.cur++; renderHeader(); renderTrace(); updatePos(); renderHw5Bar(); }
 };
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
   if (e.key === 'j' || e.key === 'ArrowDown' || e.key === 'ArrowRight') document.getElementById('next').click();
   if (e.key === 'k' || e.key === 'ArrowUp' || e.key === 'ArrowLeft') document.getElementById('prev').click();
+  // HW5 labelling: p = Pass (failure absent), f = Fail (failure present),
+  // x clears. Live only in HW5 mode, so HW4 review keeps its own bindings.
+  if (!hw5On()) return;
+  const s = curTrace();
+  if (!s) return;
+  if (e.key === 'p') saveHw5Label(convId(s), 1);
+  if (e.key === 'f') saveHw5Label(convId(s), 0);
+  if (e.key === 'x') saveHw5Label(convId(s), null);
 });
 
 function switchView(name) {
@@ -1176,6 +1402,7 @@ function switchView(name) {
   if (name === 'map') renderMap();
   if (name === 'label') renderLabels();
   if (name === 'progress') renderProgress();
+  if (name === 'queue') renderQueue();
 }
 document.querySelectorAll('.views button').forEach(b =>
   b.onclick = () => switchView(b.dataset.view));
@@ -1276,7 +1503,10 @@ window.addEventListener('resize', () => {
  * ------------------------------------------------------------------ */
 (async function boot() {
   await loadAll();
+  await loadHw5();
   renderHeader(); renderTrace(); renderProgress(); updatePos(); updateCounts();
+  renderHw5Bar();
+  if (hw5On()) switchView('queue');
   setInterval(poll, 2000);
 })();
 </script>

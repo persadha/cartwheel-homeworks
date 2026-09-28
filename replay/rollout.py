@@ -386,6 +386,38 @@ def judge_trace_text(transcript: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def judge_trace_text_named(transcript: dict[str, Any]) -> str:
+    """Format a runtime transcript like the student's HW5 judge input.
+
+    HW5 (``hw-5:analysis/run_judges.py::_judge_messages``) folded the tool
+    name into each call and result, because ``_flatten`` otherwise drops it,
+    and skipped empty user or assistant text. The judge was validated on this
+    rendering, so its verifier must see the same shape.
+    """
+    lines: list[str] = []
+    for turn in transcript.get("turns", []):
+        user = (turn.get("user") or "").strip()
+        if user:
+            lines.append(f"user: {user}")
+        for call in turn.get("tool_calls", []):
+            args = call.get("args") if isinstance(call.get("args"), dict) else {}
+            arguments = json.dumps(
+                {"tool": call.get("name"), **args},
+                ensure_ascii=False,
+                sort_keys=True,
+                default=str,
+            )
+            result = json.dumps(
+                call.get("result"), ensure_ascii=False, sort_keys=True, default=str
+            )
+            lines.append(f"tool_call: {arguments}")
+            lines.append(f"tool_result: {call.get('name')} -> {result}")
+        reply = (turn.get("reply") or "").strip()
+        if reply:
+            lines.append(f"assistant: {reply}")
+    return "\n".join(lines)
+
+
 def judge_reply(judge: dict[str, Any], reply: str, docs: str) -> str:
     """Run one frozen judge on a reply. Returns "pass" or "fail".
 

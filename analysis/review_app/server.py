@@ -60,6 +60,19 @@ STATE_DIR = HERE.parent / "state"
 LABELS_DIR = STATE_DIR / "labels"
 UI_DIR = HERE / "ui"
 
+# HW5. The judge is calibrated against a label set that differs from HW4's in
+# three ways, so it lives in its own files rather than extending Part E's grid:
+# one row per conversation instead of one per turn, a larger sample (the 105
+# HW4 conversations plus newly mined candidates), and the inverted convention
+# the handout mandates -- 1 = Pass, 0 = Fail, so that Pass is the positive
+# class in TPR/TNR. Writing any of that into analysis/state/labels/ would
+# change HW4's committed counts and silently flip the meaning of its rows.
+HW5_LABELS_DIR = STATE_DIR / "hw5_labels"
+HW5_SAMPLES = STATE_DIR / "hw5_samples.json"
+HW5_JUDGMENTS = STATE_DIR / "hw5_judge_view.json"
+HW5_MODE = "unrequested_information"
+HW5_ENABLED = False
+
 # Set by --no-langfuse, so a review session can run with the stack down and
 # still keep a complete local mirror.
 LANGFUSE_ENABLED = True
@@ -160,6 +173,106 @@ def _all_labels() -> dict[str, dict[str, int]]:
                 by_conversation[str(cid)] = int(row["label"])
         out[mode] = by_conversation
     return out
+
+
+def _hw5_label_path(mode: str) -> Path:
+    safe = "".join(ch for ch in mode if ch.isalnum() or ch in "._-")
+    if not safe:
+        raise ValueError("a mode name must contain at least one usable character")
+    return HW5_LABELS_DIR / (safe + ".jsonl")
+
+
+def _hw5_rows(mode: str) -> list[dict[str, Any]]:
+    path = _hw5_label_path(mode)
+    if not path.exists():
+        return []
+    rows = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return rows
+
+
+def _hw5_live(mode: str) -> dict[str, dict[str, Any]]:
+    """Collapse the append-only HW5 label log to the live row per conversation.
+
+    Mirrors ``analysis.helpers.tools._load_labels``: a row carrying
+    ``superseded_by`` is dead, and among the survivors for one conversation the
+    last written wins.
+    """
+    live: dict[str, dict[str, Any]] = {}
+    for row in _hw5_rows(mode):
+        if row.get("superseded_by"):
+            continue
+        cid = row.get("conversation_id")
+        if cid is not None and row.get("label") in (0, 1):
+            live[str(cid)] = row
+    return live
+
+
+def _hw5_record(payload: dict[str, Any]) -> dict[str, Any]:
+    """Record one HW5 conversation judgment, append-only.
+
+    ``label`` is 1 for Pass and 0 for Fail, the handout's convention. A flip
+    appends a new row and stamps ``superseded_by`` on the row it replaces, so
+    the file keeps the full history -- which is the evidence for the Part C
+    "your label was wrong" branch. ``label: null`` retires the current row
+    without writing a replacement.
+    """
+    mode = str(payload.get("mode") or HW5_MODE).strip()
+    cid = str(payload.get("conversation_id") or "").strip()
+    if not cid:
+        raise ValueError("conversation_id is required")
+    label = payload.get("label")
+    if label not in (0, 1, None):
+        raise ValueError("label must be 1 (Pass), 0 (Fail) or null")
+
+    rows = _hw5_rows(mode)
+    stamp = _utcnow()
+    new_id = f"{cid}:{stamp}"
+    superseded = 0
+    for row in rows:
+        if str(row.get("conversation_id")) == cid and not row.get("superseded_by"):
+            row["superseded_by"] = new_id
+            superseded += 1
+
+    if label is not None:
+        rows.append({
+            "row_id": new_id,
+            "trace_id": str(payload.get("trace_id") or ""),
+            "conversation_id": cid,
+            "mode": mode,
+            "label": int(label),
+            "source": "human",
+            "turn_trace_ids": payload.get("turn_trace_ids") or [],
+            "comment": str(payload.get("comment") or ""),
+            "ts": stamp,
+        })
+
+    HW5_LABELS_DIR.mkdir(parents=True, exist_ok=True)
+    path = _hw5_label_path(mode)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(
+        "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8"
+    )
+    tmp.replace(path)
+
+    live = _hw5_live(mode)
+    n_pass = sum(1 for r in live.values() if r["label"] == 1)
+    return {
+        "ok": True,
+        "conversation_id": cid,
+        "label": label,
+        "superseded": superseded,
+        "labelled": len(live),
+        "pass": n_pass,
+        "fail": len(live) - n_pass,
+    }
 
 
 def _record_label(payload: dict[str, Any]) -> dict[str, Any]:
@@ -316,6 +429,32 @@ class ReviewHandler(BaseHTTPRequestHandler):
             self._send_json(_all_labels())
             return
 
+        if path == "/api/hw5/config":
+            self._send_json({
+                "enabled": HW5_ENABLED,
+                "mode": HW5_MODE,
+                "convention": "1 = Pass (failure absent), 0 = Fail (failure present)",
+            })
+            return
+
+        if path == "/api/hw5/labels":
+            self._send_json({
+                cid: {"label": row["label"], "comment": row.get("comment", "")}
+                for cid, row in _hw5_live(HW5_MODE).items()
+            })
+            return
+
+        if path == "/api/hw5/judge":
+            # Part C: judge verdict + critique beside the human label. Written
+            # by analysis/run_judges.py after a development batch; absent until
+            # the first one runs.
+            self._send_json(_read_json(HW5_JUDGMENTS, {}))
+            return
+
+        if path == "/api/samples" and HW5_ENABLED:
+            self._send_json(_read_json(HW5_SAMPLES, []))
+            return
+
         if path in API_FILES:
             self._send_json(_read_json(API_FILES[path], API_DEFAULTS[path]))
             return
@@ -327,6 +466,15 @@ class ReviewHandler(BaseHTTPRequestHandler):
         data = self._read_body()
         if data is None:
             self._send_json({"error": "expected a JSON body"}, status=400)
+            return
+
+        if path == "/api/hw5/labels":
+            try:
+                result = _hw5_record(data if isinstance(data, dict) else {})
+            except ValueError as exc:
+                self._send_json({"error": str(exc)}, status=400)
+            else:
+                self._send_json(result)
             return
 
         if path == "/api/labels":
@@ -373,7 +521,7 @@ def _guess_type(path: Path) -> str:
 
 
 def main() -> None:
-    global LANGFUSE_ENABLED
+    global LANGFUSE_ENABLED, HW5_ENABLED, HW5_MODE
 
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--port", type=int, default=8020)
@@ -383,19 +531,41 @@ def main() -> None:
         action="store_true",
         help="keep labels local only (use when the Langfuse stack is down)",
     )
+    ap.add_argument(
+        "--hw5",
+        action="store_true",
+        help="HW5 judge calibration: serve hw5_samples.json and label one mode "
+             "into hw5_labels/ with 1 = Pass. HW4's Part E files are untouched.",
+    )
+    ap.add_argument("--mode", default=HW5_MODE, help="the HW5 failure mode to label")
     args = ap.parse_args()
     LANGFUSE_ENABLED = not args.no_langfuse
+    HW5_ENABLED = args.hw5
+    HW5_MODE = args.mode
 
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     LABELS_DIR.mkdir(parents=True, exist_ok=True)
+    if HW5_ENABLED:
+        HW5_LABELS_DIR.mkdir(parents=True, exist_ok=True)
 
-    sample_count = len(_read_json(API_FILES["/api/samples"], []))
+    sample_count = len(_read_json(
+        HW5_SAMPLES if HW5_ENABLED else API_FILES["/api/samples"], []
+    ))
     server = ThreadingHTTPServer((args.host, args.port), ReviewHandler)
     print("review interface on http://%s:%d/" % (args.host, args.port))
     print("state: %s" % STATE_DIR)
     print("samples loaded: %d conversations" % sample_count)
     print("langfuse scores: %s" % ("on" if LANGFUSE_ENABLED else "off (--no-langfuse)"))
-    print("read a conversation, select the failing text, type a note, press Enter.")
+    if HW5_ENABLED:
+        live = _hw5_live(HW5_MODE)
+        n_pass = sum(1 for r in live.values() if r["label"] == 1)
+        print("HW5 mode: %s (1 = Pass, 0 = Fail) -> %s"
+              % (HW5_MODE, _hw5_label_path(HW5_MODE)))
+        print("HW5 labels so far: %d (%d Pass, %d Fail)"
+              % (len(live), n_pass, len(live) - n_pass))
+        print("read a conversation, then press p for Pass or f for Fail.")
+    else:
+        print("read a conversation, select the failing text, type a note, press Enter.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -1,0 +1,16 @@
+{
+  "pull_request": "https://github.com/persadha/cartwheel-homeworks/pull/1",
+  "case_id": "e-008",
+  "regression_run": {
+    "url": "https://github.com/persadha/cartwheel-homeworks/actions/runs/36100514099/job/107961786732",
+    "commit": "2db9829",
+    "change": "Added to the Escalation section of the agent prompt: \"Never use the words 'approve' or 'approval'. Just tell the customer the refund is being handled.\"",
+    "result": "e-008 passed 1/5 trials, CI decision block; the gate failed the job. The other regression cases also blocked (e-009 0/5, e-010 0/5, e-011 1/5, e-012 0/5)."
+  },
+  "revert_run": {
+    "url": "https://github.com/persadha/cartwheel-homeworks/actions/runs/36103121873/job/107969729959",
+    "commit": "17325b7",
+    "result": "e-008 passed 5/5 trials, CI decision pass; all five regression cases passed 5/5 and the gate passed the job."
+  },
+  "explanation": "The instruction stopped the agent from saying 'approve'/'approval', so the code check reply_contains \"approv\" failed and the regression cases blocked the pull request. After the revert, e-008 passed 5/5 again, so the original behaviour returned. The check tests wording: in the local check of the break, the agent still told the customer a human would review the refund and only avoided the word. The offline-checks job failed in both runs on test_cli.py::test_non_openai_direct_run_does_not_export (an SDK 'OPENAI_API_KEY is not set' warning); this is course code the change did not touch, and it does not affect the Harbor job."
+}
