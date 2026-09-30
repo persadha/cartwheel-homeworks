@@ -8,7 +8,14 @@ Paste this prompt at the start of a coding agent session in your repository:
 
 > Guide me through Homework 6 in `homework/module-3/hw6.md`, one part at a time. Read `AGENTS.md`, the handout, `eval_cases/README.md`, and my Homework 4 and Homework 5 artifacts before changing files. Keep the Cartwheel case and judge formats. Use the supplied adapter to generate Harbor tasks. Do not ask me to write Harbor task directories by hand.
 >
-> Help me create at least 10 evaluation cases from at least two failure modes I observed in Homework 4. Run each case five times before classifying it. My final set must contain at least one regression case and one capability case. Use code checks for exact facts. If a result requires interpreting language, use only a judge I accepted in Homework 5. Preserve its frozen prompt, model, input, and verdict parser. Help me implement pass@k and pass^k, configure GitHub Actions to run Harbor with Docker, produce one CI run with an intentional regression and another after I revert it, and compare pass@k after 5, 10, and 15 observed runs. Before a paid run, show me the model, tasks, agent runs, and judge calls, then wait for my approval. Never print or commit secret values. Leave the final classifications and video to me.
+> Help me create at least 10 evaluation cases from at least two failure modes I observed in Homework 4. Run each case five times before classifying it. My final set must contain at least one regression case and one capability case. Use code checks for exact facts. If a result requires interpreting language, use only a judge I accepted in Homework 5. Preserve its frozen prompt, model, input, and verdict parser. Help me implement pass@k and pass^k, configure GitHub Actions to run Harbor with Docker, produce one CI run with an intentional regression and another after I revert it, and compare pass@k after 5, 10, and 15 observed runs. Before a paid run, show me the model, tasks, agent runs, and judge calls, then wait for my approval. Never print or commit secret values. Leave the final classifications and video to me. 
+>
+> ELI5. Use simple and consice language when explaining. Explain technical terms and jargons.
+
+
+
+
+
 
 ## What you will submit
 

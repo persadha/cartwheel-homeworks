@@ -1,0 +1,20 @@
+{
+  "judge_id": "unrequested_information-v2",
+  "judge_mode": "unrequested_information",
+  "model": "glm-5.3",
+  "random_rate": 0.2,
+  "risk_groups": ["policy_lookup", "multi_turn"],
+  "threshold": 0.15,
+  "periods": [
+    {
+      "label": "before",
+      "from": "2026-09-15T15:12:00Z",
+      "to": "2026-09-15T17:36:00Z"
+    },
+    {
+      "label": "after",
+      "from": "2026-09-28T21:33:48Z",
+      "to": "2026-09-28T21:43:05Z"
+    }
+  ]
+}
